@@ -2,7 +2,6 @@
 
 import numpy as np
 import dynet as dy
-import utils
 import argparse
 import random
 import gc
