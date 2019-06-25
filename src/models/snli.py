@@ -21,6 +21,7 @@ parser.add_argument('--dynet-weight-decay', help='DyNet requirement for regulari
 
 parser.add_argument('--gpu', type=int, default=-1, help='use GPU?')
 parser.add_argument('--num-units', type=int, default=300, help='number of units per layer')
+parser.add_argument('--data-dir') 
 parser.add_argument('--baseline', action='store_true')
 parser.add_argument('--balanced', action='store_true') 
 args = parser.parse_args()
@@ -118,7 +119,7 @@ def run():
 
     print('num_epoch: {}\nbatch_size: {}'.format(num_epoch, batch_size))
 
-    train, dev, test, w2i, i2w, vectors = load_snli()
+    train, dev, test, w2i, i2w, vectors = load_snli(args.data_dir) 
 
     # set up CL
     if not args.baseline:
@@ -198,10 +199,10 @@ def run():
                 outs = []
             sent1, sent2 = train['sents'][j]
 
-            label = train['labels'][j]
+            #label = train['labels'][j]
             lbl = train['lbls'][j]
             
-            labels.append(label)
+            #labels.append(label)
             correct.append(train['lbls'][j])
             out = dnnmodel.forward(sent1, sent2, lbl)
             outs.append(out)
@@ -246,8 +247,8 @@ def run():
 
             sent1, sent2 = dev['sents'][j]
             lbl = dev['lbls'][j]
-            label = dev['labels'][j]
-            labels.append(label)
+            #label = dev['labels'][j]
+            #labels.append(label)
             correct.append(lbl)
 
             out = dy.softmax(dnnmodel.forward(sent1, sent2, lbl, False))
@@ -282,9 +283,9 @@ def run():
 
             sent1, sent2 = test['sents'][j]
             lbl = test['lbls'][j]
-            label = test['labels'][j]
-            pairIDs.append(test['pairIDs'][j])
-            labels.append(label)
+            #label = test['labels'][j]
+            #pairIDs.append(test['pairIDs'][j])
+            #labels.append(label)
             correct.append(lbl)
 
             out = dy.softmax(dnnmodel.forward(sent1, sent2, lbl, False))

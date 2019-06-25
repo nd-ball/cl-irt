@@ -8,8 +8,6 @@ from sklearn.preprocessing import LabelEncoder
 
 
 ###### SNLI ########
-RAW_DATA_DIR = '/mnt/nfs/work1/hongyu/lalor/data/cl-data/raw/'
-PROCESSED_DATA_DIR = '/mnt/nfs/work1/hongyu/lalor/data/cl-data/processed/'
 
 
 ### HELPER Functions ###
@@ -69,7 +67,7 @@ def preprocess(X, train=False):
     return result
 
 
-def load_snli():
+def load_snli(data_dir):
     # get data
     '''
     Load some subset of the SNLI dataset, based on diff threshold 
@@ -80,12 +78,14 @@ def load_snli():
     trainfile = 'snli_1.0_train_diff.txt'
     devfile = 'snli_1.0_dev.txt'
     testfile = 'snli_1.0_test.txt'
-    train = pd.read_csv(PROCESSED_DATA_DIR + trainfile, sep='\t',
+    train = pd.read_csv(data_dir +'/processed/' + trainfile, sep='\t',
                         usecols=['gold_label', 'sentence1', 'sentence2', 'difficulty'])
-    dev = pd.read_csv(RAW_DATA_DIR + devfile, sep='\t',
+    dev = pd.read_csv(data_dir + '/raw/' + devfile, sep='\t',
                       usecols=['gold_label', 'sentence1', 'sentence2'])
-    test = pd.read_csv(RAW_DATA_DIR + testfile, sep='\t',
+    test = pd.read_csv(data_dir + '/raw/' + testfile, sep='\t',
                             usecols=['gold_label', 'sentence1', 'sentence2'])
+
+    print(train['sentence1'][0])
 
     # preprocess them as necessary
     # create the vocab for all of the data for consistency
@@ -119,7 +119,7 @@ def load_snli():
 
     i = 0
     
-    with open(RAW_DATA_DIR + 'glove.840B.300d.txt', 'r', encoding='utf-8') as glovefile:
+    with open(data_dir + '/raw/' + 'glove.840B.300d.txt', 'r', encoding='utf-8') as glovefile:
         for j, line in enumerate(glovefile):
             vals = line.rstrip().split(' ')
             if vals[0] in vocab:
