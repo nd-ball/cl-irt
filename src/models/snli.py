@@ -151,7 +151,7 @@ def run():
                 eg = train['lbls'][d] 
                 per_label_lists[eg].append(d) 
 
-            max_length = max(len(per_label_lists[0], per_label_lists[1], per_label_lists[2]))
+            max_length = max(len(per_label_lists[0]), len(per_label_lists[1]), len(per_label_lists[2]))
             train_2_idx = []
             for l in range(max_length):
                 if l < len(per_label_lists[0]):
