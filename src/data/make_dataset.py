@@ -22,8 +22,8 @@ def main():
     trainfile = 'snli_1.0_train.txt'
     devfile = 'snli_1.0_dev.txt'
     testfile_snli = 'snli_1.0_test.txt'
-    data_path = 'raw/'
-    processed_data_path = 'processed/'
+    data_path = '../data/raw/'
+    processed_data_path = '../data/processed/'
     train = pd.read_csv(data_path + trainfile, sep='\t',
                         usecols=['gold_label', 'sentence1', 'sentence2', 'pairID'])
     dev = pd.read_csv(data_path + devfile, sep='\t',

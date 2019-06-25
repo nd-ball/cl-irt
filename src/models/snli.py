@@ -11,6 +11,8 @@ import pandas as pd
 
 from sklearn.metrics import accuracy_score
 
+from build_features import load_snli 
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--dynet-autobatch', help='DyNet requirement for autobatching')
 parser.add_argument('--dynet-gpus', help='DyNet requirement to trigger gpu')
@@ -126,7 +128,7 @@ def run():
 
     print('num_epoch: {}\nbatch_size: {}'.format(num_epoch, batch_size))
 
-    train, dev, test, w2i, i2w, vectors = utils.load_snli()
+    train, dev, test, w2i, i2w, vectors = load_snli()
 
     # set up CL
     if not args.baseline:
