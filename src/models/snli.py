@@ -154,6 +154,7 @@ def run():
                 per_label_lists[0], per_label_lists[1], per_label_lists[2]
             )
             train_2_idx = [j for i in zipped_egs for j in i]
+            print(train_2_idx)
             train_2['sents'] = [train_2['sents'][z] for z in train_2_idx]
             train_2['lbls'] = [train_2['lbls'][z] for z in train_2_idx]
             train_2['difficulty'] = [train_2['difficulty'][z] for z in train_2_idx]
