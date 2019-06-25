@@ -99,21 +99,12 @@ class RNNBuilder:
         emb_out = dy.concatenate([output_p, output_h])
 
         # 3 tanh nonlinearities
-        W_tanh1 = dy.parameter(self.W_tanh1)
-        W_tanh2 = dy.parameter(self.W_tanh2)
-        W_tanh3 = dy.parameter(self.W_tanh3)
-        b_tanh1 = dy.parameter(self.b_tanh1)
-        b_tanh2 = dy.parameter(self.b_tanh2)
-        b_tanh3 = dy.parameter(self.b_tanh3)
-        W_out = dy.parameter(self.W_out)
-        b_out = dy.parameter(self.b_out)
-
-        t1 = dy.tanh((W_tanh1 * emb_out) + b_tanh1)
-        t2 = dy.tanh((W_tanh2 * t1) + b_tanh2)
-        t3 = dy.tanh((W_tanh3 * t2) + b_tanh3)
+        t1 = dy.tanh((self.W_tanh1 * emb_out) + self.b_tanh1)
+        t2 = dy.tanh((self.W_tanh2 * t1) + self.b_tanh2)
+        t3 = dy.tanh((self.W_tanh3 * t2) + self.b_tanh3)
 
         # output
-        out = (dy.transpose(W_out) * t3) + b_out
+        out = (dy.transpose(self.W_out) * t3) + self.b_out
         return out
 
 
