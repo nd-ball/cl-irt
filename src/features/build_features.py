@@ -6,8 +6,8 @@ from sklearn.preprocessing import LabelEncoder
 
 
 ###### SNLI ########
-RAW_DATA_DIR = '../data/raw/'
-PROCESSED_DATA_DIR = '../data/processed/'
+RAW_DATA_DIR = '/mnt/nfs/work1/hongyu/lalor/data/cl-data/raw/'
+PROCESSED_DATA_DIR = '/mnt/nfs/work1/hongyu/lalor/data/cl-data/processed/'
 
 
 ### HELPER Functions ###
