@@ -150,11 +150,17 @@ def run():
             for d in diffs_sorted_idx:
                 eg = train['lbls'][d] 
                 per_label_lists[eg].append(d) 
-            zipped_egs = zip(
-                per_label_lists[0], per_label_lists[1], per_label_lists[2]
-            )
-            train_2_idx = [j for i in zipped_egs for j in i]
-            print(train_2_idx)
+
+            max_length = max(len(per_label_lists[0], per_label_lists[1], per_label_lists[2]))
+            train_2_idx = []
+            for l in range(max_length):
+                if l < len(per_label_lists[0]):
+                    train_2_idx.append(per_label_lists[0][l]) 
+                if l < len(per_label_lists[1]):
+                    train_2_idx.append(per_label_lists[1][l]) 
+                if l < len(per_label_lists[2]):
+                    train_2_idx.append(per_label_lists[2][l])
+
             train_2['sents'] = [train_2['sents'][z] for z in train_2_idx]
             train_2['lbls'] = [train_2['lbls'][z] for z in train_2_idx]
             train_2['difficulty'] = [train_2['difficulty'][z] for z in train_2_idx]
