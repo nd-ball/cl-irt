@@ -1,5 +1,7 @@
 # return features for the datasets we're working with 
 import gc 
+import pandas as pd 
+import re 
 
 from sklearn.preprocessing import LabelEncoder
 
@@ -23,6 +25,11 @@ def all_vocab(txt):
             print('exception processing line {}'.format(index))
             #print(e, s1, s2)
     return vocab
+
+
+def tokenize(sent):
+    #print(sent)
+    return ' '.join([x.strip() for x in re.split('(\W+)?', sent) if x.strip()])
 
 
 def preprocess(X): 
