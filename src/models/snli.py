@@ -161,9 +161,9 @@ def run():
                 if l < len(per_label_lists[2]):
                     train_2_idx.append(per_label_lists[2][l])
 
-            train_2['sents'] = [train_2['sents'][z] for z in train_2_idx]
-            train_2['lbls'] = [train_2['lbls'][z] for z in train_2_idx]
-            train_2['difficulty'] = [train_2['difficulty'][z] for z in train_2_idx]
+            train_2['sents'] = [train['sents'][z] for z in train_2_idx]
+            train_2['lbls'] = [train['lbls'][z] for z in train_2_idx]
+            train_2['difficulty'] = [train['difficulty'][z] for z in train_2_idx]
         train = train_2 
 
     # load model and train
