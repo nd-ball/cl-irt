@@ -32,7 +32,7 @@ def tokenize(sent):
     return ' '.join([x.strip() for x in re.split('(\W+)?', sent) if x.strip()])
 
 
-def preprocess(X): 
+def preprocess(X, train=False): 
     lbls = []
     data = []
     pids = []
@@ -46,7 +46,10 @@ def preprocess(X):
             lbl = row.gold_label
             s1 = tokenize(row.sentence1).split(' ')
             s2 = tokenize(row.sentence2).split(' ')
-            pair_diff = row.difficulty 
+            if train:
+                pair_diff = row.difficulty 
+            else:
+                pair_diff = 0 
 
             if lbl != '-':
                 sents = [s1, s2]
