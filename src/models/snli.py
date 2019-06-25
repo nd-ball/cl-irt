@@ -10,7 +10,7 @@ import pandas as pd
 
 from sklearn.metrics import accuracy_score
 
-from build_features import load_snli 
+from features.build_features import load_snli 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dynet-autobatch', help='DyNet requirement for autobatching')
