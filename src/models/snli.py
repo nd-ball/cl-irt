@@ -10,7 +10,7 @@ import pandas as pd
 
 from sklearn.metrics import accuracy_score
 
-from features.build_features import load_snli 
+from features.build_features import load_snli, get_epoch_training_data
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dynet-autobatch', help='DyNet requirement for autobatching')
@@ -22,8 +22,11 @@ parser.add_argument('--dynet-weight-decay', help='DyNet requirement for regulari
 parser.add_argument('--gpu', type=int, default=-1, help='use GPU?')
 parser.add_argument('--num-units', type=int, default=300, help='number of units per layer')
 parser.add_argument('--data-dir') 
-parser.add_argument('--baseline', action='store_true')
 parser.add_argument('--balanced', action='store_true') 
+parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple'],
+                    help='CL data policy', default='simple')
+parser.add_argument('--ordering', choices=['easiest', 'hardest', 'middleout'], default='easiest') 
+parser.add_argument('--num-epochs', type=int, default=10) 
 args = parser.parse_args()
 
 print(args)
@@ -142,10 +145,13 @@ def run():
     for i in range(num_epoch):
         loss = 0.0
         print('train epoch {}'.format(i))
-        # shuffle training data
+        epoch_training_data = get_epoch_training_data(train, args.strategy, args.ordering, i, num_epoch, args.balanced, 'snli') 
+        num_train_epoch = len(epoch_training_data['phrase'])
+        print('training set size: {}'.format(num_train_epoch))
 
-        examples = list(range(num_train))
-        if args.baseline:
+        # shuffle training data
+        examples = list(range(num_train_epoch))
+        if args.strategy != 'ordered':
             random.shuffle(examples)
         labels = []
         predictions = []
@@ -160,13 +166,13 @@ def run():
                 dy.renew_cg()
                 losses = []
                 outs = []
-            sent1, sent2 = train['phrase'][j]
+            sent1, sent2 = epoch_training_data['phrase'][j]
 
             #label = train['labels'][j]
-            lbl = train['lbls'][j]
+            lbl = epoch_training_data['lbls'][j]
             
             #labels.append(label)
-            correct.append(train['lbls'][j])
+            correct.append(epoch_training_data['lbls'][j])
             out = dnnmodel.forward(sent1, sent2, lbl)
             outs.append(out)
             loss = dy.pickneglogsoftmax(out, lbl)
