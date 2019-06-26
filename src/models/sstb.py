@@ -77,7 +77,7 @@ def train(args):
 
     print('num_epoch: {}\nbatch_size: {}'.format(num_epoch, batch_size))
 
-    train, dev, test, w2i, i2w, vectors = load_sstb(args.data_path)
+    train, dev, test, w2i, i2w, vectors = load_sstb(args.data_dir)
     if len(train['phrase']) == 0:
         return -1, 0
 
@@ -239,7 +239,7 @@ def run():
     parser.add_argument('--dynet-weight-decay', help='DyNet requirement for regularization')
 
     parser.add_argument('--gpu', type=int, default=-1, help='use GPU?')
-    parser.add_argument('--data-path', help='path to SNLI dataset')
+    parser.add_argument('--data-dir', help='path to SNLI dataset')
     parser.add_argument('--num-units', type=int, default=300, help='number of units per layer')
     parser.add_argument('--balanced', action='store_true') 
     parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple'],
