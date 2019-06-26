@@ -115,7 +115,7 @@ class RNNBuilder:
 def run():
 
     # variables
-    num_epoch = 100
+    num_epoch = args.num_epochs
     batch_size = 64
     pre_trained_embs = True
     out_dim = 3

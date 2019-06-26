@@ -286,7 +286,7 @@ def get_epoch_training_data(training_set, strategy, ordering, epoch, num_epochs,
     elif strategy == 'simple':
         # how many examples do we want this epoch? 
         # CL for first half, full data for 2nd half 
-        data_per_epoch = len(training_set['phrase']) / num_epochs / 2.
+        data_per_epoch = len(training_set['phrase']) / (num_epochs / 2.)
         num_train = min(int(data_per_epoch * (epoch + 1)), len(training_set['phrase'])) 
         train['lbls'] = [train_2['lbls'][i] for i in range(num_train)] 
         train['phrase'] = [train_2['phrase'][i] for i in range(num_train)] 
