@@ -143,3 +143,85 @@ def load_snli(data_dir):
     print('dict size: {}'.format(len(w2i)))
     return train, dev, test, w2i, i2w, vectors
 
+
+############# SSTB ################
+
+def load_sstb(data_dir):
+    # load SSTB data
+    trainfile = 'sstb_train_diff.tsv'
+    devfile = 'sstb_dev.tsv'
+    testfile = 'sstb_test.labeled.tsv'
+    label_set_MASTER = [0, 1]
+
+    with open(data_dir + '/processed/' + trainfile, 'r') as infile:
+        training_data = infile.readlines()[1:]
+        training_data = [t.split('\t') for t in training_data]
+        TRAIN_SIZE = len(training_data)
+        idx = list(range(TRAIN_SIZE))  # generate labels for each item 
+         
+        # load training data 
+        train = {}
+        train['lbls'] = [] 
+        train['phrase'] = [] 
+        train['difficulty'] = []
+        for i in range(TRAIN_SIZE):
+            train['lbls'].append(eval(training_data[i][1]))
+            train['phrase'].append(tokenize(training_data[i][0].strip()).split(' ')) 
+            train['difficulty'].append(eval(training_data[i][2])) 
+
+    with open(data_dir + '/raw/' + devfile, 'r') as infile:
+        dev_data = infile.readlines()[1:]
+        dev = {}
+        dev['lbls'] = [eval(l.split('\t')[1]) for l in dev_data]
+        dev['phrase'] = [tokenize(l.split('\t')[0].strip()).split(' ') for l in dev_data]
+
+    with open(data_dir + '/raw/' + testfile, 'r') as infile:
+        test_data = infile.readlines()[1:]
+        test = {}
+        test['lbls'] = [eval(l[0]) for l in test_data]
+        #test['lbls'] = [0] * len(test_data)  # for now
+        test['phrase'] = [tokenize(l[1:].strip()).split(' ') for l in test_data]
+
+    # build vocab
+    vocab = set()
+    for dataset in [train, dev, test]:
+        for r in dataset['phrase']:
+            vocab.update(r)
+
+    # build embeddings
+    print('loading word vectors...')
+    print('vocab size: {}'.format(len(vocab)))
+
+    vectors = []
+    w2i = {}
+    i2w = {}
+
+    i = 0
+    with open(data_dir + '/raw/' + 'glove.840B.300d.txt', 'r', encoding='utf-8') as glovefile:
+        for j, line in enumerate(glovefile):
+            vals = line.rstrip().split(' ')
+            if vals[0] in vocab:
+                w2i[vals[0]] = i
+                i2w[i] = vals[0]
+                vectors.append(list(map(float, vals[1:])))
+                i += 1
+
+    # now I need to look at vocab words that aren't in glove
+    next_i = len(vectors)
+    dict_keys = w2i.keys()
+    for w in vocab:
+        if w not in dict_keys:
+            w2i[w] = next_i
+            i2w[next_i] = w
+            next_i += 1
+    w2i['<PAD>'] = next_i
+    i2w[next_i] = '<PAD>'
+
+    out_train = train
+    out_dev = dev
+
+    out_test = test
+
+    gc.collect()
+    print('dict size: {}'.format(len(w2i)))
+    return out_train, out_dev, out_test, w2i, i2w, vectors

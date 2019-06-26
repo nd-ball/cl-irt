@@ -18,6 +18,9 @@ def main(data_path):
     logger = logging.getLogger(__name__)
     logger.info('making final data set from raw data')
 
+    logger.info('##### SNLI #####')
+
+
     # for snli, write premise, hypothesis, label, and difficulty
     trainfile = 'snli_1.0_train.txt'
     devfile = 'snli_1.0_dev.txt'
@@ -29,16 +32,29 @@ def main(data_path):
 
     train = pd.read_csv(raw_data_path + trainfile, sep='\t',
                         usecols=['gold_label', 'sentence1', 'sentence2', 'pairID'])
-    dev = pd.read_csv(raw_data_path + devfile, sep='\t',
-                      usecols=['gold_label', 'sentence1', 'sentence2', 'pairID'])
-    test = pd.read_csv(raw_data_path + testfile_snli, sep='\t',
-                            usecols=['gold_label', 'sentence1', 'sentence2', 'pairID'])
     train_difficulties = pd.read_csv(raw_data_path + 'snli_train_diffs.csv', sep=',',
                             header=None, names=['pairID', 'difficulty'])
 
     new_train = pd.merge(train, train_difficulties, on='pairID')
-    new_train.to_csv(processed_data_path + 'snli_1.0_train_diff.txt', sep='\t', index=False) 
+    new_train.to_csv(processed_data_path + 'snli_1.0_train_diff.txt', sep='\t', index=False)
 
+    ############## SSTB ###################
+
+    logger.info('##### SSTB #####') 
+    trainfile = 'sstb_train.tsv'
+    devfile = 'sstb_dev.tsv'
+    testfile = 'sstb_test.labeled.tsv'
+
+    train = pd.read_csv(raw_data_path + trainfile, sep='\t',
+                        usecols=['sentence', 'label'])
+    train_difficulties = pd.read_csv(raw_data_path + 'sstb_train_diffs.csv', sep=',',
+                            header=None, names=['pairID', 'difficulty', 'variance'])
+    train['pairID'] = list(range(1, len(train) + 1)) 
+
+    new_train = pd.merge(train, train_difficulties, on='pairID')
+    new_train.to_csv(processed_data_path + 'sstb_train_diff.tsv', sep='\t', index=False)
+
+    
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
