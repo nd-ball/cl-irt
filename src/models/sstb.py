@@ -8,7 +8,7 @@ import pandas as pd
 
 from sklearn.metrics import accuracy_score
 
-from features.build_features import load_sstb 
+from features.build_features import load_sstb, get_epoch_training_data 
 
 class SentimentRNNBuilder:
     def __init__(self, model, out_dim, WORD_EMBS, w2i, i2w, lstm_dim):
@@ -70,10 +70,10 @@ class SentimentRNNBuilder:
 def train(args): 
 
     # variables
-    num_epoch = 100
+    num_epoch = args.num_epochs 
     batch_size = 64
     pre_trained_embs = True
-    out_dim = 3
+    out_dim = 2
 
     print('num_epoch: {}\nbatch_size: {}'.format(num_epoch, batch_size))
 
@@ -81,40 +81,6 @@ def train(args):
     if len(train['phrase']) == 0:
         return -1, 0
 
-    # set up CL
-    if not args.baseline:
-        train_2 = {
-            'lbls':[],
-            'phrase':[ ],
-            'difficulty': []
-        }
-        
-        diffs_sorted = np.sort(train['difficulty'])
-        diffs_sorted_idx = np.argsort(train['difficulty']) 
-        if not args.balanced:
-            train_2['phrase'] = [train['phrase'][d] for d in diffs_sorted_idx] 
-            train_2['lbls'] = [train['lbls'][d] for d in diffs_sorted_idx] 
-            train_2['difficulty'] = [train['difficulty'][d] for d in diffs_sorted_idx]
-        else:
-            per_label_lists = {
-                0:[], 1:[]
-            }
-            for d in diffs_sorted_idx:
-                eg = train['lbls'][d] 
-                per_label_lists[eg].append(d) 
-
-            max_length = max(len(per_label_lists[0]), len(per_label_lists[1]))
-            train_2_idx = []
-            for l in range(max_length):
-                if l < len(per_label_lists[0]):
-                    train_2_idx.append(per_label_lists[0][l]) 
-                if l < len(per_label_lists[1]):
-                    train_2_idx.append(per_label_lists[1][l]) 
-
-            train_2['phrase'] = [train['phrase'][z] for z in train_2_idx]
-            train_2['lbls'] = [train['lbls'][z] for z in train_2_idx]
-            train_2['difficulty'] = [train['difficulty'][z] for z in train_2_idx]
-        train = train_2 
 
     # load model and train
     print('initialize model...')
@@ -137,10 +103,14 @@ def train(args):
     for i in range(num_epoch):
         loss = 0.0
         print('train epoch {}'.format(i))
+        # load training data for this epoch
+        epoch_training_data = get_epoch_training_data(train, args.strategy, args.ordering, i, num_epoch, args.balanced, 'sstb') 
+        num_train_epoch = len(epoch_training_data['phrase'])
+        print('training set size: {}'.format(num_train_epoch))
         # shuffle training data
 
-        examples = list(range(num_train))
-        if args.baseline:
+        examples = list(range(num_train_epoch))
+        if args.strategy != 'ordered':
             random.shuffle(examples)
         predictions = []
         correct = []
@@ -153,9 +123,9 @@ def train(args):
                 dy.renew_cg()
                 losses = []
                 outs = []
-            sent1 = train['phrase'][j]
-            lbl = train['lbls'][j]
-            correct.append(train['lbls'][j])
+            sent1 = epoch_training_data['phrase'][j]
+            lbl = epoch_training_data['lbls'][j]
+            correct.append(epoch_training_data['lbls'][j])
             out = dnnmodel.forward(sent1, lbl)
             outs.append(out)
             loss = dy.pickneglogsoftmax(out, lbl)
@@ -272,7 +242,10 @@ def run():
     parser.add_argument('--data-path', help='path to SNLI dataset')
     parser.add_argument('--num-units', type=int, default=300, help='number of units per layer')
     parser.add_argument('--balanced', action='store_true') 
-    parser.add_argument('--baseline', action='store_true') 
+    parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple'],
+                        help='CL data policy', default='simple')
+    parser.add_argument('--ordering', choices=['easiest', 'hardest', 'middleout'], default='easiest') 
+    parser.add_argument('--num-epochs', type=int, default=10) 
     args = parser.parse_args()
 
     print(args)

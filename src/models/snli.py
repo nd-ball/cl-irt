@@ -119,44 +119,7 @@ def run():
 
     print('num_epoch: {}\nbatch_size: {}'.format(num_epoch, batch_size))
 
-    train, dev, test, w2i, i2w, vectors = load_snli(args.data_dir) 
-
-    # set up CL
-    if not args.baseline:
-        train_2 = {
-            'lbls':[],
-            'sents':[ ],
-            'difficulty': []
-        }
-        
-        diffs_sorted = np.sort(train['difficulty'])
-        diffs_sorted_idx = np.argsort(train['difficulty']) 
-        if not args.balanced:
-            train_2['sents'] = [train['sents'][d] for d in diffs_sorted_idx] 
-            train_2['lbls'] = [train['lbls'][d] for d in diffs_sorted_idx] 
-            train_2['difficulty'] = [train['difficulty'][d] for d in diffs_sorted_idx]
-        else:
-            per_label_lists = {
-                0:[], 1:[], 2:[]
-            }
-            for d in diffs_sorted_idx:
-                eg = train['lbls'][d] 
-                per_label_lists[eg].append(d) 
-
-            max_length = max(len(per_label_lists[0]), len(per_label_lists[1]), len(per_label_lists[2]))
-            train_2_idx = []
-            for l in range(max_length):
-                if l < len(per_label_lists[0]):
-                    train_2_idx.append(per_label_lists[0][l]) 
-                if l < len(per_label_lists[1]):
-                    train_2_idx.append(per_label_lists[1][l]) 
-                if l < len(per_label_lists[2]):
-                    train_2_idx.append(per_label_lists[2][l])
-
-            train_2['sents'] = [train['sents'][z] for z in train_2_idx]
-            train_2['lbls'] = [train['lbls'][z] for z in train_2_idx]
-            train_2['difficulty'] = [train['difficulty'][z] for z in train_2_idx]
-        train = train_2 
+    train, dev, test, w2i, i2w, vectors = load_snli(args.data_dir)  
 
     # load model and train
     print('initialize model...')
@@ -167,9 +130,9 @@ def run():
     max_train = 0
     max_dev = 0
     max_test = 0
-    num_train = len(train['sents'])
-    num_dev = len(dev['sents'])
-    num_test = len(test['sents'])
+    num_train = len(train['phrase'])
+    num_dev = len(dev['phrase'])
+    num_test = len(test['phrase'])
     top_dev = 0.0
     top_dev_epoch = 0
     top_dev_test = 0.0
@@ -197,7 +160,7 @@ def run():
                 dy.renew_cg()
                 losses = []
                 outs = []
-            sent1, sent2 = train['sents'][j]
+            sent1, sent2 = train['phrase'][j]
 
             #label = train['labels'][j]
             lbl = train['lbls'][j]
@@ -245,7 +208,7 @@ def run():
                 dy.renew_cg()
                 outs = []
 
-            sent1, sent2 = dev['sents'][j]
+            sent1, sent2 = dev['phrase'][j]
             lbl = dev['lbls'][j]
             #label = dev['labels'][j]
             #labels.append(label)
@@ -281,7 +244,7 @@ def run():
                 dy.renew_cg()
                 outs = []
 
-            sent1, sent2 = test['sents'][j]
+            sent1, sent2 = test['phrase'][j]
             lbl = test['lbls'][j]
             #label = test['labels'][j]
             #pairIDs.append(test['pairIDs'][j])

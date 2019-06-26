@@ -1,5 +1,6 @@
 # return features for the datasets we're working with 
 import gc 
+import numpy as np 
 import pandas as pd 
 import re 
 
@@ -63,7 +64,7 @@ def preprocess(X, train=False):
     print('error count: {}'.format(error_count))
     
     print(len(data), len(lbls))
-    result = {'sents': data, 'labels': lbls, 'pairIDs': pids, 'difficulty': diffs}
+    result = {'phrase': data, 'labels': lbls, 'pairIDs': pids, 'difficulty': diffs}
     return result
 
 
@@ -225,3 +226,73 @@ def load_sstb(data_dir):
     gc.collect()
     print('dict size: {}'.format(len(w2i)))
     return out_train, out_dev, out_test, w2i, i2w, vectors
+
+
+####### Get CL Data per epoch ########
+def get_epoch_training_data(training_set, strategy, ordering, epoch, num_epochs, is_balanced, task):
+    if strategy == 'baseline':
+        return training_set 
+
+    # set up CL
+    train_2 = {
+        'lbls':[],
+        'phrase':[ ],
+        'difficulty': []
+    }
+    train = {
+        'lbls':[],
+        'phrase':[ ],
+        'difficulty': []
+    }
+    
+    # how will we order the data before building curriculum?
+    if ordering == 'easiest':
+        diffs_sorted_idx = np.argsort(training_set['difficulty']) 
+    elif ordering == 'hardest':
+        diffs_sorted_idx = np.argsort(training_set['difficulty'])[::-1]
+    else:  # middle out
+        diffs_sorted_idx = np.argsort(np.abs(training_set['difficulty'])) 
+
+    # determine if we want balanced per-label or not
+    if not is_balanced:
+        train_2['phrase'] = [training_set['phrase'][d] for d in diffs_sorted_idx] 
+        train_2['lbls'] = [training_set['lbls'][d] for d in diffs_sorted_idx] 
+        train_2['difficulty'] = [training_set['difficulty'][d] for d in diffs_sorted_idx]
+    else:
+        per_label_lists = {
+            0:[], 1:[]
+        }
+        if task == 'snli':
+            per_label_lists[2] = [] 
+        for d in diffs_sorted_idx:
+            eg = training_set['lbls'][d] 
+            per_label_lists[eg].append(d) 
+
+        #max_length = max(len(per_label_lists[0]), len(per_label_lists[1]))
+        max_length = max([len(v) for k,v in per_label_lists.items()])
+        train_2_idx = []
+        for l in range(max_length):
+            for k, v in per_label_lists.items():
+                if l < len(v):
+                    train_2_idx.append(v[l])
+
+        train_2['phrase'] = [training_set['phrase'][z] for z in train_2_idx]
+        train_2['lbls'] = [training_set['lbls'][z] for z in train_2_idx]
+        train_2['difficulty'] = [training_set['difficulty'][z] for z in train_2_idx]
+
+    # based on strategy, select our training set for this epoch
+    if strategy == 'ordered':
+        return train_2 
+    elif strategy == 'simple':
+        # how many examples do we want this epoch? 
+        # CL for first half, full data for 2nd half 
+        data_per_epoch = len(training_set['phrase']) / num_epochs / 2.
+        num_train = min(int(data_per_epoch * (epoch + 1)), len(training_set['phrase'])) 
+        train['lbls'] = [train_2['lbls'][i] for i in range(num_train)] 
+        train['phrase'] = [train_2['phrase'][i] for i in range(num_train)] 
+        train['difficulty'] = [train_2['difficulty'][i] for i in range(num_train)]
+        return train 
+    else:
+        raise NotImplementedError
+
+    
