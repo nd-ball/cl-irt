@@ -245,7 +245,7 @@ def run():
     parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple'],
                         help='CL data policy', default='simple')
     parser.add_argument('--ordering', choices=['easiest', 'hardest', 'middleout'], default='easiest') 
-    parser.add_argument('--num-epochs', type=int, default=10) 
+    parser.add_argument('--num-epochs', type=int, default=50) 
     args = parser.parse_args()
 
     print(args)
