@@ -27,6 +27,7 @@ parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple'],
                     help='CL data policy', default='simple')
 parser.add_argument('--ordering', choices=['easiest', 'hardest', 'middleout'], default='easiest') 
 parser.add_argument('--num-epochs', type=int, default=50) 
+parser.add_argument('--random', action='store_true') 
 args = parser.parse_args()
 
 print(args)
@@ -120,12 +121,17 @@ def run():
     pre_trained_embs = True
     out_dim = 3
 
-    print('num_epoch: {}\nbatch_size: {}'.format(num_epoch, batch_size))
+    #print('num_epoch: {}\nbatch_size: {}'.format(num_epoch, batch_size))
+    exp_label = '{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random)
+
 
     train, dev, test, w2i, i2w, vectors = load_snli(args.data_dir)  
+    if args.random:
+        random.shuffle(train['difficulty'])
+
 
     # load model and train
-    print('initialize model...')
+    #print('initialize model...')
     model = dy.Model()
     dnnmodel = RNNBuilder(model, out_dim, vectors, w2i, i2w, args.num_units)
     
@@ -140,14 +146,14 @@ def run():
     top_dev_epoch = 0
     top_dev_test = 0.0
 
-    print('Training model {}'.format(model))
-    print('training')
+    #print('Training model {}'.format(model))
+    #print('training')
     for i in range(num_epoch):
         loss = 0.0
-        print('train epoch {}'.format(i))
+        #print('train epoch {}'.format(i))
         epoch_training_data = get_epoch_training_data(train, args.strategy, args.ordering, i, num_epoch, args.balanced, 'snli') 
         num_train_epoch = len(epoch_training_data['phrase'])
-        print('training set size: {}'.format(num_train_epoch))
+        #print('training set size: {}'.format(num_train_epoch))
 
         # shuffle training data
         examples = list(range(num_train_epoch))
@@ -200,7 +206,7 @@ def run():
 
         preds = np.argmax(np.array(predictions), axis=1)
         acc_train = accuracy_score(correct, preds)
-        print("Training accuracy: {}, epoch: {}, num examples: {}".format(acc_train, i, len(preds)))
+        #print("Training accuracy: {}, epoch: {}, num examples: {}".format(acc_train, i, len(preds)))
 
         # Dev
         labels = []
@@ -236,7 +242,7 @@ def run():
 
         preds = np.argmax(np.array(predictions), axis=1)
         acc_dev = accuracy_score(correct, preds)
-        print('Dev accuracy: {}'.format(acc_dev))
+        #print('Dev accuracy: {}'.format(acc_dev))
         
         # Test (SNLI)
         labels = []
@@ -273,14 +279,14 @@ def run():
 
         preds = np.argmax(np.array(predictions), axis=1)
         acc_test_snli = accuracy_score(correct, preds)
-        print('Test accuracy (SNLI): {}'.format(acc_test_snli))        
+        #print('Test accuracy (SNLI): {}'.format(acc_test_snli))        
         
         if acc_dev > top_dev:
             top_dev = acc_dev
             top_dev_epoch = i
             top_dev_test = acc_test_snli
-
-        print('Best so far (by dev dev): D: {}, T; {}, epoch {}'.format(top_dev, top_dev_test, top_dev_epoch))
+        print('{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, acc_train, acc_dev, acc_test_snli))
+        #print('Best so far (by dev dev): D: {}, T; {}, epoch {}'.format(top_dev, top_dev_test, top_dev_epoch))
 
         
 

@@ -21,7 +21,8 @@ def all_vocab(txt):
             vocab.update(tokenize(s1).split(' '))
             vocab.update(tokenize(s2).split(' '))
         except Exception as e:
-            print('exception processing line {}'.format(index))
+            continue
+            #print('exception processing line {}'.format(index))
             #print(e, s1, s2)
     return vocab
 
@@ -61,9 +62,9 @@ def preprocess(X, train=False):
             print('Exception on line {}'.format(index))
             error_count += 1
 
-    print('error count: {}'.format(error_count))
+    #print('error count: {}'.format(error_count))
     
-    print(len(data), len(lbls))
+    #print(len(data), len(lbls))
     result = {'phrase': data, 'labels': lbls, 'pairIDs': pids, 'difficulty': diffs}
     return result
 
@@ -74,7 +75,7 @@ def load_snli(data_dir):
     Load some subset of the SNLI dataset, based on diff threshold 
     '''
     # load data files
-    print('loading SNLI data')
+    #print('loading SNLI data')
     # train_size = 10000
     trainfile = 'snli_1.0_train_diff.txt'
     devfile = 'snli_1.0_dev.txt'
@@ -86,15 +87,15 @@ def load_snli(data_dir):
     test = pd.read_csv(data_dir + '/raw/' + testfile, sep='\t',
                             usecols=['gold_label', 'sentence1', 'sentence2'])
 
-    print(train['sentence1'][0])
+    #print(train['sentence1'][0])
 
     # preprocess them as necessary
     # create the vocab for all of the data for consistency
-    print('generating vocab...')
+    #print('generating vocab...')
     vocab = all_vocab(train) | all_vocab(dev) | all_vocab(test)
     vocab_size = len(vocab)
 
-    print('preprocessing data...')
+    #print('preprocessing data...')
     out_train = preprocess(train)
     out_dev = preprocess(dev)
     out_test = preprocess(test)
@@ -106,13 +107,13 @@ def load_snli(data_dir):
     out_dev['lbls'] = le.transform(out_dev['labels'])
     out_test['lbls'] = le.transform(out_test['labels'])
 
-    print('training set size: {}'.format(len(out_train['lbls'])))
+    #print('training set size: {}'.format(len(out_train['lbls'])))
 
     train, dev, test, vocab = out_train, out_dev, out_test, vocab
 
     # build embedding table
-    print('loading word vectors...')
-    print('vocab size: {}'.format(len(vocab)))
+    #print('loading word vectors...')
+    #print('vocab size: {}'.format(len(vocab)))
 
     vectors = []
     w2i = {}
@@ -141,7 +142,7 @@ def load_snli(data_dir):
     i2w[next_i] = '<PAD>'
 
     gc.collect()
-    print('dict size: {}'.format(len(w2i)))
+    #print('dict size: {}'.format(len(w2i)))
     return train, dev, test, w2i, i2w, vectors
 
 
@@ -190,8 +191,8 @@ def load_sstb(data_dir):
             vocab.update(r)
 
     # build embeddings
-    print('loading word vectors...')
-    print('vocab size: {}'.format(len(vocab)))
+    #print('loading word vectors...')
+    #print('vocab size: {}'.format(len(vocab)))
 
     vectors = []
     w2i = {}
@@ -224,7 +225,7 @@ def load_sstb(data_dir):
     out_test = test
 
     gc.collect()
-    print('dict size: {}'.format(len(w2i)))
+    #print('dict size: {}'.format(len(w2i)))
     return out_train, out_dev, out_test, w2i, i2w, vectors
 
 
@@ -250,8 +251,10 @@ def get_epoch_training_data(training_set, strategy, ordering, epoch, num_epochs,
         diffs_sorted_idx = np.argsort(training_set['difficulty']) 
     elif ordering == 'hardest':
         diffs_sorted_idx = np.argsort(training_set['difficulty'])[::-1]
-    else:  # middle out
+    elif ordering == 'middleout':  # middle out
         diffs_sorted_idx = np.argsort(np.abs(training_set['difficulty'])) 
+    else:  # random baseline 
+        raise NotImplementedError
 
     # determine if we want balanced per-label or not
     if not is_balanced:

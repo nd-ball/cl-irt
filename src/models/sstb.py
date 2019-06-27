@@ -75,15 +75,20 @@ def train(args):
     pre_trained_embs = True
     out_dim = 2
 
-    print('num_epoch: {}\nbatch_size: {}'.format(num_epoch, batch_size))
+    #print('num_epoch: {}\nbatch_size: {}'.format(num_epoch, batch_size))
+    # construct the exp label
+
+    exp_label = '{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random)
 
     train, dev, test, w2i, i2w, vectors = load_sstb(args.data_dir)
     if len(train['phrase']) == 0:
         return -1, 0
+    if args.random:
+        random.shuffle(train['difficulty'])
 
 
     # load model and train
-    print('initialize model...')
+    #print('initialize model...')
     model = dy.Model()
     dnnmodel = SentimentRNNBuilder(model, out_dim, vectors, w2i, i2w, args.num_units)
     
@@ -102,11 +107,11 @@ def train(args):
     print('training')
     for i in range(num_epoch):
         loss = 0.0
-        print('train epoch {}'.format(i))
+        #print('train epoch {}'.format(i))
         # load training data for this epoch
         epoch_training_data = get_epoch_training_data(train, args.strategy, args.ordering, i, num_epoch, args.balanced, 'sstb') 
         num_train_epoch = len(epoch_training_data['phrase'])
-        print('training set size: {}'.format(num_train_epoch))
+        #print('training set size: {}'.format(num_train_epoch))
         # shuffle training data
 
         examples = list(range(num_train_epoch))
@@ -153,7 +158,7 @@ def train(args):
 
         preds = np.argmax(np.array(predictions), axis=1)
         acc_train = accuracy_score(correct, preds)
-        print("Training accuracy: {}, epoch: {}, num examples: {}".format(acc_train, i, len(preds)))
+        #print("Training accuracy: {}, epoch: {}, num examples: {}".format(acc_train, i, len(preds)))
 
         # Dev
         predictions = []
@@ -184,7 +189,7 @@ def train(args):
 
         preds = np.argmax(np.array(predictions), axis=1)
         acc_dev = accuracy_score(correct, preds)
-        print('Dev accuracy: {}'.format(acc_dev))
+        #print('Dev accuracy: {}'.format(acc_dev))
         
         # Test (SNLI)
         predictions = []
@@ -216,7 +221,9 @@ def train(args):
 
         preds = np.argmax(np.array(predictions), axis=1)
         acc_test = accuracy_score(correct, preds)
-        print('Test accuracy: {}'.format(acc_test))
+        #print('Test accuracy: {}'.format(acc_test))
+
+        print('{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, acc_train, acc_dev, acc_test))
                 
         
         if acc_dev > top_dev:
@@ -224,8 +231,8 @@ def train(args):
             top_dev_epoch = i
             top_dev_test = acc_test 
 
-        print('Best so far (dev): {}, epoch {}'.format(top_dev, top_dev_epoch))
-        print('Best so far (test): {}, epoch {}'.format(top_dev_test, top_dev_epoch))
+        #print('Best so far (dev): {}, epoch {}'.format(top_dev, top_dev_epoch))
+        #print('Best so far (test): {}, epoch {}'.format(top_dev_test, top_dev_epoch))
         
     return top_dev_test, num_train 
 
@@ -246,11 +253,12 @@ def run():
                         help='CL data policy', default='simple')
     parser.add_argument('--ordering', choices=['easiest', 'hardest', 'middleout'], default='easiest') 
     parser.add_argument('--num-epochs', type=int, default=50) 
+    parser.add_argument('--random', action='store_true') 
     args = parser.parse_args()
 
-    print(args)
+    #print(args)
     test_acc, training_set_size = train(args)  
-    print(test_acc) 
+    #print(test_acc) 
 
 
 if __name__ == '__main__':
