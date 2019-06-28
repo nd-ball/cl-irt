@@ -87,7 +87,7 @@ best_acc = 0  # best test accuracy
 
 # Data
 
-print('==> Preparing data..')
+#print('==> Preparing data..')
 transform_train = transforms.Compose([
     transforms.RandomCrop(32, padding=4),
     transforms.RandomHorizontalFlip(),
@@ -110,7 +110,7 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False,
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 # Model
-print('==> Building model..')
+#print('==> Building model..')
 net = VGG('VGG16')
 # net = ResNet18()
 # net = PreActResNet18()
@@ -132,8 +132,8 @@ optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5
 
 # Training
 def train(epoch):
-    print('\nEpoch: %d' % epoch)
-    print('Training')
+    #print('\nEpoch: %d' % epoch)
+    #print('Training')
     net.train()
     train_loss = 0
     correct = 0
@@ -146,6 +146,7 @@ def train(epoch):
     test_preds = []
 
     trainloader = get_epoch_training_data_vision(trainset, args, epoch) 
+    train_length = len(trainloader.dataset) 
 
     #target_counts = collections.Counter([m[1] for m in trainset])
     #print(target_counts)
@@ -166,6 +167,7 @@ def train(epoch):
         train_labels.extend(label)
         train_targets.extend(targets)
         train_preds.extend(predicted)
+    train_acc = 100. * correct / train_length  
 
     # testing
     print('Testing')
@@ -187,13 +189,16 @@ def train(epoch):
             test_labels.extend(label)
             test_targets.extend(targets)
             test_preds.extend(predicted)
+    test_loss /= len(testloader.dataset)
 
     # Save checkpoint.
     acc = 100.*correct/total
+    print('{},{},{},{}'.format(train_length, train_acc, test_loss, acc))
+
     if acc > best_acc:
-        print('Saving..')
+        #print('Saving..')
         best_acc = acc
-        print('epoch: {}, best acc: {}'.format(epoch, best_acc))
+        #print('epoch: {}, best acc: {}'.format(epoch, best_acc))
     return best_acc
 
 
