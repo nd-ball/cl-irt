@@ -170,7 +170,7 @@ def train(epoch):
     train_acc = 100. * correct / train_length  
 
     # testing
-    print('Testing')
+    #print('Testing')
     global best_acc
     net.eval()
     test_loss = 0
