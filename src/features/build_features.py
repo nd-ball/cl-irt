@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd 
 import re 
 
+import torch 
+
 from sklearn.preprocessing import LabelEncoder
 
 
@@ -295,6 +297,63 @@ def get_epoch_training_data(training_set, strategy, ordering, epoch, num_epochs,
         train['phrase'] = [train_2['phrase'][i] for i in range(num_train)] 
         train['difficulty'] = [train_2['difficulty'][i] for i in range(num_train)]
         return train 
+    else:
+        raise NotImplementedError
+
+
+### CL for vision data sets (since they are built slightly differently)
+def get_epoch_training_data_vision(training_set, args, epoch):
+    use_cuda = not args.no_cuda and torch.cuda.is_available()
+    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+    if args.strategy == 'baseline':
+        return torch.utils.data.DataLoader(training_set,
+                batch_size=args.batch_size, shuffle=True, **kwargs)
+ 
+    # set up CL #     
+    # how will we order the data before building curriculum?
+    difficulties = [img[3] for img in training_set]
+    diffs_sorted_idx = np.argsort(difficulties) 
+
+    if args.ordering == 'easiest':
+        diffs_sorted_idx = diffs_sorted_idx
+    elif args.ordering == 'hardest':
+        diffs_sorted_idx = diffs_sorted_idx[::-1]
+    elif args.ordering == 'middleout':  # middle out
+        diffs_sorted_idx = np.argsort(np.abs(difficulties))  
+    else:  # random baseline 
+        raise NotImplementedError
+
+    # determine if we want balanced per-label or not
+    if not args.is_balanced:
+        train_2 = [training_set[d] for d in diffs_sorted_idx]
+    else:
+        per_label_lists = {
+                0:[], 1:[], 2:[], 3:[], 4:[], 
+                5:[], 6:[], 7:[], 8:[], 9:[]
+            }
+        for d in diffs_sorted_idx:
+            eg = training_set[d] 
+            per_label_lists[eg[1].item()].append(eg) 
+        zipped_egs = zip(
+            per_label_lists[0], per_label_lists[1], per_label_lists[2],
+            per_label_lists[3], per_label_lists[4], per_label_lists[5],
+            per_label_lists[6], per_label_lists[7], per_label_lists[8],
+            per_label_lists[9]
+        )
+        train_2 = [j for i in zipped_egs for j in i]
+
+    # based on strategy, select our training set for this epoch
+    if args.strategy == 'ordered':
+        return torch.utils.data.DataLoader(train_2,
+                batch_size=args.batch_size, shuffle=False, **kwargs) 
+    elif args.strategy == 'simple':
+        # how many examples do we want this epoch? 
+        # CL for first half, full data for 2nd half 
+        data_per_epoch = len(training_set) / (args.num_epochs / 2.)
+        num_train = min(int(data_per_epoch * (epoch + 1)), len(training_set))
+        train = [train_2[i] for i in range(num_train)] 
+        return torch.utils.data.DataLoader(train_2,
+                batch_size=args.batch_size, shuffle=True, **kwargs) 
     else:
         raise NotImplementedError
 
