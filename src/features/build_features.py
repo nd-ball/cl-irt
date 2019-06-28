@@ -324,7 +324,7 @@ def get_epoch_training_data_vision(training_set, args, epoch):
         raise NotImplementedError
 
     # determine if we want balanced per-label or not
-    if not args.is_balanced:
+    if not args.balanced:
         train_2 = [training_set[d] for d in diffs_sorted_idx]
     else:
         per_label_lists = {
