@@ -332,8 +332,8 @@ def get_epoch_training_data_vision(training_set, args, epoch):
                 5:[], 6:[], 7:[], 8:[], 9:[]
             }
         for d in diffs_sorted_idx:
-            eg = training_set[d] 
-            per_label_lists[eg[1].item()].append(eg) 
+            eg = training_set[d]
+            per_label_lists[eg[1].item()].append(d) 
 
         max_length = max([len(v) for k,v in per_label_lists.items()])
         train_2_idx = []
