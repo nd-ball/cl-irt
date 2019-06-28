@@ -339,9 +339,9 @@ class my_CIFAR10(data.Dataset):
         self.difficulties = []
         if diff_dir is not None:
             if self.train:
-                diff_file = diff_dir + '/cifar_rp_train_snli.csv.diffs'
+                diff_file = diff_dir + '/cifar_diffs_train.csv'
             else:
-                diff_file = diff_dir + '/cifar_rp_test_snli.csv.diffs'
+                diff_file = diff_dir + '/cifar_diffs_test.csv'
             with open(diff_file, 'r') as infile:
                 diffreader = csv.reader(infile, delimiter=',')
 
@@ -358,9 +358,9 @@ class my_CIFAR10(data.Dataset):
             self.pcorrect = []
             self.pcorrect_dict = {}
             if self.train:
-                pcorrect_file = diff_dir + 'cifar_rp_train_snli.csv'
+                pcorrect_file = diff_dir + 'cifar_rp_train.csv'
             else:
-                pcorrect_file = diff_dir + 'cifar_rp_test_snli.csv'
+                pcorrect_file = diff_dir + 'cifar_rp_test.csv'
             with open(pcorrect_file, 'r') as infile:
                 pcorrect_reader = csv.reader(infile, delimiter=',')
 
