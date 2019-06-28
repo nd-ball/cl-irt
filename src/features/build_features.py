@@ -334,13 +334,14 @@ def get_epoch_training_data_vision(training_set, args, epoch):
         for d in diffs_sorted_idx:
             eg = training_set[d] 
             per_label_lists[eg[1].item()].append(eg) 
-        zipped_egs = zip(
-            per_label_lists[0], per_label_lists[1], per_label_lists[2],
-            per_label_lists[3], per_label_lists[4], per_label_lists[5],
-            per_label_lists[6], per_label_lists[7], per_label_lists[8],
-            per_label_lists[9]
-        )
-        train_2 = [j for i in zipped_egs for j in i]
+
+        max_length = max([len(v) for k,v in per_label_lists.items()])
+        train_2_idx = []
+        for l in range(max_length):
+            for k, v in per_label_lists.items():
+                if l < len(v):
+                    train_2_idx.append(v[l])
+        train_2 = [training_set[j] for j in train_2_idx]
 
     # based on strategy, select our training set for this epoch
     if args.strategy == 'ordered':
