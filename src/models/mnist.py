@@ -39,18 +39,25 @@ def train(args, model, device, train_data, test_loader,
     imageIDs = []
     targets = []
     preds = []
+    correct = 0.
 
     train_loader = get_epoch_training_data_vision(train_data, args, epoch) 
+    train_length = len(train_loader.dataset) 
     for batch_idx, (data, target, label, diff, _) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
         loss = F.nll_loss(output, target)
+        pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
+        correct += pred.eq(target.view_as(pred)).sum().item()
+
         loss.backward()
         optimizer.step()
         imageIDs.extend(label)
         targets.extend(target)
         preds.extend(output)
+
+    train_acc = 100. * correct / train_length  
 
     model.eval()
     test_loss = 0
@@ -70,16 +77,17 @@ def train(args, model, device, train_data, test_loader,
             test_targets.extend(target)
             test_preds.extend(pred)
 
-
     test_loss /= len(test_loader.dataset)
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
-        test_loss, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))
+    test_acc = 100. * correct / len(test_loader.dataset) 
+    print('{},{},{},{}'.format(train_length, train_acc, test_loss, test_acc))
+    #print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+    #    test_loss, correct, len(test_loader.dataset),
+    #    100. * correct / len(test_loader.dataset)))
     epoch_test_acc = 100. * correct / len(test_loader.dataset)
     if epoch_test_acc > best_acc:
-        print('best test acc: {}, (epoch {})'.format(
-            epoch_test_acc, epoch
-        ))
+        #print('best test acc: {}, (epoch {})'.format(
+        #    epoch_test_acc, epoch
+        #))
         best_acc = epoch_test_acc
 
     return best_acc

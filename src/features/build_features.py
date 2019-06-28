@@ -307,7 +307,7 @@ def get_epoch_training_data_vision(training_set, args, epoch):
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     if args.strategy == 'baseline':
         return torch.utils.data.DataLoader(training_set,
-                batch_size=args.batch_size, shuffle=True, **kwargs)
+                batch_size=args.batch_size, shuffle=True, **kwargs)  
  
     # set up CL #     
     # how will we order the data before building curriculum?
@@ -345,7 +345,7 @@ def get_epoch_training_data_vision(training_set, args, epoch):
     # based on strategy, select our training set for this epoch
     if args.strategy == 'ordered':
         return torch.utils.data.DataLoader(train_2,
-                batch_size=args.batch_size, shuffle=False, **kwargs) 
+                batch_size=args.batch_size, shuffle=False, **kwargs)
     elif args.strategy == 'simple':
         # how many examples do we want this epoch? 
         # CL for first half, full data for 2nd half 
@@ -353,7 +353,7 @@ def get_epoch_training_data_vision(training_set, args, epoch):
         num_train = min(int(data_per_epoch * (epoch + 1)), len(training_set))
         train = [train_2[i] for i in range(num_train)] 
         return torch.utils.data.DataLoader(train,
-                batch_size=args.batch_size, shuffle=True, **kwargs) 
+                batch_size=args.batch_size, shuffle=True, **kwargs)
     else:
         raise NotImplementedError
 
