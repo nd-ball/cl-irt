@@ -352,7 +352,7 @@ def get_epoch_training_data_vision(training_set, args, epoch):
         data_per_epoch = len(training_set) / (args.num_epochs / 2.)
         num_train = min(int(data_per_epoch * (epoch + 1)), len(training_set))
         train = [train_2[i] for i in range(num_train)] 
-        return torch.utils.data.DataLoader(train_2,
+        return torch.utils.data.DataLoader(train,
                 batch_size=args.batch_size, shuffle=True, **kwargs) 
     else:
         raise NotImplementedError
