@@ -201,5 +201,5 @@ for epoch in range(0, args.num_epochs):
     ba = train(epoch)
     #test(epoch)
 print(ba) 
-print(len(trainset))
-print(target_counts)
+#print(len(trainset))
+#print(target_counts)
