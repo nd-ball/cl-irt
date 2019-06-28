@@ -66,8 +66,6 @@ class VGG(nn.Module):
 
 parser = argparse.ArgumentParser(description='PyTorch DNN Training')
 parser.add_argument('--lr', default=0.1, type=float, help='learning rate')
-parser.add_argument('--baseline', action='store_true')
-parser.add_argument('--balanced', action='store_true') 
 parser.add_argument('--batch-size', type=int, default=128, metavar='N',
                         help='input batch size for training (default: 64)')
 parser.add_argument('--data-dir', help='path to SNLI dataset')
