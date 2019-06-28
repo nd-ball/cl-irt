@@ -156,7 +156,7 @@ def main():
     
     best_test = 0
 
-    for epoch in range(1, args.num_epochs + 1):             
+    for epoch in range(0, args.num_epochs):             
         best_test = train(args, model, device, mnist_train, test_loader, optimizer, epoch, best_test)
     last_line = '{}'.format(best_test)
     print(last_line)
