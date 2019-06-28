@@ -34,7 +34,7 @@ class Net(nn.Module):
 
 
 def train(args, model, device, train_data, test_loader, 
-            optimizer, epoch, best_acc, num_epochs):
+            optimizer, epoch, best_acc):
     model.train()
     imageIDs = []
     targets = []
