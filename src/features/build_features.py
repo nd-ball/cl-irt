@@ -232,7 +232,7 @@ def load_sstb(data_dir):
 
 
 ####### Get CL Data per epoch ########
-def get_epoch_training_data(training_set, strategy, ordering, epoch, num_epochs, is_balanced, task):
+def get_epoch_training_data(training_set, strategy, ordering, epoch, num_epochs, is_balanced, task, use_length=False):
     if strategy == 'baseline':
         return training_set 
 
@@ -249,6 +249,12 @@ def get_epoch_training_data(training_set, strategy, ordering, epoch, num_epochs,
     }
     
     # how will we order the data before building curriculum?
+    # difficulty baseline: use the length of the text as a proxy
+    if use_length:
+        if task == 'sstb':
+            training_set['difficulty'] = [len(p) for p in training_set['phrase']]
+        else:  # snli
+            training_set['difficulty'] = [len(p[0]) for p in training_set['phrase']] 
     if ordering == 'easiest':
         diffs_sorted_idx = np.argsort(training_set['difficulty']) 
     elif ordering == 'hardest':

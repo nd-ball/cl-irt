@@ -28,6 +28,7 @@ parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple'],
 parser.add_argument('--ordering', choices=['easiest', 'hardest', 'middleout'], default='easiest') 
 parser.add_argument('--num-epochs', type=int, default=50) 
 parser.add_argument('--random', action='store_true') 
+parser.add_argument('--use-length', action='store_true')
 args = parser.parse_args()
 
 print(args)
