@@ -1,0 +1,50 @@
+\documentclass{article}
+
+\title{Curriculum Learning}
+\author{John Lalor} 
+
+\begin{document}
+\maketitle 
+\begin{abstract}
+CL has been shown to be effective.
+Many measures of ``difficulty'' are based on heuristics and not on true difficulty.
+we want to change that by leveraging methods from psychometrics.
+Experiments on vision and language data show that using learned difficulty and ability to set up a curriculum is effective.
+\end{abstract}
+
+\section{Introduction}
+- go over CL
+- why it works
+- why there are currently issues with it (heuristics)
+- bottlenecks to some of the existing approaches
+
+\section{Methods}
+
+- brief review of IRT (focus on rasch model because that is what we're using)
+
+- talk about how to fit the model using variational inference
+
+- selecting data as the model is reayd for it (based on theta)
+
+\section{Data and experiments} 
+
+- vision (mnist and cifar)
+
+- language (SNLI and SSTB) 
+
+- experiments: ordered vs simple vs irt, balanced vs not balanced 
+
+\section{Results} 
+
+- plots and tables 
+
+- really show that using our method is efficient and practical 
+
+\section{Related work}
+
+Lots to do here. need a thorough lit review as part of this paper 
+
+\section{Conclusion} 
+
+
+\end{document}
