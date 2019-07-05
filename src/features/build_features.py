@@ -298,7 +298,10 @@ def get_epoch_training_data(training_set, strategy, ordering, epoch, num_epochs,
         # how many examples do we want this epoch? 
         # CL for first half, full data for 2nd half 
         data_per_epoch = len(training_set['phrase']) / (num_epochs / 2.)
-        num_train = min(int(data_per_epoch * (epoch + 1)), len(training_set['phrase'])) 
+        if epoch % 2 == 0:
+            num_train = min(int(data_per_epoch * (epoch + 1)), len(training_set['phrase'])) 
+        else:
+            num_train = min(int(data_per_epoch * (epoch)), len(training_set['phrase'])) 
         train['lbls'] = [train_2['lbls'][i] for i in range(num_train)] 
         train['phrase'] = [train_2['phrase'][i] for i in range(num_train)] 
         train['difficulty'] = [train_2['difficulty'][i] for i in range(num_train)]
@@ -360,7 +363,10 @@ def get_epoch_training_data_vision(training_set, args, epoch):
         # how many examples do we want this epoch? 
         # CL for first half, full data for 2nd half 
         data_per_epoch = len(training_set) / (args.num_epochs / 2.)
-        num_train = min(int(data_per_epoch * (epoch + 1)), len(training_set))
+        if epoch % 2 == 0:
+            num_train = min(int(data_per_epoch * (epoch + 1)), len(training_set))
+        else:
+            num_train = min(int(data_per_epoch * (epoch)), len(training_set))
         train = [train_2[i] for i in range(num_train)] 
         return torch.utils.data.DataLoader(train,
                 batch_size=args.batch_size, shuffle=True, **kwargs)
