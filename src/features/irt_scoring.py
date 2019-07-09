@@ -15,8 +15,6 @@ def theta_fn(difficulties, student_prior, response_pattern):
         #print(probabilities) 
         log_likelihood = student_prior.logpdf(theta) 
         for i, rp in enumerate(response_pattern):
-            if rp == 0:
-                rp == -1
             log_likelihood += np.log1p((2 * probabilities[i] - 1) * rp) 
         #print(log_likelihood)
         return  -log_likelihood 
@@ -43,4 +41,4 @@ def test():
     rp = [1.] * 2500 + [-1.] * 7500 
     print(calculate_theta(diffs, rp)) 
 
-test() 
+#test() 

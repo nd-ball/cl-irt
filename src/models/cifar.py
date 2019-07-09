@@ -178,8 +178,8 @@ def train(epoch):
 
     # calculate theta based on current epoch data 
     train_rps = [j if j==1 else -1 for j in train_rps] 
-    print(train_diffs) 
-    print(train_rps) 
+    #print(train_diffs) 
+    #print(train_rps) 
     theta_hat = calculate_theta(train_diffs, train_rps) 
     print('estimated theta: {}'.format(theta_hat[0])) 
 
