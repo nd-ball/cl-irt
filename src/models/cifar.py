@@ -23,6 +23,7 @@ import os
 from data.my_data_downloaders import my_CIFAR10
 
 from features.build_features import get_epoch_training_data_vision
+from features.irt_scoring import calculate_theta 
 
 
 ### Define VGG model
@@ -145,13 +146,16 @@ def train(epoch):
     test_targets = []
     test_preds = []
 
+    train_diffs = [] 
+    train_rps = [] 
+
     trainloader = get_epoch_training_data_vision(trainset, args, epoch) 
     train_length = len(trainloader.dataset) 
 
     #target_counts = collections.Counter([m[1] for m in trainset])
     #print(target_counts)
 
-    for batch_idx, (inputs, targets, label, _, _) in enumerate(trainloader):
+    for batch_idx, (inputs, targets, label, diffs, _) in enumerate(trainloader):
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
         outputs = net(inputs)
@@ -167,7 +171,13 @@ def train(epoch):
         train_labels.extend(label)
         train_targets.extend(targets)
         train_preds.extend(predicted)
+        train_diffs.extend(diffs) 
+        train_rps.extend(predicted.eq(targets)) 
     train_acc = 100. * correct / train_length  
+
+    # calculate theta based on current epoch data 
+    theta_hat = calculate_theta(train_diffs, train_rps) 
+    print(theta_hat) 
 
     # testing
     #print('Testing')
