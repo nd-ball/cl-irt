@@ -149,7 +149,7 @@ def train(epoch, theta_hat=-4.0):
     train_diffs = [] 
     train_rps = [] 
 
-    trainloader = get_epoch_training_data_vision(trainset, args, epoch) 
+    trainloader = get_epoch_training_data_vision(trainset, args, epoch, theta_hat) 
     train_length = len(trainloader.dataset) 
 
     #target_counts = collections.Counter([m[1] for m in trainset])
