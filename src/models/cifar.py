@@ -72,14 +72,14 @@ parser.add_argument('--batch-size', type=int, default=128, metavar='N',
 parser.add_argument('--data-dir', help='path to SNLI dataset')
 parser.add_argument('--num-units', type=int, default=300, help='number of units per layer')
 parser.add_argument('--balanced', action='store_true') 
-parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple'],
+parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple', 'theta'],
                     help='CL data policy', default='simple')
 parser.add_argument('--ordering', choices=['easiest', 'hardest', 'middleout'], default='easiest') 
 parser.add_argument('--num-epochs', type=int, default=50) 
 parser.add_argument('--random', action='store_true') 
 parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
-
+parser.add_argument('--min-train-length', default=100, type=int)
 
 args = parser.parse_args()
 

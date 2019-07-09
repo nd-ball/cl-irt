@@ -311,12 +311,14 @@ def get_epoch_training_data(training_set, strategy, ordering, epoch, num_epochs,
 
 
 ### CL for vision data sets (since they are built slightly differently)
-def get_epoch_training_data_vision(training_set, args, epoch):
+def get_epoch_training_data_vision(training_set, args, epoch, theta_hat=None):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     if args.strategy == 'baseline':
         return torch.utils.data.DataLoader(training_set,
                 batch_size=args.batch_size, shuffle=True, **kwargs)  
+    if args.strategy == 'theta':
+        assert theta_hat is not None and args.ordering == 'easiest' 
  
     # set up CL #     
     # how will we order the data before building curriculum?
@@ -368,6 +370,12 @@ def get_epoch_training_data_vision(training_set, args, epoch):
         else:
             num_train = min(int(data_per_epoch * (epoch)), len(training_set))
         train = [train_2[i] for i in range(num_train)] 
+        return torch.utils.data.DataLoader(train,
+                batch_size=args.batch_size, shuffle=True, **kwargs)
+    elif args.strategy == 'theta':
+        train = [train_2[i] for i in range(len(training_set)) if train_2[i][3] <= theta_hat]
+        if len(train) < args.min_train_length:
+            train = [train_2[i] for i in range(args.min_train_length)] 
         return torch.utils.data.DataLoader(train,
                 batch_size=args.batch_size, shuffle=True, **kwargs)
     else:
