@@ -35,12 +35,12 @@ def calculate_theta(difficulties, response_pattern):
 
 
 def test():
-    diffs = [-3., -2., 2., 3.]
-    diffs = [-1.0, -0.75, 0.02, 1.4, 3.2]
-    rp = [-1, -1, -1, -1, -1]
+    diffs = [-3., -2., -2., -1., -3.]
+    #diffs = [-1.0, -0.75, 0.02, 1.4, 3.2]
+    rp = [1, -1, 1, 1, -1]
     #rp = [0,0,0,0,0]
-    diffs = np.random.rand(10000)
-    rp = [1.] * 9990 + [-1.] * 10 
+    diffs = np.random.rand(10000) - 2.
+    rp = [1.] * 2500 + [-1.] * 7500 
     print(calculate_theta(diffs, rp)) 
 
-#test() 
+test() 
