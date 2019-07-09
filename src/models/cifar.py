@@ -177,7 +177,7 @@ def train(epoch):
 
     # calculate theta based on current epoch data 
     theta_hat = calculate_theta(train_diffs, train_rps) 
-    print(theta_hat) 
+    print('estimated theta: {}'.format(theta_hat[0])) 
 
     # testing
     #print('Testing')

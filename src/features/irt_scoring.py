@@ -12,11 +12,11 @@ def theta_fn(difficulties, student_prior, response_pattern):
     def fn(theta):
         theta = theta[0] 
         probabilities = expit(theta - difficulties)
-        print(probabilities) 
+        #print(probabilities) 
         log_likelihood = student_prior.logpdf(theta) 
         for i, rp in enumerate(response_pattern):
             log_likelihood += np.log1p((2 * probabilities[i] - 1) * rp) 
-        print(log_likelihood)
+        #print(log_likelihood)
         return  -log_likelihood 
     return fn 
 
