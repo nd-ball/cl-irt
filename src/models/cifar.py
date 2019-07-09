@@ -132,7 +132,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
 
 # Training
-def train(epoch):
+def train(epoch, theta_hat=-4.0):
     #print('\nEpoch: %d' % epoch)
     #print('Training')
     net.train()
@@ -213,11 +213,11 @@ def train(epoch):
         #print('Saving..')
         best_acc = acc
         #print('epoch: {}, best acc: {}'.format(epoch, best_acc))
-    return best_acc
+    return best_acc, theta_hat
 
-
+th = -4.0
 for epoch in range(0, args.num_epochs):
-    ba = train(epoch)
+    ba, th = train(epoch, th)
     #test(epoch)
 print(ba) 
 #print(len(trainset))
