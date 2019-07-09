@@ -132,9 +132,42 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
 
 # Training
-def train(epoch, theta_hat=-4.0):
+def train(epoch):
     #print('\nEpoch: %d' % epoch)
     #print('Training')
+    # get a theta estimate from entire training set 
+    net.eval()
+    test_loss = 0
+    correct = 0
+    total = 0
+    train_diffs = [] 
+    train_rps = []
+    use_cuda = not args.no_cuda and torch.cuda.is_available()
+    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+
+    irt_trainloader = torch.utils.data.DataLoader(trainset,
+                batch_size=args.batch_size, shuffle=True, **kwargs) 
+
+    with torch.no_grad():
+        for batch_idx, (inputs, targets, label, diffs, _) in enumerate(irt_trainloader):
+            inputs, targets = inputs.to(device), targets.to(device)
+            outputs = net(inputs)
+            loss = criterion(outputs, targets)
+
+            test_loss += loss.item()
+            _, predicted = outputs.max(1)
+            total += targets.size(0)
+            correct += predicted.eq(targets).sum().item()
+            rp = predicted.eq(targets).cpu().numpy() 
+            train_diffs.extend(diffs.numpy()) 
+            train_rps.extend(rp)
+    # calculate theta based on current epoch data 
+    train_rps = [j if j==1 else -1 for j in train_rps] 
+    #print(train_diffs) 
+    #print(train_rps) 
+    theta_hat = calculate_theta(train_diffs, train_rps)[0] 
+    print('estimated theta: {}'.format(theta_hat)) 
+   
     net.train()
     train_loss = 0
     correct = 0
@@ -145,9 +178,6 @@ def train(epoch, theta_hat=-4.0):
     test_labels = []
     test_targets = []
     test_preds = []
-
-    train_diffs = [] 
-    train_rps = [] 
 
     trainloader = get_epoch_training_data_vision(trainset, args, epoch, theta_hat) 
     train_length = len(trainloader.dataset) 
@@ -167,21 +197,12 @@ def train(epoch, theta_hat=-4.0):
         _, predicted = outputs.max(1)
         total += targets.size(0)
         correct += predicted.eq(targets).sum().item()
-        rp = predicted.eq(targets).cpu().numpy() 
 
         train_labels.extend(label)
         train_targets.extend(targets)
         train_preds.extend(predicted)
-        train_diffs.extend(diffs.numpy()) 
-        train_rps.extend(rp)   
     train_acc = 100. * correct / train_length  
 
-    # calculate theta based on current epoch data 
-    train_rps = [j if j==1 else -1 for j in train_rps] 
-    #print(train_diffs) 
-    #print(train_rps) 
-    theta_hat = calculate_theta(train_diffs, train_rps)[0] 
-    print('estimated theta: {}'.format(theta_hat)) 
 
     # testing
     #print('Testing')
@@ -213,11 +234,10 @@ def train(epoch, theta_hat=-4.0):
         #print('Saving..')
         best_acc = acc
         #print('epoch: {}, best acc: {}'.format(epoch, best_acc))
-    return best_acc, theta_hat
+    return best_acc
 
-th = -4.0
 for epoch in range(0, args.num_epochs):
-    ba, th = train(epoch, th)
+    ba = train(epoch)
     #test(epoch)
 print(ba) 
 #print(len(trainset))
