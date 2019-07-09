@@ -180,8 +180,8 @@ def train(epoch, theta_hat=-4.0):
     train_rps = [j if j==1 else -1 for j in train_rps] 
     #print(train_diffs) 
     #print(train_rps) 
-    theta_hat = calculate_theta(train_diffs, train_rps) 
-    print('estimated theta: {}'.format(theta_hat[0])) 
+    theta_hat = calculate_theta(train_diffs, train_rps)[0] 
+    print('estimated theta: {}'.format(theta_hat)) 
 
     # testing
     #print('Testing')
