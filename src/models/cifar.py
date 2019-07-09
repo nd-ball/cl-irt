@@ -167,15 +167,18 @@ def train(epoch):
         _, predicted = outputs.max(1)
         total += targets.size(0)
         correct += predicted.eq(targets).sum().item()
+        rp = predicted.eq(targets).cpu().numpy() 
 
         train_labels.extend(label)
         train_targets.extend(targets)
         train_preds.extend(predicted)
         train_diffs.extend(diffs.numpy()) 
-        train_rps.extend(predicted.eq(targets).cpu().numpy())  
+        train_rps.extend(rp)   
     train_acc = 100. * correct / train_length  
 
     # calculate theta based on current epoch data 
+    print(train_diffs) 
+    print(train_rps) 
     theta_hat = calculate_theta(train_diffs, train_rps) 
     print('estimated theta: {}'.format(theta_hat[0])) 
 
