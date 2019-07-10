@@ -152,12 +152,7 @@ def train(epoch):
         for batch_idx, (inputs, targets, label, diffs, _) in enumerate(irt_trainloader):
             inputs, targets = inputs.to(device), targets.to(device)
             outputs = net(inputs)
-            loss = criterion(outputs, targets)
-
-            test_loss += loss.item()
             _, predicted = outputs.max(1)
-            total += targets.size(0)
-            correct += predicted.eq(targets).sum().item()
             rp = predicted.eq(targets).cpu().numpy() 
             train_diffs.extend(diffs.numpy()) 
             train_rps.extend(rp)

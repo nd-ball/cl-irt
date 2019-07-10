@@ -12,6 +12,7 @@ from torchvision import datasets, transforms
 from data.my_data_downloaders import my_MNIST
 
 from features.build_features import get_epoch_training_data_vision
+from features.irt_scoring import calculate_theta 
 
 
 class Net(nn.Module):
@@ -35,13 +36,40 @@ class Net(nn.Module):
 
 def train(args, model, device, train_data, test_loader, 
             optimizer, epoch, best_acc):
+    
+    # estimate theta for the model in its current state 
+    model.eval() 
+    train_diffs = [] 
+    train_rps = []
+    use_cuda = not args.no_cuda and torch.cuda.is_available()
+    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+
+    irt_trainloader = torch.utils.data.DataLoader(train_data,
+                batch_size=args.batch_size, shuffle=True, **kwargs)
+
+    with torch.no_grad():
+        for batch_idx, (data, target, label, diff, _) in enumerate(irt_trainloader):
+            data, target = data.to(device), target.to(device)
+            output = model(data)
+            pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
+            correct += pred.eq(target.view_as(pred)).sum().item()
+            rp = pred.eq(target).cpu().numpy() 
+            train_diffs.extend(diff.numpy()) 
+            train_rps.extend(rp)
+    # calculate theta based on current epoch data 
+    train_rps = [j if j==1 else -1 for j in train_rps] 
+    #print(train_diffs) 
+    #print(train_rps) 
+    theta_hat = calculate_theta(train_diffs, train_rps)[0] 
+    print('estimated theta: {}'.format(theta_hat))     
+    
     model.train()
     imageIDs = []
     targets = []
     preds = []
     correct = 0.
 
-    train_loader = get_epoch_training_data_vision(train_data, args, epoch) 
+    train_loader = get_epoch_training_data_vision(train_data, args, epoch, theta_hat) 
     train_length = len(train_loader.dataset) 
     for batch_idx, (data, target, label, diff, _) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
@@ -117,7 +145,7 @@ def main():
     parser.add_argument('--ordering', choices=['easiest', 'hardest', 'middleout'], default='easiest') 
     parser.add_argument('--num-epochs', type=int, default=50) 
     parser.add_argument('--random', action='store_true') 
-
+    parser.add_argument('--min-train-length', default=100, type=int)
 
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
