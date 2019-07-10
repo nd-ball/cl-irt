@@ -146,7 +146,7 @@ def train(args):
         preds = np.argmax(np.array(predictions), axis=1)
         rps = [int(p == c) for p, c in zip(preds, correct)] 
 
-        theta_hat = calculate_theta(train['difficulties'], rps) 
+        theta_hat = calculate_theta(train['difficulty'], rps) 
 
 
         epoch_training_data = get_epoch_training_data(train, args, i, 'sstb', theta_hat) 
