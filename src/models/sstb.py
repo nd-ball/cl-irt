@@ -292,6 +292,7 @@ def run():
     parser.add_argument('--num-epochs', type=int, default=100) 
     parser.add_argument('--random', action='store_true') 
     parser.add_argument('--use-length', action='store_true')
+    parser.add_argument('--min-train-length', default=100, type=int)
     args = parser.parse_args()
 
     #print(args)
