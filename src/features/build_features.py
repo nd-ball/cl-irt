@@ -98,7 +98,7 @@ def load_snli(data_dir):
     vocab_size = len(vocab)
 
     #print('preprocessing data...')
-    out_train = preprocess(train)
+    out_train = preprocess(train, True)
     out_dev = preprocess(dev)
     out_test = preprocess(test)
     gc.collect()
