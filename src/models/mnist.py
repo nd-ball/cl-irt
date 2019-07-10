@@ -52,7 +52,6 @@ def train(args, model, device, train_data, test_loader,
             data, target = data.to(device), target.to(device)
             output = model(data)
             pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
-            correct += pred.eq(target.view_as(pred)).sum().item()
             rp = pred.eq(target).cpu().numpy() 
             train_diffs.extend(diff.numpy()) 
             train_rps.extend(rp)
