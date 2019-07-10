@@ -22,7 +22,7 @@ sbatch -p m40-long --gres=gpu:1 --mem=90gb --output=logs/mnist_cl_ordered_not_ba
 
 for o in easiest middleout hardest
 do
-    for s in simple balanced 
+    for s in simple #balanced 
     do 
 
         # CL, simple, balanced

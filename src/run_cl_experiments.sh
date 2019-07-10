@@ -24,7 +24,7 @@ sbatch -p titanx-long --gres=gpu:1 --mem=90gb --output=logs/snli_baseline.log --
 
 for o in easiest middleout hardest
 do
-    for s in simple balanced 
+    for s in simple #balanced 
     do 
         # CL, simple, balanced
         sbatch -p titanx-long --gres=gpu:1 --mem=90gb --output=logs/snli_cl_balanced-$s-$o.log --wrap="python -u -m models.snli --dynet-autobatch 1 --dynet-gpu 1 --dynet-mem 11000 --gpu 0 --data-dir /mnt/nfs/work1/hongyu/lalor/data/cl-data/ --strategy $s --balanced --ordering $o --num-epochs $NUMEPOCHS"
@@ -41,7 +41,7 @@ sbatch -p titanx-long --gres=gpu:1 --mem=90gb --output=logs/sstb_baseline_easies
 
 for o in easiest middleout hardest
 do
-    for s in simple balanced 
+    for s in simple #balanced 
     do 
         # CL, simple, balanced
         sbatch -p titanx-long --gres=gpu:1 --mem=90gb --output=logs/sstb__cl_balanced-$s-$o.log --wrap="python -u -m models.sstb --dynet-autobatch 1 --dynet-gpu 1 --dynet-mem 11000 --gpu 0 --data-dir /mnt/nfs/work1/hongyu/lalor/data/cl-data/ --strategy $s --balanced --ordering $o --num-epochs $NUMEPOCHS"
