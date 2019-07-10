@@ -115,7 +115,8 @@ def train(args):
         # estimate theta_hat 
         examples = list(range(num_train))
         rps = []
-        diffs = []
+        outs = []
+        correct = [] 
         k = 0
 
         for j in examples:
