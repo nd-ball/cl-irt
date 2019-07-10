@@ -9,6 +9,8 @@ import pandas as pd
 from sklearn.metrics import accuracy_score
 
 from features.build_features import load_sstb, get_epoch_training_data 
+from features.irt_scoring import calculate_theta 
+
 
 class SentimentRNNBuilder:
     def __init__(self, model, out_dim, WORD_EMBS, w2i, i2w, lstm_dim):
@@ -109,7 +111,42 @@ def train(args):
         loss = 0.0
         #print('train epoch {}'.format(i))
         # load training data for this epoch
-        epoch_training_data = get_epoch_training_data(train, args.strategy, args.ordering, i, num_epoch, args.balanced, 'sstb') 
+
+        # estimate theta_hat 
+        examples = list(range(num_train))
+        rps = []
+        diffs = []
+        k = 0
+
+        for j in examples:
+            if k % batch_size == 0:
+                dy.renew_cg()
+                losses = []
+                outs = []
+            sent1 = train['phrase'][j]
+            lbl = train['lbls'][j]
+            correct.append(train['lbls'][j])
+            out = dnnmodel.forward(sent1, lbl)
+            outs.append(out)
+
+            if k % batch_size == batch_size - 1:
+                dy.forward(outs)
+                predictions.extend([o.npvalue() for o in outs])
+                outs = []
+            k += 1
+
+        # need to do one last batch in case there are elements left over in a "last batch"
+        # final pass if there are unbatched values
+        if len(outs) > 0:
+            dy.forward(outs)
+            predictions.extend([o.npvalue() for o in outs])
+        preds = np.argmax(np.array(predictions), axis=1)
+        rps = [int(p == c) for p, c in zip(preds, correct)] 
+
+        theta_hat = calculate_theta(train['difficulties'], rps) 
+
+
+        epoch_training_data = get_epoch_training_data(train, args, i, 'sstb', theta_hat) 
         num_train_epoch = len(epoch_training_data['phrase'])
         #print('training set size: {}'.format(num_train_epoch))
         # shuffle training data
@@ -249,7 +286,7 @@ def run():
     parser.add_argument('--data-dir', help='path to SNLI dataset')
     parser.add_argument('--num-units', type=int, default=300, help='number of units per layer')
     parser.add_argument('--balanced', action='store_true') 
-    parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple'],
+    parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple', 'theta'],
                         help='CL data policy', default='simple')
     parser.add_argument('--ordering', choices=['easiest', 'hardest', 'middleout'], default='easiest') 
     parser.add_argument('--num-epochs', type=int, default=100) 

@@ -232,9 +232,12 @@ def load_sstb(data_dir):
 
 
 ####### Get CL Data per epoch ########
-def get_epoch_training_data(training_set, strategy, ordering, epoch, num_epochs, is_balanced, task, use_length=False):
-    if strategy == 'baseline':
-        return training_set 
+def get_epoch_training_data(training_set, args, epoch, task, theta_hat=None):
+    if args.strategy == 'baseline':
+        return training_set
+    if args.strategy == 'theta':
+        assert theta_hat is not None and args.ordering == 'easiest' 
+ 
 
     # set up CL
     train_2 = {
@@ -250,22 +253,22 @@ def get_epoch_training_data(training_set, strategy, ordering, epoch, num_epochs,
     
     # how will we order the data before building curriculum?
     # difficulty baseline: use the length of the text as a proxy
-    if use_length:
+    if args.use_length:
         if task == 'sstb':
             training_set['difficulty'] = [len(p) for p in training_set['phrase']]
         else:  # snli
             training_set['difficulty'] = [len(p[0]) for p in training_set['phrase']] 
-    if ordering == 'easiest':
+    if args.ordering == 'easiest':
         diffs_sorted_idx = np.argsort(training_set['difficulty']) 
-    elif ordering == 'hardest':
+    elif args.ordering == 'hardest':
         diffs_sorted_idx = np.argsort(training_set['difficulty'])[::-1]
-    elif ordering == 'middleout':  # middle out
+    elif args.ordering == 'middleout':  # middle out
         diffs_sorted_idx = np.argsort(np.abs(training_set['difficulty'])) 
     else:  # random baseline 
         raise NotImplementedError
 
     # determine if we want balanced per-label or not
-    if not is_balanced:
+    if not args.is_balanced:
         train_2['phrase'] = [training_set['phrase'][d] for d in diffs_sorted_idx] 
         train_2['lbls'] = [training_set['lbls'][d] for d in diffs_sorted_idx] 
         train_2['difficulty'] = [training_set['difficulty'][d] for d in diffs_sorted_idx]
@@ -292,12 +295,12 @@ def get_epoch_training_data(training_set, strategy, ordering, epoch, num_epochs,
         train_2['difficulty'] = [training_set['difficulty'][z] for z in train_2_idx]
 
     # based on strategy, select our training set for this epoch
-    if strategy == 'ordered':
+    if args.strategy == 'ordered':
         return train_2 
-    elif strategy == 'simple':
+    elif args.strategy == 'simple':
         # how many examples do we want this epoch? 
         # CL for first half, full data for 2nd half 
-        data_per_epoch = len(training_set['phrase']) / (num_epochs / 2.)
+        data_per_epoch = len(training_set['phrase']) / (args.num_epochs / 2.)
         if epoch % 2 == 0:
             num_train = min(int(data_per_epoch * (epoch + 1)), len(training_set['phrase'])) 
         else:
@@ -305,6 +308,14 @@ def get_epoch_training_data(training_set, strategy, ordering, epoch, num_epochs,
         train['lbls'] = [train_2['lbls'][i] for i in range(num_train)] 
         train['phrase'] = [train_2['phrase'][i] for i in range(num_train)] 
         train['difficulty'] = [train_2['difficulty'][i] for i in range(num_train)]
+        return train 
+    elif args.strategy == 'theta':
+        train_idx = [i for i in range(len(training_set['phrase'])) if train_2['difficulty'][i] <= theta_hat]
+        if len(train_idx) < args.min_train_length:
+            train_idx = [i for i in range(args.min_train_length)] 
+        train['lbls'] = [train_2['lbls'][i] for i in train_idx] 
+        train['phrase'] = [train_2['phrase'][i] for i in train_idx] 
+        train['difficulty'] = [train_2['difficulty'][i] for i in train_idx]
         return train 
     else:
         raise NotImplementedError
