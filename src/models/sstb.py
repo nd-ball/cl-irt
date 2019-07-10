@@ -145,9 +145,9 @@ def train(args):
             predictions.extend([o.npvalue() for o in outs])
         preds = np.argmax(np.array(predictions), axis=1)
         rps = [int(p == c) for p, c in zip(preds, correct)] 
+        rps = [j if j==1 else -1 for j in rps] 
 
         theta_hat = calculate_theta(train['difficulty'], rps) 
-
 
         epoch_training_data = get_epoch_training_data(train, args, i, 'sstb', theta_hat) 
         num_train_epoch = len(epoch_training_data['phrase'])

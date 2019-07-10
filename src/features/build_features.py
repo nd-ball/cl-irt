@@ -268,7 +268,7 @@ def get_epoch_training_data(training_set, args, epoch, task, theta_hat=None):
         raise NotImplementedError
 
     # determine if we want balanced per-label or not
-    if not args.is_balanced:
+    if not args.balanced:
         train_2['phrase'] = [training_set['phrase'][d] for d in diffs_sorted_idx] 
         train_2['lbls'] = [training_set['lbls'][d] for d in diffs_sorted_idx] 
         train_2['difficulty'] = [training_set['difficulty'][d] for d in diffs_sorted_idx]
