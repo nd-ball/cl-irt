@@ -117,6 +117,8 @@ def train(args):
         rps = []
         outs = []
         correct = [] 
+        predictions = []
+
         k = 0
 
         for j in examples:
