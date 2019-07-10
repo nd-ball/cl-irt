@@ -171,7 +171,7 @@ def load_sstb(data_dir):
         for i in range(TRAIN_SIZE):
             train['lbls'].append(eval(training_data[i][1]))
             train['phrase'].append(tokenize(training_data[i][0].strip()).split(' ')) 
-            train['difficulty'].append(eval(training_data[i][2])) 
+            train['difficulty'].append(eval(training_data[i][3])) 
 
     with open(data_dir + '/raw/' + devfile, 'r') as infile:
         dev_data = infile.readlines()[1:]
