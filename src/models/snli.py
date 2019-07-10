@@ -11,6 +11,8 @@ import pandas as pd
 from sklearn.metrics import accuracy_score
 
 from features.build_features import load_snli, get_epoch_training_data
+from features.irt_scoring import calculate_theta 
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dynet-autobatch', help='DyNet requirement for autobatching')
@@ -150,9 +152,45 @@ def run():
     #print('Training model {}'.format(model))
     #print('training')
     for i in range(num_epoch):
+        # estimate theta for current model parameters
+        labels = []
+        predictions = []
+        correct = []
+        pairIDs = []
+        outs = []
+        k = 0
+        for j in range(num_train):
+            if k % batch_size == 0:
+                dy.renew_cg()
+                outs = []
+
+            sent1, sent2 = train['phrase'][j]
+            lbl = train['lbls'][j]
+            correct.append(lbl)
+            out = dy.softmax(dnnmodel.forward(sent1, sent2, lbl, False))
+            outs.append(out)
+
+            if k % batch_size == batch_size - 1:
+                dy.forward(outs)
+                predictions.extend([o.npvalue() for o in outs])
+                outs = []
+            k += 1
+
+        # final pass if there are unbatched values
+        if len(outs) > 0:
+            dy.forward(outs)
+            predictions.extend([o.npvalue() for o in outs])
+        preds = np.argmax(np.array(predictions), axis=1)
+        rps = [int(p == c) for p, c in zip(preds, correct)] 
+        rps = [j if j==1 else -1 for j in rps] 
+        #print(rps) 
+        #print(train['difficulty']) 
+        theta_hat = calculate_theta(train['difficulty'], rps)[0] 
+        print('estimated theta: {}'.format(theta_hat))     
+
         loss = 0.0
         #print('train epoch {}'.format(i))
-        epoch_training_data = get_epoch_training_data(train, args.strategy, args.ordering, i, num_epoch, args.balanced, 'snli') 
+        epoch_training_data = get_epoch_training_data(train, args, i, 'snli', theta_hat)  
         num_train_epoch = len(epoch_training_data['phrase'])
         #print('training set size: {}'.format(num_train_epoch))
 
