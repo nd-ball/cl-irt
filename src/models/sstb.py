@@ -149,7 +149,7 @@ def train(args):
         #print(rps) 
         #print(train['difficulty']) 
         theta_hat = calculate_theta(train['difficulty'], rps)[0] 
-        print('estimated theta: {}'.format(theta_hat))     
+        #print('estimated theta: {}'.format(theta_hat))     
 
         epoch_training_data = get_epoch_training_data(train, args, i, 'sstb', theta_hat) 
         num_train_epoch = len(epoch_training_data['phrase'])
@@ -265,7 +265,7 @@ def train(args):
         acc_test = accuracy_score(correct, preds)
         #print('Test accuracy: {}'.format(acc_test))
 
-        print('{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, acc_train, acc_dev, acc_test))
+        print('{},{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, acc_train, acc_dev, acc_test, theta_hat))
                 
         
         if acc_dev > top_dev:

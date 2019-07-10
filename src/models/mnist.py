@@ -60,7 +60,7 @@ def train(args, model, device, train_data, test_loader,
     #print(train_diffs) 
     #print(train_rps) 
     theta_hat = calculate_theta(train_diffs, train_rps)[0] 
-    print('estimated theta: {}'.format(theta_hat))     
+    #print('estimated theta: {}'.format(theta_hat))     
     
     model.train()
     imageIDs = []
@@ -106,7 +106,7 @@ def train(args, model, device, train_data, test_loader,
 
     test_loss /= len(test_loader.dataset)
     test_acc = 100. * correct / len(test_loader.dataset) 
-    print('{},{},{},{}'.format(train_length, train_acc, test_loss, test_acc))
+    print('{},{},{},{},{}'.format(train_length, train_acc, test_loss, test_acc, theta_hat))
     #print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
     #    test_loss, correct, len(test_loader.dataset),
     #    100. * correct / len(test_loader.dataset)))

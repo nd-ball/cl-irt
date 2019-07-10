@@ -187,7 +187,7 @@ def run():
         #print(rps) 
         #print(train['difficulty']) 
         theta_hat = calculate_theta(train['difficulty'], rps)[0] 
-        print('estimated theta: {}'.format(theta_hat))     
+        #print('estimated theta: {}'.format(theta_hat))     
 
         loss = 0.0
         #print('train epoch {}'.format(i))
@@ -325,7 +325,7 @@ def run():
             top_dev = acc_dev
             top_dev_epoch = i
             top_dev_test = acc_test_snli
-        print('{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, acc_train, acc_dev, acc_test_snli))
+        print('{},{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, acc_train, acc_dev, acc_test_snli, theta_hat))
         #print('Best so far (by dev dev): D: {}, T; {}, epoch {}'.format(top_dev, top_dev_test, top_dev_epoch))
 
         

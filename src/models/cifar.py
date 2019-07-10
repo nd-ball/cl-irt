@@ -161,7 +161,7 @@ def train(epoch):
     #print(train_diffs) 
     #print(train_rps) 
     theta_hat = calculate_theta(train_diffs, train_rps)[0] 
-    print('estimated theta: {}'.format(theta_hat)) 
+    #print('estimated theta: {}'.format(theta_hat)) 
    
     net.train()
     train_loss = 0
@@ -223,7 +223,7 @@ def train(epoch):
 
     # Save checkpoint.
     acc = 100.*correct/total
-    print('{},{},{},{}'.format(train_length, train_acc, test_loss, acc))
+    print('{},{},{},{},{}'.format(train_length, train_acc, test_loss, acc, theta_hat))
 
     if acc > best_acc:
         #print('Saving..')
