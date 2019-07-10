@@ -147,7 +147,7 @@ def train(args):
         rps = [int(p == c) for p, c in zip(preds, correct)] 
         rps = [j if j==1 else -1 for j in rps] 
         #print(rps) 
-        print(train['difficulty']) 
+        #print(train['difficulty']) 
         theta_hat = calculate_theta(train['difficulty'], rps)[0] 
         print('estimated theta: {}'.format(theta_hat))     
 
