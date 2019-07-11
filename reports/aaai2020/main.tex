@@ -16,6 +16,7 @@ CL has been shown to be effective.
 Many measures of ``difficulty'' are based on heuristics and not on true difficulty.
 we want to change that by leveraging methods from psychometrics.
 Experiments on vision and language data show that using learned difficulty and ability to set up a curriculum is effective.
+Curriculum that is dynamically determined by the current competency of the model as estimated by Item Response Theory. 
 \end{abstract}
 
 \section{Introduction}
@@ -24,13 +25,47 @@ Experiments on vision and language data show that using learned difficulty and a
 - why there are currently issues with it (heuristics)
 - bottlenecks to some of the existing approaches
 
+Curriculum learning is a well-studied area of artificial intelligence, with results demonstrating that building a curriculum of training data where easy examples are shown first can speed up learning and improve generalization, as has also been shown in humans. 
+
+A major drawback of existing CL techniques is that they rely on heuristics to measure the difficulty of data, and either ignore the competency of the model at its present state or rely on heuristics there as well.
+
+Recent work has shown that it is possible to estimate both the difficulty of examples and the ability of deep learning models as latent variables based on model performance. 
+
+In this work we propose Dynamic Curriculum Learning with IRT (DCL-IRT), a novel framework that uses the estimated ability of a model at a specific point in the training process to identify appropriate training data.
+
+Our contributions are as follows: (i) we propose a novel CL framework, DCL-IRT, which automatically selects training data based on the estimated ability of the model, (b) we show that model training using DCL-IRT leads to faster convergence than traditional training and better performance than baseline CL methods, (c) we provide an analysis of the DCL-IRT training regime to show why certain training examples hurt instead of help generalization.
+
+All code used for this work will be released upon publication, and are included as supplemental material.
+
 \section{Methods}
 
 - brief review of IRT (focus on rasch model because that is what we're using)
 
 - talk about how to fit the model using variational inference
 
-- selecting data as the model is reayd for it (based on theta)
+- selecting data as the model is ready for it (based on theta)
+\subsection{Curriculum Learning}
+In a traditional CL framework, training data examples are ordered according to some notion of difficulty, and the training set shown to the learner is augmented at a set pace with more and more difficult examples.
+
+Typically, the model's current performance is not taken into account (CONFIRM THAT THIS IS TRUE FOR EVERYTHING BUT NAACL PAPER). Recent work has incorporated a notion of ``competency,'' but in actual fact just used a slightly more complex inclusion rate calculation that does not actually consider the competency of the model but simulates it.
+
+\subsection{Learning Latent Parameters with IRT}
+Learning the latent difficulty parameters of training examples can be done off-line using existing techniques (CITE EMNLP PAPER).
+
+Estimating the ability of a model at a point in time is done with a ``scoring'' function. Since the difficulties of the examples are known, we can maximize the likelihood of the data given the response patterns to obtain the ability estimate.
+
+\subsection{Dynamic Curriculum Learning with IRT}
+
+We propose DCL-IRT, where the training examples are selected dynamically at each training epoch based on the estimated ability of the model at that point.
+
+The first step of DCL-IRT is to estimate the ability of the model using the scoring function (Sec. above). To do this we use the full training set, but crucially, only to get response data, not to update parameters. 
+
+Once ability is estimated, data selection is done by comparing esimated ability to the examples' difficulty parameters.
+
+With DCL-IRT, the training data size does not have to be monotonically increasing. If a model's performance suffers as a result of adding data too quickly, then this will be reflected in lower ability estimates, which leads to less data selected in the next epoch. 
+
+Algorithm XX shows all of the steps for DCL-IRT. Code implementing DCL-IRT is included as supplemental material and will be released upon publication. 
+
 
 \section{Data and experiments} 
 
