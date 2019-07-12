@@ -1,40 +1,52 @@
 library(tidyverse)
 
+# sstb
 data_dir <- 'G:/My Drive/data/curriculum_learning_irt/'
-D.baseline <- read_csv(paste(data_dir,'mnist_baseline.log',sep=''), 
-              col_names = c('train_size', 'train_acc', 'test_loss', 'test_acc'),
-              n_max=20) 
-D.baseline$epoch <- c(1:20) 
+exp_type <- 'mnist'
+num_skip <- 0
+D.baseline <- read_csv(paste(data_dir, exp_type,'_baseline.log',sep=''), 
+                       col_names = c('train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
+                       skip=num_skip, n_max=100) 
+D.baseline$epoch <- c(1:100) 
 D.baseline$exp <- 'baseline'
 
+D.irt <- read_csv(paste(data_dir, 'irt_cl_', exp_type, '.log', sep=''),
+                  col_names = c('train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
+                  skip=num_skip, n_max=100)
+D.irt$epoch <- c(1:100)
+D.irt$exp <- 'irt'
 
-D.easiest <- read_csv(paste(data_dir,'mnist_cl_simple_not_balanced-easiest.log',sep=''), 
-                       col_names = c('train_size', 'train_acc', 'test_loss', 'test_acc'),
-                       n_max=20) 
-D.easiest$epoch <- c(1:20) 
+D.easiest <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-simple-easiest.log',sep=''), 
+                      col_names = c('train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
+                      skip=num_skip, n_max=100) 
+D.easiest$epoch <- c(1:100) 
 D.easiest$exp <- 'easiest'
 
-D.middleout <- read_csv(paste(data_dir,'mnist_cl_simple_not_balanced-middleout.log',sep=''), 
-                      col_names = c('train_size', 'train_acc', 'test_loss', 'test_acc'),
-                      n_max=20) 
-D.middleout$epoch <- c(1:20) 
+D.middleout <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-simple-middleout.log',sep=''), 
+                        col_names = c('train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
+                        skip=num_skip, n_max=100) 
+D.middleout$epoch <- c(1:100) 
 D.middleout$exp <- 'middleout'
 
-D.ordered <- read_csv(paste(data_dir,'mnist_cl_ordered_not_balanced-easiest.log',sep=''), 
-                      col_names = c('train_size', 'train_acc', 'test_loss', 'test_acc'),
-                      n_max=20) 
-D.ordered$epoch <- c(1:20) 
-D.ordered$exp <- 'ordered'
+D <- rbind(D.baseline, D.irt, D.easiest, D.middleout)
+filter <- D %>%
+  group_by(exp) %>%
+  summarize(max=max(test_acc)) 
+
+max_epochs <- merge(D,filter, by.x=c('exp','test_acc'), by.y=c('exp','max'))
 
 
-D <- rbind(D.baseline, D.easiest, D.ordered)
-
-ggplot(D, aes(x=epoch, y=test_acc / 100, color=exp))  + 
+png("../../reports/figures/cl_irt_mnist.png", width=1100, height=700)
+ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
   geom_line() + 
-  geom_line(aes(x=epoch, y=train_size / max(train_size)), D[which(D$exp == 'easiest'),], linetype=2) + 
-  theme_minimal() +
-  ggtitle('Initial CL Experiment: MNIST') +
-  ylab("Test Set Accuracy") + xlab('Epoch') + 
+  geom_line(aes(x=epoch, y=train_size/600, color=exp),D, linetype=2) + 
+  geom_vline(aes(xintercept=epoch, color=exp ), D[c(100,288,196,396),]) + 
+  theme_minimal() + 
+  ggtitle("Comaprison of CL Strategies: MNIST") + 
+  ylab("Test accuracy") + 
+  xlab("Epoch") + 
   scale_color_discrete(name='Experiment',
-                       breaks=c('baseline', 'ordered', 'easiest'),
-                       labels=c('Baseline', 'Ordered', 'SimpleCL'))
+                       breaks=c('baseline', 'easiest', 'irt', 'middleout'),
+                       labels=c('Baseline', 'EasyFirst', 'Theta', 'MiddleOut'))
+dev.off()
+

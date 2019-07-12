@@ -1,43 +1,50 @@
 library(tidyverse)
 
+# sstb
 data_dir <- 'G:/My Drive/data/curriculum_learning_irt/'
-D <- read_csv(paste(data_dir, 'snli_results.csv', sep=''), 
-              col_names = c('exp', 'epoch', 'train_size', 'acc_train', 'acc_dev', 'acc_test')) 
+exp_type <- 'snli'
+num_skip <- 17
+D.baseline <- read_csv(paste(data_dir, exp_type,'_baseline.log',sep=''), 
+                       col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
+                       skip=num_skip, n_max=100) 
+D.baseline$epoch <- c(1:100) 
+D.baseline$exp <- 'baseline'
 
-# this is too messy, so break it down
-ggplot(D, aes(x=train_size, y=acc_test, color=exp))  + 
-  geom_point()
+D.irt <- read_csv(paste(data_dir, 'irt_cl_', exp_type, '.log', sep=''),
+                  col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
+                  skip=num_skip, n_max=100)
+D.irt$epoch <- c(1:100)
+D.irt$exp <- 'irt'
 
-# baseline vs simple (balanced)
-exp.include <- c('baseline_False_easiest_False', 'simple_True_easiest_False', 'simple_False_easiest_False', 
-                 'simple_True_middleout_False', 'simple_False_middleout_False', 'simple_False_hardest_True')
-exp.include <- c('baseline_False_easiest_False', 'simple_False_easiest_False', 
-                  'simple_False_middleout_False', 'simple_False_hardest_True', 'simple_False_hardest_False')
-exp.include <- c('baseline_False_easiest_False', 'ordered_False_easiest_False', 
-                 'simple_False_easiest_False')
-exp.include <- c('baseline_False_easiest_False', 'ordered_False_middleout_False', 
-                 'simple_False_middleout_False')
-exp.include <- c('baseline_False_easiest_False', 'ordered_False_hardest_False', 
-                 'simple_False_hardest_False', 'simple_False_hardest_True')
+D.easiest <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-simple-easiest.log',sep=''), 
+                      col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
+                      skip=num_skip, n_max=100) 
+D.easiest$epoch <- c(1:100) 
+D.easiest$exp <- 'easiest'
 
-D.plot <- D[which(D$exp %in% exp.include),]
-ggplot(D.plot, aes(x=epoch, y=acc_dev, color=exp))  + 
-  geom_line() + 
-  #geom_hline(yintercept=max(D.plot[which(D.plot$exp == 'baseline_False_easiest_False'),]$acc_dev), color='black') + 
-  geom_line(aes(x=epoch, y=train_size / max(train_size)), D.plot[which(D.plot$exp == 'simple_False_easiest_False'),], linetype=2) + 
-  theme_minimal() +
-  ggtitle('Initial CL Experiment: SNLI') +
-  ylab("Dev Set Accuracy") + xlab('Epoch') + 
-  scale_color_discrete(name='Experiment',
-                       breaks=exp.include,
-                       labels=c('Baseline', 'Ordered', 'SimpleCL'))
+D.middleout <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-simple-middleout.log',sep=''), 
+                        col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
+                        skip=num_skip, n_max=100) 
+D.middleout$epoch <- c(1:100) 
+D.middleout$exp <- 'middleout'
 
-D[which(D$acc_dev == max(D$acc_dev)),]
-
-z <- D.plot %>%
+D <- rbind(D.baseline, D.irt, D.easiest, D.middleout)
+filter <- D %>%
   group_by(exp) %>%
-  summarize(max=max(acc_dev)) 
+  summarize(max=max(dev_acc)) 
 
-D[which(D$acc_dev %in% z$max ),]
+max_epochs <- merge(D,filter, by.x=c('exp','dev_acc'), by.y=c('exp','max'))
 
-inner_join(D.plot, z, by=c('exp', 'acc_dev' = 'max'))
+png("../../reports/figures/cl_irt_snli.png", width=1100, height=700)
+ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
+  geom_line() + 
+  geom_line(aes(x=epoch, y=train_size/549184, color=exp),D, linetype=2) + 
+  geom_vline(aes(xintercept=epoch, color=exp ), D[c(23,259,136,354),]) + 
+  theme_minimal() + 
+  ggtitle("Comaprison of CL Strategies: SNLI") + 
+  ylab("Test accuracy") + 
+  xlab("Epoch") + 
+  scale_color_discrete(name='Experiment',
+                       breaks=c('baseline', 'easiest', 'irt', 'middleout'),
+                       labels=c('Baseline', 'EasyFirst', 'Theta', 'MiddleOut'))
+dev.off()
