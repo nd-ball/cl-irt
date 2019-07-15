@@ -69,7 +69,7 @@ class SentimentRNNBuilder:
         return out
 
 
-def train(args): 
+def train(args, outwriter): 
 
     # variables
     num_epoch = args.num_epochs 
@@ -237,6 +237,7 @@ def train(args):
         predictions = []
         correct = []
         outs = []
+        itemIDs = [] 
         k = 0
         for j in range(num_test):
             if k % batch_size == 0:
@@ -246,6 +247,7 @@ def train(args):
             sent1 = test['phrase'][j]
             lbl = test['lbls'][j]
             correct.append(lbl)
+            itemIDs.append(test['itemID'][j])
 
             out = dy.softmax(dnnmodel.forward(sent1, lbl, False))
             outs.append(out)
@@ -267,7 +269,11 @@ def train(args):
 
         print('{},{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, acc_train, acc_dev, acc_test, theta_hat))
                 
-        
+        # write test predictions to file
+        for j in range(len(predictions)):
+            row = [i, itemIDs[j], correct[j], predictions[j]]
+            outwriter.writerow(row) 
+
         if acc_dev > top_dev:
             top_dev = acc_dev
             top_dev_epoch = i
@@ -300,8 +306,13 @@ def run():
     parser.add_argument('--min-train-length', default=100, type=int)
     args = parser.parse_args()
 
+    preds_file = '{}processed/test_predictions/sstb_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random) 
+    outfile = open(preds_file, 'w') 
+    outwriter = csv.writer(outfile, delimiter=',')
+    outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])
+
     #print(args)
-    test_acc, training_set_size = train(args)  
+    test_acc, training_set_size = train(args, outwriter)   
     #print(test_acc) 
 
 

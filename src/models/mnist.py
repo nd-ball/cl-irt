@@ -35,7 +35,7 @@ class Net(nn.Module):
 
 
 def train(args, model, device, train_data, test_loader, 
-            optimizer, epoch, best_acc):
+            optimizer, epoch, best_acc, outwriter):
     
     # estimate theta for the model in its current state 
     model.eval() 
@@ -100,9 +100,9 @@ def train(args, model, device, train_data, test_loader,
             test_loss += F.nll_loss(output, target, reduction='sum').item() # sum up batch loss
             pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
             correct += pred.eq(target.view_as(pred)).sum().item()
-            test_imageIDs.extend(label)
-            test_targets.extend(target)
-            test_preds.extend(pred)
+            test_imageIDs.extend(label.cpu().item())
+            test_targets.extend(target.cpu().item())
+            test_preds.extend(pred.cpu().item())
 
     test_loss /= len(test_loader.dataset)
     test_acc = 100. * correct / len(test_loader.dataset) 
@@ -116,6 +116,11 @@ def train(args, model, device, train_data, test_loader,
         #    epoch_test_acc, epoch
         #))
         best_acc = epoch_test_acc
+
+    # write test predictions to file
+    for i in range(len(test_preds)):
+        row = [epoch, test_imageIDs[i], test_targets[i], test_preds[i]]
+        outwriter.writerow(row) 
 
     return best_acc
 
@@ -148,6 +153,11 @@ def main():
 
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
+
+    preds_file = '{}processed/test_predictions/mnist_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random) 
+    outfile = open(preds_file, 'w') 
+    outwriter = csv.writer(outfile, delimiter=',')
+    outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])
 
     torch.manual_seed(args.seed)
 
@@ -184,7 +194,7 @@ def main():
     best_test = 0
 
     for epoch in range(0, args.num_epochs):             
-        best_test = train(args, model, device, mnist_train, test_loader, optimizer, epoch, best_test)
+        best_test = train(args, model, device, mnist_train, test_loader, optimizer, epoch, best_test, outwriter)
     last_line = '{}'.format(best_test)
     print(last_line)
 

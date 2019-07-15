@@ -48,6 +48,7 @@ def preprocess(X, train=False):
             lbl = row.gold_label
             s1 = tokenize(row.sentence1).split(' ')
             s2 = tokenize(row.sentence2).split(' ')
+            pid = row.pairID 
             if train:
                 pair_diff = row.difficulty 
             else:
@@ -59,6 +60,7 @@ def preprocess(X, train=False):
                 data.append(sents)
                 lbls.append(lbl)
                 diffs.append(pair_diff)
+                pids.append(pid) 
 
         except Exception as e:
             print('Exception on line {}'.format(index))
@@ -83,11 +85,11 @@ def load_snli(data_dir):
     devfile = 'snli_1.0_dev.txt'
     testfile = 'snli_1.0_test.txt'
     train = pd.read_csv(data_dir +'/processed/' + trainfile, sep='\t',
-                        usecols=['gold_label', 'sentence1', 'sentence2', 'difficulty'])
+                        usecols=['gold_label', 'sentence1', 'sentence2', 'pairID', 'difficulty'])
     dev = pd.read_csv(data_dir + '/raw/' + devfile, sep='\t',
-                      usecols=['gold_label', 'sentence1', 'sentence2'])
+                      usecols=['gold_label', 'sentence1', 'sentence2', 'pairID'])
     test = pd.read_csv(data_dir + '/raw/' + testfile, sep='\t',
-                            usecols=['gold_label', 'sentence1', 'sentence2'])
+                            usecols=['gold_label', 'sentence1', 'sentence2', 'pairID'])
 
     #print(train['sentence1'][0])
 
@@ -168,16 +170,19 @@ def load_sstb(data_dir):
         train['lbls'] = [] 
         train['phrase'] = [] 
         train['difficulty'] = []
+        train['itemID'] = []
         for i in range(TRAIN_SIZE):
             train['lbls'].append(eval(training_data[i][1]))
             train['phrase'].append(tokenize(training_data[i][0].strip()).split(' ')) 
             train['difficulty'].append(eval(training_data[i][3])) 
+            train['itemID'].append(eval(training_data[i][2]))
 
     with open(data_dir + '/raw/' + devfile, 'r') as infile:
         dev_data = infile.readlines()[1:]
         dev = {}
         dev['lbls'] = [eval(l.split('\t')[1]) for l in dev_data]
         dev['phrase'] = [tokenize(l.split('\t')[0].strip()).split(' ') for l in dev_data]
+        dev['itemID'] = list(range(len(dev['phrase'])))
 
     with open(data_dir + '/raw/' + testfile, 'r') as infile:
         test_data = infile.readlines()[1:]
@@ -185,6 +190,7 @@ def load_sstb(data_dir):
         test['lbls'] = [eval(l[0]) for l in test_data]
         #test['lbls'] = [0] * len(test_data)  # for now
         test['phrase'] = [tokenize(l[1:].strip()).split(' ') for l in test_data]
+        test['itemID'] = list(range(len(test['phrase']))) 
 
     # build vocab
     vocab = set()

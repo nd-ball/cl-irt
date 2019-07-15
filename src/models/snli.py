@@ -39,6 +39,10 @@ print(args)
 VOCAB_SIZE = 0
 INPUT_DIM = 100
 
+preds_file = '{}processed/test_predictions/snli_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random) 
+outfile = open(preds_file, 'w') 
+outwriter = csv.writer(outfile, delimiter=',')
+outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])
 
 # first define the LSTM model that we'll be using 
 # TODO: rip this out and replace with a more advanced model (in PyTorch) 
@@ -128,11 +132,9 @@ def run():
     #print('num_epoch: {}\nbatch_size: {}'.format(num_epoch, batch_size))
     exp_label = '{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random)
 
-
     train, dev, test, w2i, i2w, vectors = load_snli(args.data_dir)  
     if args.random:
         random.shuffle(train['difficulty'])
-
 
     # load model and train
     #print('initialize model...')
@@ -299,7 +301,7 @@ def run():
             sent1, sent2 = test['phrase'][j]
             lbl = test['lbls'][j]
             #label = test['labels'][j]
-            #pairIDs.append(test['pairIDs'][j])
+            pairIDs.append(test['pairIDs'][j])
             #labels.append(label)
             correct.append(lbl)
 
@@ -317,6 +319,11 @@ def run():
             dy.forward(outs)
             predictions.extend([o.npvalue() for o in outs])
 
+        # write test predictions to file
+        for j in range(len(predictions)):
+            row = [i, pairIDs[j], correct[j], predictions[j]]
+            outwriter.writerow(row) 
+
         preds = np.argmax(np.array(predictions), axis=1)
         acc_test_snli = accuracy_score(correct, preds)
         #print('Test accuracy (SNLI): {}'.format(acc_test_snli))        
@@ -327,7 +334,6 @@ def run():
             top_dev_test = acc_test_snli
         print('{},{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, acc_train, acc_dev, acc_test_snli, theta_hat))
         #print('Best so far (by dev dev): D: {}, T; {}, epoch {}'.format(top_dev, top_dev_test, top_dev_epoch))
-
         
 
 if __name__ == '__main__':

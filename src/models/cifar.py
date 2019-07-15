@@ -86,6 +86,11 @@ args = parser.parse_args()
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 best_acc = 0  # best test accuracy
 
+preds_file = '{}processed/test_predictions/cifar_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random) 
+outfile = open(preds_file, 'w') 
+outwriter = csv.writer(outfile, delimiter=',')
+outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])
+
 # Data
 
 #print('==> Preparing data..')
@@ -132,7 +137,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
 
 # Training
-def train(epoch):
+def train(epoch, outwriter):
     #print('\nEpoch: %d' % epoch)
     #print('Training')
     # get a theta estimate from entire training set 
@@ -216,14 +221,19 @@ def train(epoch):
             _, predicted = outputs.max(1)
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
-            test_labels.extend(label)
-            test_targets.extend(targets)
-            test_preds.extend(predicted)
+            test_labels.extend(label.cpu().item())
+            test_targets.extend(targets.cpu().item())
+            test_preds.extend(predicted.cpu().item())
     test_loss /= len(testloader.dataset)
 
     # Save checkpoint.
     acc = 100.*correct/total
     print('{},{},{},{},{}'.format(train_length, train_acc, test_loss, acc, theta_hat))
+
+    # write test predictions to file
+    for i in range(len(test_preds)):
+        row = [epoch, test_labels[i], test_targets[i], test_preds[i]]
+        outwriter.writerow(row) 
 
     if acc > best_acc:
         #print('Saving..')
@@ -231,8 +241,9 @@ def train(epoch):
         #print('epoch: {}, best acc: {}'.format(epoch, best_acc))
     return best_acc
 
+
 for epoch in range(0, args.num_epochs):
-    ba = train(epoch)
+    ba = train(epoch, outwriter)
     #test(epoch)
 print(ba) 
 #print(len(trainset))
