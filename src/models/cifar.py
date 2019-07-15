@@ -221,9 +221,9 @@ def train(epoch, outwriter):
             _, predicted = outputs.max(1)
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
-            test_labels.extend(label.cpu().item())
-            test_targets.extend(targets.cpu().item())
-            test_preds.extend(predicted.cpu().item())
+            test_labels.extend(label)
+            test_targets.extend(targets)
+            test_preds.extend(predicted)
     test_loss /= len(testloader.dataset)
 
     # Save checkpoint.
@@ -232,7 +232,7 @@ def train(epoch, outwriter):
 
     # write test predictions to file
     for i in range(len(test_preds)):
-        row = [epoch, test_labels[i], test_targets[i], test_preds[i]]
+        row = [epoch, test_labels[i].cpu().item(), test_targets[i].cpu().item(), test_preds[i].cpu().item()]
         outwriter.writerow(row) 
 
     if acc > best_acc:

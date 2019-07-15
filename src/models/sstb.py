@@ -271,7 +271,7 @@ def train(args, outwriter):
                 
         # write test predictions to file
         for j in range(len(predictions)):
-            row = [i, itemIDs[j], correct[j], predictions[j]]
+            row = [i, itemIDs[j], correct[j], preds[j]]
             outwriter.writerow(row) 
 
         if acc_dev > top_dev:

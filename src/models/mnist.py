@@ -100,9 +100,9 @@ def train(args, model, device, train_data, test_loader,
             test_loss += F.nll_loss(output, target, reduction='sum').item() # sum up batch loss
             pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
             correct += pred.eq(target.view_as(pred)).sum().item()
-            test_imageIDs.extend(label.cpu().item())
-            test_targets.extend(target.cpu().item())
-            test_preds.extend(pred.cpu().item())
+            test_imageIDs.extend(label)
+            test_targets.extend(target)
+            test_preds.extend(pred)
 
     test_loss /= len(test_loader.dataset)
     test_acc = 100. * correct / len(test_loader.dataset) 
@@ -119,7 +119,7 @@ def train(args, model, device, train_data, test_loader,
 
     # write test predictions to file
     for i in range(len(test_preds)):
-        row = [epoch, test_imageIDs[i], test_targets[i], test_preds[i]]
+        row = [epoch, test_imageIDs[i].cpu().item(), test_targets[i].cpu().item(), test_preds[i].cpu().item()]
         outwriter.writerow(row) 
 
     return best_acc

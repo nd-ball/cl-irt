@@ -319,15 +319,14 @@ def run():
             dy.forward(outs)
             predictions.extend([o.npvalue() for o in outs])
 
-        # write test predictions to file
-        for j in range(len(predictions)):
-            row = [i, pairIDs[j], correct[j], predictions[j]]
-            outwriter.writerow(row) 
-
         preds = np.argmax(np.array(predictions), axis=1)
         acc_test_snli = accuracy_score(correct, preds)
         #print('Test accuracy (SNLI): {}'.format(acc_test_snli))        
-        
+        # write test predictions to file
+        for j in range(len(predictions)):
+            row = [i, pairIDs[j], correct[j], preds[j]]
+            outwriter.writerow(row) 
+
         if acc_dev > top_dev:
             top_dev = acc_dev
             top_dev_epoch = i
