@@ -26,10 +26,25 @@ Curriculum that is dynamically determined by the current competency of the model
 - bottlenecks to some of the existing approaches
 
 Curriculum learning is a well-studied area of artificial intelligence, with results demonstrating that building a curriculum of training data where easy examples are shown first can speed up learning and improve generalization, as has also been shown in humans. 
+The basic premise is that machine learning (ML) models are trained according to a ``curriculum'' that sorts training examples according to difficulty.
+At first, the model is trained with only the easiest examples, and more difficult examples are gradually added according to some schedule.
+A major gain for CL methods is that model convergence can often be quicker when the model is trained according to some curriculum (CITE a bunch of examples here).
+Model efficiency has always been a major aim of the research community (cite old papers), but recently with the size of models continuing to grow and better understanding of the impact of model training on the environment there is a renewed need for efficiency (CITE EMMA).
 
 A major drawback of existing CL techniques is that they rely on heuristics to measure the difficulty of data, and either ignore the competency of the model at its present state or rely on heuristics there as well.
+For example, often for natural language processing (NLP) tasks, sentence length is considered a proxy for difficulty (cite naacl19 and original paper).
+Similarly, the original CL paper used the number of objects in an image as a proxy for difficulty in an image recognition task (CCITE Bengio).
+Competency was recently introduced as a mechanism to dictate when new examples should be added to the training data (CITE NAACL 19), however in that work the competency schedule was ad hoc, and did not actually look at the competency of the model but assumed a schedule according to learning heuristics (CITE NAACL). 
+It would be better if model competency was actually measured, so that the training data could be appropriately matched with the model at a given point in the training.
 
-Recent work has shown that it is possible to estimate both the difficulty of examples and the ability of deep learning models as latent variables based on model performance. 
+Recent work has shown that it is possible to estimate both the difficulty of examples and the ability of deep learning models as latent variables based on model performance (cite emnlp19).
+Item Response Theory (IRT) is a well-studied methodology in the psychometric literature for test set construction and subject evaluation.
+A typical IRT model will estimate latent parameters such as difficulty for examples under consideration for inclusion in a test set.
+This is done by administering a test to a large number of human subjects, collecting and grading their responses as correct or incorrect, and using the student-response data matrix to estimate the latent traits of the data.
+Once learned, these latent parameters can be used to estimate latent ability parameters of future test-takers, based on their graded responses to the examples.
+IRT has not seen wide adoption in the ML community, primarily due to the fact that fitting IRT models typically requires a large amount of human annotated data for each example.
+However, recent work has shown that it is possible to fit IRT models using machine-generated data instead of human-generated data as the input to the IRT models (CITE US).
+Because one can learn example difficulty and subject ability together, IRT is an interesting framework to consider for the problem of CL. 
 
 In this work we propose Dynamic Curriculum Learning with IRT (DCL-IRT), a novel framework that uses the estimated ability of a model at a specific point in the training process to identify appropriate training data.
 
