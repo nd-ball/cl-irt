@@ -50,3 +50,64 @@ ggplot(D, aes(x=epoch, y=test_acc, color=exp))  +
                        labels=c('Baseline', 'EasyFirst', 'Theta', 'MiddleOut'))
 dev.off() 
 
+
+# load detailed RP data
+rps_baseline <- read_csv(
+  paste(data_dir, 'test_preds/cifar_simple_False_easiest_True.csv',sep='')
+)
+
+rps_irt <- read_csv(
+  paste(data_dir, 'test_preds/cifar_theta_False_easiest_False.csv',sep='')
+)
+
+test_diffs <- read_csv(
+  paste(data_dir, 'test_preds/cifar_rp_test_snli.csv.diffs',sep=''),
+  col_names=c('pairid', 'diff')
+)
+
+rps_irt <- merge(rps_irt, test_diffs, by.x='itemID', by.y='pairid')
+rps_irt$bin <- 1
+rps_irt[which(rps_irt$diff >= -1.2),]$bin <- 2
+rps_irt[which(rps_irt$diff >= -0.14),]$bin <- 3
+rps_irt[which(rps_irt$diff >= 0.98),]$bin <- 4
+
+table(rps_irt$bin)
+
+Z.irt <- rps_irt %>% 
+  group_by(epoch,bin) %>%
+  summarize(mean=mean(correct==pred))
+
+rps_baseline <- merge(rps_baseline, test_diffs, by.x='itemID', by.y='pairid')
+rps_baseline$bin <- 1
+rps_baseline[which(rps_baseline$diff >= -1.2),]$bin <- 2
+rps_baseline[which(rps_baseline$diff >= -0.14),]$bin <- 3
+rps_baseline[which(rps_baseline$diff >= 0.98),]$bin <- 4
+
+table(rps_baseline$bin)
+table(rps_irt$bin)
+
+Z.baseline <- rps_baseline %>% 
+  group_by(epoch,bin) %>%
+  summarize(mean=mean(correct==pred))
+
+ggplot(Z.irt,aes(x=epoch,y=mean,color=as.factor(bin))) + 
+  geom_line() + 
+  ggtitle("DCL-IRT") + 
+  geom_line(aes(x=epoch, y=mean, color=as.factor(bin)), Z.baseline, linetype=2)
+
+
+ggplot(Z.baseline,aes(x=epoch,y=mean,color=as.factor(bin))) + 
+  geom_line() + 
+  ggtitle("Baseline")
+
+
+z.baseline.all <- rps_baseline %>% 
+  group_by(epoch) %>%
+  summarize(mean=mean(correct==pred))
+z.irt.all <- rps_irt %>% 
+  group_by(epoch) %>%
+  summarize(mean=mean(correct==pred))
+
+ggplot(z.irt.all, aes(x=epoch,y=mean)) + 
+  geom_line() + 
+  geom_line(aes(x=epoch,y=mean), z.baseline.all, linetype=2)

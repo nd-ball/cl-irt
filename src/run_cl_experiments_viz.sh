@@ -1,7 +1,7 @@
 # run curriculum learning experiments on gypsum
 # setup
 
-NUMEPOCHS=100
+NUMEPOCHS=200
 # MNIST 
 # baseline (all data)
 sbatch -p m40-long --gres=gpu:1 --mem=90gb --output=logs/mnist_baseline.log --wrap="python -u -m models.mnist --data-dir /mnt/nfs/work1/hongyu/lalor/data/cl-data/ --num-epochs $NUMEPOCHS --strategy baseline"
@@ -20,9 +20,9 @@ sbatch -p m40-long --gres=gpu:1 --mem=90gb --output=logs/mnist_cl_simple_not_bal
 #sbatch -p m40-long --gres=gpu:1 --mem=90gb --output=logs/mnist_cl_ordered_not_balanced-random.log --wrap="python -u -m models.mnist --data-dir /mnt/nfs/work1/hongyu/lalor/data/cl-data/ --num-epochs $NUMEPOCHS --strategy ordered --random"
 
 
-for o in easiest #middleout hardest
+for o in easiest middleout hardest
 do
-    for s in simple #balanced 
+    for s in simple ordered #balanced 
     do 
 
         # CL, simple, balanced
@@ -53,9 +53,9 @@ sbatch -p m40-long --gres=gpu:1 --mem=90gb --output=logs/cifar_cl_simple_not_bal
 #sbatch -p m40-long --gres=gpu:1 --mem=90gb --output=logs/cifar_cl_ordered_not_balanced-random.log --wrap="python -u -m models.cifar --data-dir /mnt/nfs/work1/hongyu/lalor/data/cl-data/ --num-epochs $NUMEPOCHS --strategy ordered --random"
 
 
-for o in easiest #middleout hardest
+for o in easiest middleout hardest
 do
-    for s in simple #balanced 
+    for s in simple ordered #balanced 
     do 
 
         # CL, simple, balanced
