@@ -47,8 +47,12 @@ However, recent work has shown that it is possible to fit IRT models using machi
 Because one can learn example difficulty and subject ability together, IRT is an interesting framework to consider for the problem of CL. 
 
 In this work we propose Dynamic Curriculum Learning with IRT (DCL-IRT), a novel framework that uses the estimated ability of a model at a specific point in the training process to identify appropriate training data.
+At each training epoch, the latent ability of the model is estimated.
+Based on this estimate, only training data that the model has a reasonable chance of labeling correctly is included in training.
+As the model improves, the estimated ability will improve, and more training data will be added.
 
 Our contributions are as follows: (i) we propose a novel CL framework, DCL-IRT, which automatically selects training data based on the estimated ability of the model, (b) we show that model training using DCL-IRT leads to faster convergence than traditional training and better performance than baseline CL methods, (c) we provide an analysis of the DCL-IRT training regime to show why certain training examples hurt instead of help generalization.
+This is the first work to learn a model competency during training that is directly comparable to the difficulty of the training data pool.
 
 All code used for this work will be released upon publication, and are included as supplemental material.
 
