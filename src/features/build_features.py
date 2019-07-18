@@ -328,7 +328,7 @@ def get_epoch_training_data(training_set, args, epoch, task, theta_hat=None):
 
 
 ### CL for vision data sets (since they are built slightly differently)
-def get_epoch_training_data_vision(training_set, args, epoch, theta_hat=None):
+def get_epoch_training_data_vision(training_set, args, epoch, theta_hat=None, k=0):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     if args.strategy == 'baseline':
@@ -341,6 +341,8 @@ def get_epoch_training_data_vision(training_set, args, epoch, theta_hat=None):
     # how will we order the data before building curriculum?
     difficulties = [img[3] for img in training_set]
     diffs_sorted_idx = np.argsort(difficulties) 
+    if k > 0:
+        diffs_sorted_idx = k_sort(difficulties, k) 
 
     if args.ordering == 'easiest':
         diffs_sorted_idx = diffs_sorted_idx
@@ -399,3 +401,33 @@ def get_epoch_training_data_vision(training_set, args, epoch, theta_hat=None):
         raise NotImplementedError
 
     
+def k_sort(D, k):
+    '''
+    take a fully sorted input and return a random shuffling that is k-sorted (each element is at most k away from the right spot)
+    '''
+    D_shuffled = np.sort(D) 
+    D_shuffled_idx = list(np.argsort(D)) 
+    D_idx = list(range(len(D))) 
+
+    k_sorted = False 
+    for i in range(len(D_shuffled) - 1):
+        for j in range(len(D_shuffled) - 1):
+            if D[j] > D[j+1]:
+                D[j], D[j+1] = D[j+1], D[j]
+                D_idx[j], D_idx[j+1] = D_idx[j+1], D_idx[j] 
+        k_sorted = True  
+        for j in range(len(D_shuffled)):
+            if np.abs(j - D_shuffled_idx.index(D_idx[j])) <= k:
+                continue 
+            else:
+                k_sorted = False 
+        if k_sorted:
+            break 
+
+    result = D_idx  
+
+    return result 
+
+D = [10,20,30,60,40,15]
+k=0
+print(k_sort(D,k)) 
