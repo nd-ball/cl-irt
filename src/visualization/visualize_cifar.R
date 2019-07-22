@@ -22,13 +22,19 @@ D.easiest <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-simple-easiest.
 D.easiest$epoch <- c(1:100) 
 D.easiest$exp <- 'easiest'
 
+D.ordered <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-ordered-easiest.log',sep=''), 
+                      col_names = c('train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
+                      skip=num_skip, n_max=100) 
+D.ordered$epoch <- c(1:100) 
+D.ordered$exp <- 'ordered'
+
 D.middleout <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-simple-middleout.log',sep=''), 
                         col_names = c('train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
                         skip=num_skip, n_max=100) 
 D.middleout$epoch <- c(1:100) 
 D.middleout$exp <- 'middleout'
 
-D <- rbind(D.baseline, D.irt, D.easiest, D.middleout)
+D <- rbind(D.baseline, D.irt, D.easiest, D.middleout, D.ordered)
 filter <- D %>%
   group_by(exp) %>%
   summarize(max=max(test_acc)) 
@@ -40,14 +46,14 @@ png("../../reports/figures/cl_irt_cifar.png", width=1100, height=700)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
   geom_line() + 
   geom_line(aes(x=epoch, y=train_size/500, color=exp),D, linetype=2) + 
-  geom_vline(aes(xintercept=epoch, color=exp ), D[c(92,280,156,377),]) + 
+  geom_vline(aes(xintercept=epoch, color=exp ), D[c(63,298,173,399,477),]) + 
   theme_minimal() + 
   ggtitle("Comaprison of CL Strategies: CIFAR") + 
   ylab("Test accuracy") + 
   xlab("Epoch") + 
   scale_color_discrete(name='Experiment',
-                       breaks=c('baseline', 'easiest', 'irt', 'middleout'),
-                       labels=c('Baseline', 'EasyFirst', 'Theta', 'MiddleOut'))
+                       breaks=c('baseline', 'easiest', 'irt', 'middleout', 'ordered'),
+                       labels=c('Baseline', 'EasyFirst', 'Theta', 'MiddleOut', 'Ordered'))
 dev.off() 
 
 
