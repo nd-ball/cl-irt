@@ -84,12 +84,23 @@ All that is required is a single forward pass of the model on the data, as is ty
 \subsection{Dynamic Curriculum Learning with IRT}
 
 We propose DCL-IRT, where the training examples are selected dynamically at each training epoch based on the estimated ability of the model at that point.
+With DCL-IRT, model ability can be estimated according to a well-studied psychometric framework as opposed to heuristics.
+At the same time, the estimated ability of the model ($\hat{\theta}$) is on the same scale as the difficulty parameters of the data, so there is a principled recipe for selecting data at any given training epoch.
 
-The first step of DCL-IRT is to estimate the ability of the model using the scoring function (Sec. above). To do this we use the full training set, but crucially, only to get response data, not to update parameters. 
 
-Once ability is estimated, data selection is done by comparing esimated ability to the examples' difficulty parameters.
+The first step of DCL-IRT is to estimate the ability of the model using the scoring function (Sec. above). 
+To do this we use the full training set, but crucially, only to get response data, not to update parameters. 
+Model outputs are obtained for the training set, and graded as correct or incorrect as compared to the gold standard label. 
+This response pattern is then used to estimate model ability at the current epoch ($\hat{\theta_e}$).
+
+Once ability is estimated, data selection is done by comparing estimated ability to the examples' difficulty parameters.
+Each example in the training pool has an estimated difficulty parameter ($b_x$).
+If the difficulty of an example is less than or equal to the estimated ability, then the example is included in training for this epoch.
+Examples where the difficulty is greater than estimated ability are not included.
 
 With DCL-IRT, the training data size does not have to be monotonically increasing. If a model's performance suffers as a result of adding data too quickly, then this will be reflected in lower ability estimates, which leads to less data selected in the next epoch. 
+This avoids a scenario where data is added too quickly at the expense of learning the easier examples.
+At the same time, if estimated model ability is high, then more data can be added more quickly, without artificially slowing down the learning due to a rigid schedule.
 
 Algorithm XX shows all of the steps for DCL-IRT. Code implementing DCL-IRT is included as supplemental material and will be released upon publication. 
 
