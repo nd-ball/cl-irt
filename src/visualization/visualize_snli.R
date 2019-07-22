@@ -6,33 +6,33 @@ exp_type <- 'snli'
 num_skip <- 17
 D.baseline <- read_csv(paste(data_dir, exp_type,'_baseline.log',sep=''), 
                        col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
-                       skip=num_skip, n_max=100) 
-D.baseline$epoch <- c(1:100) 
+                       skip=num_skip, n_max=200) 
+D.baseline$epoch <- c(1:200) 
 D.baseline$exp <- 'baseline'
 
 D.irt <- read_csv(paste(data_dir, 'irt_cl_', exp_type, '.log', sep=''),
                   col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
-                  skip=num_skip, n_max=100)
-D.irt$epoch <- c(1:100)
+                  skip=num_skip, n_max=200)
+D.irt$epoch <- c(1:200)
 D.irt$exp <- 'irt'
 
 D.easiest <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-simple-easiest.log',sep=''), 
                       col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
-                      skip=num_skip, n_max=100) 
-D.easiest$epoch <- c(1:100) 
+                      skip=num_skip, n_max=200) 
+D.easiest$epoch <- c(1:200) 
 D.easiest$exp <- 'easiest'
 
 D.ordered <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-ordered-easiest.log',sep=''), 
                       col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
-                      skip=num_skip, n_max=100) 
-D.ordered$epoch <- c(1:100) 
+                      skip=num_skip, n_max=200) 
+D.ordered$epoch <- c(1:200) 
 D.ordered$exp <- 'ordered'
 
 
 D.middleout <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-simple-middleout.log',sep=''), 
                         col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
-                        skip=num_skip, n_max=100) 
-D.middleout$epoch <- c(1:100) 
+                        skip=num_skip, n_max=200) 
+D.middleout$epoch <- c(1:200) 
 D.middleout$exp <- 'middleout'
 
 D <- rbind(D.baseline, D.irt, D.easiest, D.middleout,D.ordered)

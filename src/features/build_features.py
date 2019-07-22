@@ -430,7 +430,3 @@ def k_sort(D, k):
     result = D_idx  
 
     return result 
-
-D = [10,20,30,60,40,15]
-k=0
-print(k_sort(D,k)) 
