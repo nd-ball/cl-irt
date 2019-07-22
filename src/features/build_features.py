@@ -264,6 +264,7 @@ def get_epoch_training_data(training_set, args, epoch, task, theta_hat=None):
             training_set['difficulty'] = [len(p) for p in training_set['phrase']]
         else:  # snli
             training_set['difficulty'] = [len(p[0]) for p in training_set['phrase']] 
+
     if args.ordering == 'easiest':
         diffs_sorted_idx = np.argsort(training_set['difficulty']) 
     elif args.ordering == 'hardest':
@@ -272,6 +273,8 @@ def get_epoch_training_data(training_set, args, epoch, task, theta_hat=None):
         diffs_sorted_idx = np.argsort(np.abs(training_set['difficulty'])) 
     else:  # random baseline 
         raise NotImplementedError
+    if args.k > 0:
+        diffs_sorted_idx = k_sort(training_set['difficulty'], args.k) 
 
     # determine if we want balanced per-label or not
     if not args.balanced:
@@ -328,7 +331,7 @@ def get_epoch_training_data(training_set, args, epoch, task, theta_hat=None):
 
 
 ### CL for vision data sets (since they are built slightly differently)
-def get_epoch_training_data_vision(training_set, args, epoch, theta_hat=None, k=0):
+def get_epoch_training_data_vision(training_set, args, epoch, theta_hat=None):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     if args.strategy == 'baseline':
@@ -341,8 +344,8 @@ def get_epoch_training_data_vision(training_set, args, epoch, theta_hat=None, k=
     # how will we order the data before building curriculum?
     difficulties = [img[3] for img in training_set]
     diffs_sorted_idx = np.argsort(difficulties) 
-    if k > 0:
-        diffs_sorted_idx = k_sort(difficulties, k) 
+    if args.k > 0:
+        diffs_sorted_idx = k_sort(difficulties, args.k) 
 
     if args.ordering == 'easiest':
         diffs_sorted_idx = diffs_sorted_idx

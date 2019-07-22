@@ -304,6 +304,7 @@ def run():
     parser.add_argument('--random', action='store_true') 
     parser.add_argument('--use-length', action='store_true')
     parser.add_argument('--min-train-length', default=100, type=int)
+    parser.add_argument('--k', default=0, type=int) 
     args = parser.parse_args()
 
     preds_file = '{}processed/test_predictions/sstb_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random) 
