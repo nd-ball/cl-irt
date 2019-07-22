@@ -70,8 +70,16 @@ Typically, the model's current performance is not taken into account (CONFIRM TH
 
 \subsection{Learning Latent Parameters with IRT}
 Learning the latent difficulty parameters of training examples can be done off-line using existing techniques (CITE EMNLP PAPER).
+Traditional IRT model fitting relies on marginal maximum likelihood (MML) estimation, where the latent ability parameters ($\theta$) are assumed to be random effects and integrated out.
+Latent item parameters are estimated using an expectation maximization (EM) method (CITE BOCK and AIKEN).
+These methods assume human subjects, and were typically used for relatively small data sets of no more than a hundred items or so.
+A major bottleneck of using IRT methods on machine learning data sets is the fact that each subject would have to label each (or most of) the examples in order to have enough response patterns to estimate the latent parameters.
+Asking humans to annotate tens or hundreds of thousands of examples can't be done, but recent work has shown that the human subjects can be replaced with an ensemble of machine learning models, and the response patterns from this ``artificial crowd'' can be used to estimate item parameters.
+Such models can be fit using variational inference methods, where the latent parameters are estimated via variational distributions (CITE Minka and Us). 
 
-Estimating the ability of a model at a point in time is done with a ``scoring'' function. Since the difficulties of the examples are known, we can maximize the likelihood of the data given the response patterns to obtain the ability estimate.
+Estimating the ability of a model at a point in time is done with a ``scoring'' function. 
+Since the difficulties of the examples are known, we can maximize the likelihood of the data given the response patterns to obtain the ability estimate.
+All that is required is a single forward pass of the model on the data, as is typically done with a test set. 
 
 \subsection{Dynamic Curriculum Learning with IRT}
 
