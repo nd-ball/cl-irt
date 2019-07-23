@@ -40,7 +40,7 @@ print(args)
 VOCAB_SIZE = 0
 INPUT_DIM = 100
 
-preds_file = '{}processed/test_predictions/snli_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random) 
+preds_file = '{}processed/test_predictions/snli_{}_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random, args.k) 
 outfile = open(preds_file, 'w') 
 outwriter = csv.writer(outfile, delimiter=',')
 outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])

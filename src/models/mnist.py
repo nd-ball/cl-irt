@@ -154,7 +154,7 @@ def main():
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
-    preds_file = '{}processed/test_predictions/mnist_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random) 
+    preds_file = '{}processed/test_predictions/mnist_{}_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random, args.k) 
     outfile = open(preds_file, 'w') 
     outwriter = csv.writer(outfile, delimiter=',')
     outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])

@@ -86,7 +86,7 @@ args = parser.parse_args()
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 best_acc = 0  # best test accuracy
 
-preds_file = '{}processed/test_predictions/cifar_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random) 
+preds_file = '{}processed/test_predictions/cifar_{}_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random, args.k) 
 outfile = open(preds_file, 'w') 
 outwriter = csv.writer(outfile, delimiter=',')
 outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])

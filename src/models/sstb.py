@@ -313,7 +313,7 @@ def run():
     parser.add_argument('--k', default=0, type=int) 
     args = parser.parse_args()
 
-    preds_file = '{}processed/test_predictions/sstb_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random) 
+    preds_file = '{}processed/test_predictions/sstb_{}_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random, args.k) 
     outfile = open(preds_file, 'w') 
     outwriter = csv.writer(outfile, delimiter=',')
     outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])
