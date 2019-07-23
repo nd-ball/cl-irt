@@ -6,26 +6,26 @@ exp_type <- 'mnist'
 num_skip <- 0
 D.baseline <- read_csv(paste(data_dir, exp_type,'_baseline.log',sep=''), 
                        col_names = c('train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
-                       skip=num_skip, n_max=100) 
-D.baseline$epoch <- c(1:100) 
+                       skip=num_skip, n_max=200) 
+D.baseline$epoch <- c(1:200) 
 D.baseline$exp <- 'baseline'
 
 D.irt <- read_csv(paste(data_dir, 'irt_cl_', exp_type, '.log', sep=''),
                   col_names = c('train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
-                  skip=num_skip, n_max=100)
-D.irt$epoch <- c(1:100)
+                  skip=num_skip, n_max=200)
+D.irt$epoch <- c(1:200)
 D.irt$exp <- 'irt'
 
 D.easiest <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-simple-easiest.log',sep=''), 
                       col_names = c('train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
-                      skip=num_skip, n_max=100) 
-D.easiest$epoch <- c(1:100) 
+                      skip=num_skip, n_max=200) 
+D.easiest$epoch <- c(1:200) 
 D.easiest$exp <- 'easiest'
 
 D.middleout <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-simple-middleout.log',sep=''), 
                         col_names = c('train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
-                        skip=num_skip, n_max=100) 
-D.middleout$epoch <- c(1:100) 
+                        skip=num_skip, n_max=200) 
+D.middleout$epoch <- c(1:200) 
 D.middleout$exp <- 'middleout'
 
 # load detailed RP data
@@ -38,7 +38,7 @@ rps_irt <- read_csv(
 )
 
 test_diffs <- read_csv(
-  paste(data_dir, 'test_preds/mnist_rp_test_snli.csv.diffs',sep=''),
+  paste(data_dir, 'test_preds/mnist_diffs_test.csv',sep=''),
   col_names=c('pairid', 'diff')
 )
 

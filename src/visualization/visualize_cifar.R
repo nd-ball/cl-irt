@@ -65,7 +65,11 @@ sum(D[which(D$exp=='ordered'&D$epoch <= max_epochs[which(max_epochs$exp=='ordere
 
 # load detailed RP data
 rps_baseline <- read_csv(
-  paste(data_dir, 'test_preds/cifar_simple_False_easiest_True.csv',sep='')
+  paste(data_dir, 'test_preds/cifar_baseline_False_easiest_False.csv',sep='')
+)
+
+rps_simple <- read_csv(
+  paste(data_dir, 'test_preds/cifar_simple_False_middleout_False.csv',sep='')
 )
 
 rps_irt <- read_csv(
@@ -73,7 +77,7 @@ rps_irt <- read_csv(
 )
 
 test_diffs <- read_csv(
-  paste(data_dir, 'test_preds/cifar_rp_test_snli.csv.diffs',sep=''),
+  paste(data_dir, 'test_preds/cifar_diffs_test.csv',sep=''),
   col_names=c('pairid', 'diff')
 )
 
@@ -102,10 +106,25 @@ Z.baseline <- rps_baseline %>%
   group_by(epoch,bin) %>%
   summarize(mean=mean(correct==pred))
 
+rps_simple <- merge(rps_simple, test_diffs, by.x='itemID', by.y='pairid')
+rps_simple$bin <- 1
+rps_simple[which(rps_simple$diff >= -1.2),]$bin <- 2
+rps_simple[which(rps_simple$diff >= -0.14),]$bin <- 3
+rps_simple[which(rps_simple$diff >= 0.98),]$bin <- 4
+
+table(rps_simple$bin)
+table(rps_irt$bin)
+
+Z.simple <- rps_simple %>% 
+  group_by(epoch,bin) %>%
+  summarize(mean=mean(correct==pred))
+
+
 ggplot(Z.irt,aes(x=epoch,y=mean,color=as.factor(bin))) + 
   geom_line() + 
   ggtitle("DCL-IRT") + 
-  geom_line(aes(x=epoch, y=mean, color=as.factor(bin)), Z.baseline, linetype=2)
+  geom_line(aes(x=epoch, y=mean, color=as.factor(bin)), Z.baseline, linetype=2) + 
+  geom_line(aes(x=epoch, y=mean, color=as.factor(bin)), Z.simple, linetype=3)
 
 
 ggplot(Z.baseline,aes(x=epoch,y=mean,color=as.factor(bin))) + 

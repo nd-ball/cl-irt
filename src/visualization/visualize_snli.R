@@ -46,7 +46,7 @@ png("../../reports/figures/cl_irt_snli.png", width=1100, height=700)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
   geom_line() + 
   geom_line(aes(x=epoch, y=train_size/549184, color=exp),D, linetype=2) + 
-  geom_vline(aes(xintercept=epoch, color=exp ), D[c(20,297,134,394,401),]) + 
+  geom_vline(aes(xintercept=epoch, color=exp ), D[c(20,234,497,704,980),]) + 
   theme_minimal() + 
   ggtitle("Comaprison of CL Strategies: SNLI") + 
   ylab("Test accuracy") + 
@@ -55,3 +55,11 @@ ggplot(D, aes(x=epoch, y=test_acc, color=exp))  +
                        breaks=c('baseline', 'easiest', 'irt', 'middleout', 'ordered'),
                        labels=c('Baseline', 'EasyFirst', 'Theta', 'MiddleOut', 'Ordered'))
 dev.off()
+
+######### Table to show how much data was required to get to best acc #################
+sum(D[which(D$exp=='baseline'&D$epoch <= max_epochs[which(max_epochs$exp=='baseline'),]$epoch),]$train_size)
+sum(D[which(D$exp=='irt'&D$epoch <= max_epochs[which(max_epochs$exp=='irt'),]$epoch),]$train_size)
+sum(D[which(D$exp=='easiest'&D$epoch <= max_epochs[which(max_epochs$exp=='easiest'),]$epoch),]$train_size)
+sum(D[which(D$exp=='middleout'&D$epoch <= max_epochs[which(max_epochs$exp=='middleout'),]$epoch),]$train_size)
+sum(D[which(D$exp=='ordered'&D$epoch <= max_epochs[which(max_epochs$exp=='ordered'),]$epoch),]$train_size)
+
