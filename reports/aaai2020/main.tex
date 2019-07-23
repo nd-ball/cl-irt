@@ -208,9 +208,65 @@ Algorithm XX shows all of the steps for DCL-IRT. Code implementing DCL-IRT is in
 
 \section{Data and experiments} 
 
-- vision (mnist and cifar)
+We experiment with four data sets (two from vision and two from NLP) to demonstrate the effectiveness of DCL-IRT across multiple domains: handwritten digit recognition, image recognition, sentiment analysis, and natural language inference.
 
-- language (SNLI and SSTB) 
+\subsection{MNIST}
+
+There are 60,000 training examples and 10,000 test examples in the data set.
+We retain the training/test split that is typically used for evaluation.
+
+\subsection{CIFAR} 
+
+There are 50,000 training example and 10,000 test examples in the data set.
+
+\subsection{SSTB} 
+
+
+There are XX,XXX examples in the data set.
+
+\subsection{SNLI} 
+
+There are 500,000 ish examples in the data set.
+
+\subsection{Generating Response Patterns}
+
+In order to learn the difficulty parameters of the data we require a data set of response patterns.
+As previously mentioned, gathering enough labels for each example in the data sets to fit an IRT model would be prohibitively expensive if using humans.
+In addition, the annotation quality would be suspect due to the humans labeling tens of thousands of examples.
+Therefore we used artificial crowds to generate our response patterns (CITE EMNLP). 
+
+\subsection{Experiments} 
+
+In order to demonstrate the effectiveness of DCL-IRT we must show that the model is more efficient than standard supervised learning training while maintaining the level of performance in terms of test set accuracy. 
+Any gains in predictive performance are an additional benefit, but are not the main goal.
+With this in mind we performed the following experiment.
+
+For each data set, we trained a standard model architecture for a set number of epochs. 
+We varied the training data available to the model at each epoch based on the type of curriculum applied:
+
+\begin{itemize}
+	\item 
+	Baseline: At each epoch, the model has access to all of the data, shuffled and in mini-batches
+	\item 
+	Ordered: At each epoch, the model has access to all of the data, but here the data is ordered according to difficulty (i.e. not shuffled) 
+	\item 
+	Simple-IRT: At each epoch, the model has access to $\frac{e}{N}$ training examples, where $e$ is the current epoch and $N$ is the full training set size. 
+	This strategy ignores the competence of the model and only uses the example difficulty as inclusion criteria
+	\item 
+	DCL-IRT: At each epoch, model ability is estimated ($\hat{\theta_e}$, see \S above) and all training examples where difficulty is less that $\hat{\theta_e}$ are included.
+\end{itemize}
+
+For Ordered and Simple, there are several options available in terms of which examples are introduced first.
+For each method we experiment with ordering the data in three ways:
+\begin{itemize}
+	\item 
+	Easy-first: The data are ordered from easiest to hardest. At each epoch, more difficult examples are included in training
+	\item 
+	Hard-first: The data are ordered from hardest to easiest. At each epoch, easier examples are included in training
+	\item 
+	Middle-out: The data are ordered from smallest to largest in terms of the absolute value of the difficulty parameter. Recall that difficulty is roughly normally distributed (CLEAN THIS UP BECAUSE THAT ISN'T EXACTLY TRUE). At the first training epoch, data that are of an ``average'' difficulty are included in training. At each subsequent epoch, some data that are slightly easier and some data that are slightly harder are added to the training set.
+\end{itemize}
+
 
 - experiments: ordered vs simple vs irt, balanced vs not balanced 
 
