@@ -10,7 +10,7 @@ import pandas as pd
 
 from sklearn.metrics import accuracy_score
 
-from features.build_features import load_snli, get_epoch_training_data
+from features.build_features import load_snli, get_epoch_training_data, k_sort 
 from features.irt_scoring import calculate_theta 
 
 
@@ -137,6 +137,13 @@ def run():
     if args.random:
         random.shuffle(train['difficulty'])
 
+    # if k is set, sort once
+    if args.k > 0:
+        diffs = train['difficulty'] 
+        diffs_sorted_idx = k_sort(diffs, args.k) 
+    else:
+        diffs_sorted_idx = None 
+
     # load model and train
     #print('initialize model...')
     model = dy.Model()
@@ -194,7 +201,7 @@ def run():
 
         loss = 0.0
         #print('train epoch {}'.format(i))
-        epoch_training_data = get_epoch_training_data(train, args, i, 'snli', theta_hat)  
+        epoch_training_data = get_epoch_training_data(train, args, i, 'snli', theta_hat, diffs_sorted_idx)  
         num_train_epoch = len(epoch_training_data['phrase'])
         #print('training set size: {}'.format(num_train_epoch))
 

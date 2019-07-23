@@ -10,7 +10,7 @@ D.baseline <- read_csv(paste(data_dir, exp_type,'_baseline.log',sep=''),
 D.baseline$epoch <- c(1:200) 
 D.baseline$exp <- 'baseline'
 
-D.irt <- read_csv(paste(data_dir, 'irt_cl_', exp_type, '.log', sep=''),
+D.irt <- read_csv(paste(data_dir, 'irt_cl_', exp_type, '_5000.log', sep=''),
                   col_names = c('train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
                   skip=num_skip, n_max=200)
 D.irt$epoch <- c(1:200)
@@ -46,7 +46,7 @@ png("../../reports/figures/cl_irt_cifar.png", width=1100, height=700)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
   geom_line() + 
   geom_line(aes(x=epoch, y=train_size/500, color=exp),D, linetype=2) + 
-  geom_vline(aes(xintercept=epoch, color=exp ), D[c(135,588,343,715,945),]) + 
+  geom_vline(aes(xintercept=epoch, color=exp ), D[c(135,588,295,715,945),]) + 
   theme_minimal() + 
   ggtitle("Comaprison of CL Strategies: CIFAR") + 
   ylab("Test accuracy") + 
@@ -56,6 +56,12 @@ ggplot(D, aes(x=epoch, y=test_acc, color=exp))  +
                        labels=c('Baseline', 'EasyFirst', 'Theta', 'MiddleOut', 'Ordered'))
 dev.off() 
 
+######### Table to show how much data was required to get to best acc #################
+sum(D[which(D$exp=='baseline'&D$epoch <= max_epochs[which(max_epochs$exp=='baseline'),]$epoch),]$train_size)
+sum(D[which(D$exp=='irt'&D$epoch <= max_epochs[which(max_epochs$exp=='irt'),]$epoch),]$train_size)
+sum(D[which(D$exp=='easiest'&D$epoch <= max_epochs[which(max_epochs$exp=='easiest'),]$epoch),]$train_size)
+sum(D[which(D$exp=='middleout'&D$epoch <= max_epochs[which(max_epochs$exp=='middleout'),]$epoch),]$train_size)
+sum(D[which(D$exp=='ordered'&D$epoch <= max_epochs[which(max_epochs$exp=='ordered'),]$epoch),]$train_size)
 
 # load detailed RP data
 rps_baseline <- read_csv(

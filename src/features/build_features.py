@@ -238,7 +238,7 @@ def load_sstb(data_dir):
 
 
 ####### Get CL Data per epoch ########
-def get_epoch_training_data(training_set, args, epoch, task, theta_hat=None):
+def get_epoch_training_data(training_set, args, epoch, task, theta_hat=None, diffs_sorted_idx):
     if args.strategy == 'baseline':
         return training_set
     if args.strategy == 'theta':
@@ -264,6 +264,10 @@ def get_epoch_training_data(training_set, args, epoch, task, theta_hat=None):
             training_set['difficulty'] = [len(p) for p in training_set['phrase']]
         else:  # snli
             training_set['difficulty'] = [len(p[0]) for p in training_set['phrase']] 
+
+    if diffs_sorted_idx is None:
+        difficulties = [img[3] for img in training_set]
+        diffs_sorted_idx = np.argsort(difficulties) 
 
     if args.ordering == 'easiest':
         diffs_sorted_idx = np.argsort(training_set['difficulty']) 
@@ -331,7 +335,7 @@ def get_epoch_training_data(training_set, args, epoch, task, theta_hat=None):
 
 
 ### CL for vision data sets (since they are built slightly differently)
-def get_epoch_training_data_vision(training_set, args, epoch, theta_hat=None):
+def get_epoch_training_data_vision(training_set, args, epoch, theta_hat=None, diffs_sorted_idx=None):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     if args.strategy == 'baseline':
@@ -342,10 +346,9 @@ def get_epoch_training_data_vision(training_set, args, epoch, theta_hat=None):
  
     # set up CL #     
     # how will we order the data before building curriculum?
-    difficulties = [img[3] for img in training_set]
-    diffs_sorted_idx = np.argsort(difficulties) 
-    if args.k > 0:
-        diffs_sorted_idx = k_sort(difficulties, args.k) 
+    if diffs_sorted_idx is None:
+        difficulties = [img[3] for img in training_set]
+        diffs_sorted_idx = np.argsort(difficulties) 
 
     if args.ordering == 'easiest':
         diffs_sorted_idx = diffs_sorted_idx

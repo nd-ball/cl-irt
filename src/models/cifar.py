@@ -22,7 +22,7 @@ import os
 
 from data.my_data_downloaders import my_CIFAR10
 
-from features.build_features import get_epoch_training_data_vision
+from features.build_features import get_epoch_training_data_vision, k_sort 
 from features.irt_scoring import calculate_theta 
 
 
@@ -136,6 +136,11 @@ if device == 'cuda':
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
 
+# if k is set, sort once
+if args.k > 0:
+    diffs = [img[3] for img in trainset]
+    diffs_sorted_idx = k_sort(diffs, args.k) 
+    
 # Training
 def train(epoch, outwriter):
     #print('\nEpoch: %d' % epoch)
@@ -179,7 +184,10 @@ def train(epoch, outwriter):
     test_targets = []
     test_preds = []
 
-    trainloader = get_epoch_training_data_vision(trainset, args, epoch, theta_hat) 
+    if args.k > 0:
+        trainloader = get_epoch_training_data_vision(trainset, args, epoch, theta_hat, diffs_sorted_idx)
+    else:
+        trainloader = get_epoch_training_data_vision(trainset, args, epoch, theta_hat)
     train_length = len(trainloader.dataset) 
 
     #target_counts = collections.Counter([m[1] for m in trainset])

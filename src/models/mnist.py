@@ -11,7 +11,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from data.my_data_downloaders import my_MNIST
 
-from features.build_features import get_epoch_training_data_vision
+from features.build_features import get_epoch_training_data_vision, k_sort 
 from features.irt_scoring import calculate_theta 
 
 
@@ -35,7 +35,7 @@ class Net(nn.Module):
 
 
 def train(args, model, device, train_data, test_loader, 
-            optimizer, epoch, best_acc, outwriter):
+            optimizer, epoch, best_acc, outwriter, diffs_sorted_idx=None):
     
     # estimate theta for the model in its current state 
     model.eval() 
@@ -68,7 +68,7 @@ def train(args, model, device, train_data, test_loader,
     preds = []
     correct = 0.
 
-    train_loader = get_epoch_training_data_vision(train_data, args, epoch, theta_hat) 
+    train_loader = get_epoch_training_data_vision(train_data, args, epoch, theta_hat, diffs_sorted_idx) 
     train_length = len(train_loader.dataset) 
     for batch_idx, (data, target, label, diff, _) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
@@ -193,8 +193,15 @@ def main():
     
     best_test = 0
 
+    # if k is set, sort once
+    if args.k > 0:
+        diffs = [img[3] for img in mnist_train]
+        diffs_sorted_idx = k_sort(diffs, args.k) 
+    else:
+        diffs_sorted_idx = None 
+
     for epoch in range(0, args.num_epochs):             
-        best_test = train(args, model, device, mnist_train, test_loader, optimizer, epoch, best_test, outwriter)
+        best_test = train(args, model, device, mnist_train, test_loader, optimizer, epoch, best_test, outwriter, diffs_sorted_idx)
     last_line = '{}'.format(best_test)
     print(last_line)
 

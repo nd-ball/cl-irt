@@ -8,7 +8,7 @@ import pandas as pd
 
 from sklearn.metrics import accuracy_score
 
-from features.build_features import load_sstb, get_epoch_training_data 
+from features.build_features import load_sstb, get_epoch_training_data, k_sort 
 from features.irt_scoring import calculate_theta 
 
 
@@ -88,6 +88,12 @@ def train(args, outwriter):
     if args.random:
         random.shuffle(train['difficulty'])
 
+    # if k is set, sort once
+    if args.k > 0:
+        diffs = train['difficulty'] 
+        diffs_sorted_idx = k_sort(diffs, args.k) 
+    else:
+        diffs_sorted_idx = None 
 
     # load model and train
     #print('initialize model...')
@@ -151,7 +157,7 @@ def train(args, outwriter):
         theta_hat = calculate_theta(train['difficulty'], rps)[0] 
         #print('estimated theta: {}'.format(theta_hat))     
 
-        epoch_training_data = get_epoch_training_data(train, args, i, 'sstb', theta_hat) 
+        epoch_training_data = get_epoch_training_data(train, args, i, 'sstb', theta_hat, diffs_sorted_idx) 
         num_train_epoch = len(epoch_training_data['phrase'])
         #print('training set size: {}'.format(num_train_epoch))
         # shuffle training data
