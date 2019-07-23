@@ -238,7 +238,7 @@ def load_sstb(data_dir):
 
 
 ####### Get CL Data per epoch ########
-def get_epoch_training_data(training_set, args, epoch, task, theta_hat=None, diffs_sorted_idx):
+def get_epoch_training_data(training_set, args, epoch, task, theta_hat=None, diffs_sorted_idx=None):
     if args.strategy == 'baseline':
         return training_set
     if args.strategy == 'theta':
