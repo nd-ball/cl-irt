@@ -239,6 +239,7 @@ Briefly, for each data set an ensemble of neural network models are trained, usi
 Training data is subsampled and corrupted (label flipping) so that performance across models in the ensemble is varied.
 Each trained model then labels the test set examples.
 These labels are graded correct/incorrect against the gold-standard test label and the output response patterns are used to fit an IRT model for the data.
+Prior work has shown that this is an effective way to generate a set of response patterns for fitting IRT models to machine learning data (cite us).
 
 
 \subsection{Experiments} 
@@ -289,6 +290,15 @@ Using IRT leads to quicker convergence for the trained models (Figure XX).
 The vertical lines in each plot indicate the point at which the model has converged, based on early stopping using the development set accuracy.
 In most cases DCL-IRT leads to the fastest convergence, however for XX using the Simple-IRT curriculum ordered easiest to hardest leads to the fastest convergence.
 In all cases some use of IRT to determine the curriculum improves over the baseline training criterion. 
+
+By using DCL-IRT a curriculum can adapt during training according to the estimated ability of the model.
+DCL-IRT adds or removes training data based not on a fixed step schedule but rather by probing the model at each epoch and using the estimated ability to match data to the model (Figure XX).
+This way if a model has a high estimated ability early in training, then more data can be added to the training set more quickly, and learning isn't artificially slowed down due to the curriculum schedule.
+For each data set in question, DCL-IRT adds training data more quickly than a more traditional CL schedule, which leads to faster convergence.
+
+Performance for ordered is strange.
+Sometimes it works very well (SSTB), sometimes it doesn't work at all (SNLI).
+More work is required here to see what is going on (PUT IT IN THE ANALYSIS SECTION).
 
 Even though training with these curriculum use less data than the baseline, efficiency does not have a significant negative impact on generalizability in terms of test set performance (Table YY).
 The number of training examples required to reach convergence is lower than the baseline in each case for DCL-IRT.
