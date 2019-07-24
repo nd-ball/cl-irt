@@ -235,6 +235,12 @@ As previously mentioned, gathering enough labels for each example in the data se
 In addition, the annotation quality would be suspect due to the humans labeling tens of thousands of examples.
 Therefore we used artificial crowds to generate our response patterns (CITE EMNLP). 
 
+Briefly, for each data set an ensemble of neural network models are trained, using different subsets of the training data set.
+Training data is subsampled and corrupted (label flipping) so that performance across models in the ensemble is varied.
+Each trained model then labels the test set examples.
+These labels are graded correct/incorrect against the gold-standard test label and the output response patterns are used to fit an IRT model for the data.
+
+
 \subsection{Experiments} 
 
 In order to demonstrate the effectiveness of DCL-IRT we must show that the model is more efficient than standard supervised learning training while maintaining the level of performance in terms of test set accuracy. 
@@ -288,6 +294,13 @@ Even though training with these curriculum use less data than the baseline, effi
 The number of training examples required to reach convergence is lower than the baseline in each case for DCL-IRT.
 Change in performance compared to the baseline is often lower, but the delta is extremely small (usually XX or YY relative change). 
 In particular, the amount of data needed to achieve very high performance on the SSTB task is roughly 25\% of what a typical training regiment would require.
+
+
+\subsection{Performance by Difficulty}
+Does using DCL-IRT for training lead to a more interpretable output in terms of test set performance?
+That is, when a curriculum is employed, does the model perform better on easier test examples than difficult ones?
+A comparison of methods on test data binned by difficulty shows that model performance is similar when test set difficulty is taken into account (Figure XX).
+The main difference is that for the baseline models, performance is stratified by difficulty almost immediately, and there are small improvements across groups during training, while for the CL methods, there is consistent improvement across groups as training continues, and more data is added. 
 
 
 \section{Related work}
