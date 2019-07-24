@@ -267,6 +267,9 @@ For each method we experiment with ordering the data in three ways:
 	Middle-out: The data are ordered from smallest to largest in terms of the absolute value of the difficulty parameter. Recall that difficulty is roughly normally distributed (CLEAN THIS UP BECAUSE THAT ISN'T EXACTLY TRUE). At the first training epoch, data that are of an ``average'' difficulty are included in training. At each subsequent epoch, some data that are slightly easier and some data that are slightly harder are added to the training set.
 \end{itemize}
 
+For each data set a relatively simple model architecture was used.
+Performance in terms of test set accuracy is determined by using the development set accuracy as an early stopping indicator.
+Each model was trained for 200 epochs. 
 
 - experiments: ordered vs simple vs irt, balanced vs not balanced 
 
@@ -275,6 +278,17 @@ For each method we experiment with ordering the data in three ways:
 - plots and tables 
 
 - really show that using our method is efficient and practical 
+
+Using IRT leads to quicker convergence for the trained models (Figure XX).
+The vertical lines in each plot indicate the point at which the model has converged, based on early stopping using the development set accuracy.
+In most cases DCL-IRT leads to the fastest convergence, however for XX using the Simple-IRT curriculum ordered easiest to hardest leads to the fastest convergence.
+In all cases some use of IRT to determine the curriculum improves over the baseline training criterion. 
+
+Even though training with these curriculum use less data than the baseline, efficiency does not have a significant negative impact on generalizability in terms of test set performance (Table YY).
+The number of training examples required to reach convergence is lower than the baseline in each case for DCL-IRT.
+Change in performance compared to the baseline is often lower, but the delta is extremely small (usually XX or YY relative change). 
+In particular, the amount of data needed to achieve very high performance on the SSTB task is roughly 25\% of what a typical training regiment would require.
+
 
 \section{Related work}
 
