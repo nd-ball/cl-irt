@@ -277,8 +277,8 @@ def get_epoch_training_data(training_set, args, epoch, task, theta_hat=None, dif
         diffs_sorted_idx = np.argsort(np.abs(training_set['difficulty'])) 
     else:  # random baseline 
         raise NotImplementedError
-    if args.k > 0:
-        diffs_sorted_idx = k_sort(training_set['difficulty'], args.k) 
+    #if args.k > 0:
+    #    diffs_sorted_idx = k_sort(training_set['difficulty'], args.k) 
 
     # determine if we want balanced per-label or not
     if not args.balanced:

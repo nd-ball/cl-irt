@@ -36,31 +36,31 @@ class Net(nn.Module):
 
 def train(args, model, device, train_data, test_loader, 
             optimizer, epoch, best_acc, outwriter, diffs_sorted_idx=None):
-    
-    # estimate theta for the model in its current state 
-    model.eval() 
-    train_diffs = [] 
-    train_rps = []
-    use_cuda = not args.no_cuda and torch.cuda.is_available()
-    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+    if args.strategy == 'theta':
+        # estimate theta for the model in its current state 
+        model.eval() 
+        train_diffs = [] 
+        train_rps = []
+        use_cuda = not args.no_cuda and torch.cuda.is_available()
+        kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
-    irt_trainloader = torch.utils.data.DataLoader(train_data,
-                batch_size=args.batch_size, shuffle=True, **kwargs)
+        irt_trainloader = torch.utils.data.DataLoader(train_data,
+                    batch_size=args.batch_size, shuffle=True, **kwargs)
 
-    with torch.no_grad():
-        for batch_idx, (data, target, label, diff, _) in enumerate(irt_trainloader):
-            data, target = data.to(device), target.to(device)
-            output = model(data)
-            pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
-            rp = pred.eq(target.view_as(pred)).cpu().numpy() 
-            train_diffs.extend(diff.numpy()) 
-            train_rps.extend(rp)
-    # calculate theta based on current epoch data 
-    train_rps = [j if j==1 else -1 for j in train_rps] 
-    #print(train_diffs) 
-    #print(train_rps) 
-    theta_hat = calculate_theta(train_diffs, train_rps)[0] 
-    #print('estimated theta: {}'.format(theta_hat))     
+        with torch.no_grad():
+            for batch_idx, (data, target, label, diff, _) in enumerate(irt_trainloader):
+                data, target = data.to(device), target.to(device)
+                output = model(data)
+                pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
+                rp = pred.eq(target.view_as(pred)).cpu().numpy() 
+                train_diffs.extend(diff.numpy()) 
+                train_rps.extend(rp)
+        # calculate theta based on current epoch data 
+        train_rps = [j if j==1 else -1 for j in train_rps] 
+        #print(train_diffs) 
+        #print(train_rps) 
+        theta_hat = calculate_theta(train_diffs, train_rps)[0] 
+        #print('estimated theta: {}'.format(theta_hat))     
     
     model.train()
     imageIDs = []

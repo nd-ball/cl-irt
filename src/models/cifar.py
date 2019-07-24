@@ -145,34 +145,36 @@ if args.k > 0:
 def train(epoch, outwriter):
     #print('\nEpoch: %d' % epoch)
     #print('Training')
-    # get a theta estimate from entire training set 
-    net.eval()
-    test_loss = 0
-    correct = 0
-    total = 0
-    train_diffs = [] 
-    train_rps = []
-    use_cuda = not args.no_cuda and torch.cuda.is_available()
-    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
-    irt_trainloader = torch.utils.data.DataLoader(trainset,
-                batch_size=args.batch_size, shuffle=True, **kwargs) 
+    if args.strategy == 'theta':
+        # get a theta estimate from entire training set 
+        net.eval()
+        test_loss = 0
+        correct = 0
+        total = 0
+        train_diffs = [] 
+        train_rps = []
+        use_cuda = not args.no_cuda and torch.cuda.is_available()
+        kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
-    with torch.no_grad():
-        for batch_idx, (inputs, targets, label, diffs, _) in enumerate(irt_trainloader):
-            inputs, targets = inputs.to(device), targets.to(device)
-            outputs = net(inputs)
-            _, predicted = outputs.max(1)
-            rp = predicted.eq(targets).cpu().numpy() 
-            train_diffs.extend(diffs.numpy()) 
-            train_rps.extend(rp)
-    # calculate theta based on current epoch data 
-    train_rps = [j if j==1 else -1 for j in train_rps] 
-    #print(train_diffs) 
-    #print(train_rps) 
-    theta_hat = calculate_theta(train_diffs, train_rps)[0] 
-    #print('estimated theta: {}'.format(theta_hat)) 
-   
+        irt_trainloader = torch.utils.data.DataLoader(trainset,
+                    batch_size=args.batch_size, shuffle=True, **kwargs) 
+
+        with torch.no_grad():
+            for batch_idx, (inputs, targets, label, diffs, _) in enumerate(irt_trainloader):
+                inputs, targets = inputs.to(device), targets.to(device)
+                outputs = net(inputs)
+                _, predicted = outputs.max(1)
+                rp = predicted.eq(targets).cpu().numpy() 
+                train_diffs.extend(diffs.numpy()) 
+                train_rps.extend(rp)
+        # calculate theta based on current epoch data 
+        train_rps = [j if j==1 else -1 for j in train_rps] 
+        #print(train_diffs) 
+        #print(train_rps) 
+        theta_hat = calculate_theta(train_diffs, train_rps)[0] 
+        #print('estimated theta: {}'.format(theta_hat)) 
+    
     net.train()
     train_loss = 0
     correct = 0
