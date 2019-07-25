@@ -90,8 +90,10 @@ target/
 
 
 # R history
-.Rhistory
+*.Rhistory
 
 
 # images (re-create them locally)
-.png 
+*.png 
+*.pdf 
+*.gz 
