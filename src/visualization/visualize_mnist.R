@@ -42,6 +42,11 @@ filter <- D %>%
 
 max_epochs <- merge(D,filter, by.x=c('exp','test_acc'), by.y=c('exp','max'))
 
+which(D$exp=='baseline' & D$epoch==172)
+which(D$exp=='easiest' & D$epoch==177)
+which(D$exp=='irt' & D$epoch==158)
+which(D$exp=='middleout' & D$epoch==157)
+which(D$exp=='ordered' & D$epoch==167)
 
 png("../../reports/figures/cl_irt_mnist.png", width=1100, height=700)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
@@ -63,3 +68,62 @@ sum(D[which(D$exp=='irt'&D$epoch <= max_epochs[which(max_epochs$exp=='irt'),]$ep
 sum(D[which(D$exp=='easiest'&D$epoch <= max_epochs[which(max_epochs$exp=='easiest'),]$epoch),]$train_size)
 sum(D[which(D$exp=='middleout'&D$epoch <= max_epochs[which(max_epochs$exp=='middleout'),]$epoch),]$train_size)
 sum(D[which(D$exp=='ordered'&D$epoch <= max_epochs[which(max_epochs$exp=='ordered'),]$epoch),]$train_size)
+
+
+# load detailed RP data
+rps_baseline <- read_csv(
+  paste(data_dir, 'test_preds/mnist_baseline_False_easiest_False.csv',sep='')
+)
+rps_baseline$exp <- "baseline"
+
+rps_irt <- read_csv(
+  paste(data_dir, 'test_preds/mnist_theta_False_easiest_False.csv',sep='')
+)
+rps_irt$exp <- "Theta"
+
+rps_easiest <- read_csv(
+  paste(data_dir, 'test_preds/mnist_simple_False_easiest_False.csv',sep='')
+)
+rps_easiest$exp <- "Simple-Easiest"
+
+rps_middleout <- read_csv(
+  paste(data_dir, 'test_preds/mnist_simple_False_middleout_False.csv',sep='')
+)
+rps_middleout$exp <- "Simple-MiddleOut"
+
+rps_ordered <- read_csv(
+  paste(data_dir, 'test_preds/mnist_ordered_False_easiest_False.csv',sep='')
+)
+rps_ordered$exp <- "Ordered"
+
+
+test_diffs <- read_csv(
+  paste(data_dir, 'test_preds/mnist_diffs_test.csv',sep=''),
+  col_names=c('pairid', 'diff')
+)
+
+rps_all <- rbind(rps_baseline, rps_irt, rps_easiest, rps_middleout, rps_ordered)
+
+quantiles <- quantile(test_diffs$diff)
+
+rps_all <- merge(rps_all, test_diffs, by.x='itemID', by.y='pairid')
+rps_all$bin <- 1
+rps_all[which(rps_all$diff >= quantiles[2]),]$bin <- 2
+rps_all[which(rps_all$diff >= quantiles[3]),]$bin <- 3
+rps_all[which(rps_all$diff >= quantiles[4]),]$bin <- 4
+
+table(rps_all$bin)
+
+Z <- rps_all %>% 
+  group_by(epoch,bin,exp) %>%
+  summarize(mean=mean(correct==pred))
+
+
+ggplot(Z,aes(x=epoch,y=mean,linetype=exp, color=as.factor(bin))) + 
+  geom_line() 
+
+Z[which(Z$exp=='baseline' & Z$epoch==172),]
+Z[which(Z$exp=='Simple-Easiest' & Z$epoch==177),]
+Z[which(Z$exp=='Theta' & Z$epoch==158),]
+Z[which(Z$exp=='Simple-MiddleOut' & Z$epoch==157),]
+Z[which(Z$exp=='Ordered' & Z$epoch==167),]

@@ -42,6 +42,12 @@ filter <- D %>%
 
 max_epochs <- merge(D,filter, by.x=c('exp','test_loss'), by.y=c('exp','max'))
 
+which(D$exp=='baseline' & D$epoch==126)
+which(D$exp=='easiest' & D$epoch==93)
+which(D$exp=='irt' & D$epoch==46)
+which(D$exp=='middleout' & D$epoch==170)
+which(D$exp=='ordered' & D$epoch==32)
+
 png("../../reports/figures/cl_irt_sstb.png", width=1100, height=700)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
   geom_line() + 

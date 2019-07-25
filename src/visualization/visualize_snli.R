@@ -10,10 +10,10 @@ D.baseline <- read_csv(paste(data_dir, exp_type,'_baseline.log',sep=''),
 D.baseline$epoch <- c(1:200) 
 D.baseline$exp <- 'baseline'
 
-D.irt <- read_csv(paste(data_dir, 'irt_cl_', exp_type, '.log', sep=''),
+D.irt <- read_csv(paste(data_dir, 'irt_cl_', exp_type, '_5000.log', sep=''),
                   col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
                   skip=num_skip, n_max=200)
-D.irt$epoch <- c(1:200)
+D.irt$epoch <- c(1:118)
 D.irt$exp <- 'irt'
 
 D.easiest <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-simple-easiest.log',sep=''), 
@@ -42,11 +42,18 @@ filter <- D %>%
 
 max_epochs <- merge(D,filter, by.x=c('exp','dev_acc'), by.y=c('exp','max'))
 
+which(D$exp=='baseline' & D$epoch==20)
+which(D$exp=='easiest' & D$epoch==97)
+which(D$exp=='irt' & D$epoch==31)
+which(D$exp=='middleout' & D$epoch==104)
+which(D$exp=='ordered' & D$epoch==180)
+
+
 png("../../reports/figures/cl_irt_snli.png", width=1100, height=700)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
   geom_line() + 
   geom_line(aes(x=epoch, y=train_size/549184, color=exp),D, linetype=2) + 
-  geom_vline(aes(xintercept=epoch, color=exp ), D[c(20,234,497,704,980),]) + 
+  geom_vline(aes(xintercept=epoch, color=exp ), D[c(20,415,231,622,898),]) + 
   theme_minimal() + 
   ggtitle("Comaprison of CL Strategies: SNLI") + 
   ylab("Test accuracy") + 

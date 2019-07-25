@@ -64,6 +64,7 @@ table(rps_baseline$bin)
 Z.baseline <- rps_baseline %>% 
   group_by(epoch,bin) %>%
   summarize(mean=mean(correct==pred))
+
 ggplot(Z.irt,aes(x=epoch,y=mean,color=as.factor(bin))) + 
   geom_line() + 
   geom_line(aes(x=epoch, y=mean, color=as.factor(bin)), Z.baseline, linetype=2)

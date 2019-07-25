@@ -41,6 +41,12 @@ filter <- D %>%
 
 max_epochs <- merge(D,filter, by.x=c('exp','test_acc'), by.y=c('exp','max'))
 
+which(D$exp=='baseline' & D$epoch==135)
+which(D$exp=='easiest' & D$epoch==188)
+which(D$exp=='irt' & D$epoch==95)
+which(D$exp=='middleout' & D$epoch==115)
+which(D$exp=='ordered' & D$epoch==145)
+
 
 png("../../reports/figures/cl_irt_cifar.png", width=1100, height=700)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
@@ -67,78 +73,56 @@ sum(D[which(D$exp=='ordered'&D$epoch <= max_epochs[which(max_epochs$exp=='ordere
 rps_baseline <- read_csv(
   paste(data_dir, 'test_preds/cifar_baseline_False_easiest_False.csv',sep='')
 )
-
-rps_simple <- read_csv(
-  paste(data_dir, 'test_preds/cifar_simple_False_middleout_False.csv',sep='')
-)
+rps_baseline$exp <- "baseline"
 
 rps_irt <- read_csv(
   paste(data_dir, 'test_preds/cifar_theta_False_easiest_False.csv',sep='')
 )
+rps_irt$exp <- "Theta"
+
+rps_easiest <- read_csv(
+  paste(data_dir, 'test_preds/cifar_simple_False_easiest_False.csv',sep='')
+)
+rps_easiest$exp <- "Simple-Easiest"
+
+rps_middleout <- read_csv(
+  paste(data_dir, 'test_preds/cifar_simple_False_middleout_False.csv',sep='')
+)
+rps_middleout$exp <- "Simple-MiddleOut"
+
+rps_ordered <- read_csv(
+  paste(data_dir, 'test_preds/cifar_ordered_False_easiest_False.csv',sep='')
+)
+rps_ordered$exp <- "Ordered"
+
 
 test_diffs <- read_csv(
   paste(data_dir, 'test_preds/cifar_diffs_test.csv',sep=''),
   col_names=c('pairid', 'diff')
 )
 
-rps_irt <- merge(rps_irt, test_diffs, by.x='itemID', by.y='pairid')
-rps_irt$bin <- 1
-rps_irt[which(rps_irt$diff >= -1.2),]$bin <- 2
-rps_irt[which(rps_irt$diff >= -0.14),]$bin <- 3
-rps_irt[which(rps_irt$diff >= 0.98),]$bin <- 4
+rps_all <- rbind(rps_baseline, rps_irt, rps_easiest, rps_middleout, rps_ordered)
 
-table(rps_irt$bin)
+quantiles <- quantile(test_diffs$diff)
 
-Z.irt <- rps_irt %>% 
-  group_by(epoch,bin) %>%
-  summarize(mean=mean(correct==pred))
+rps_all <- merge(rps_all, test_diffs, by.x='itemID', by.y='pairid')
+rps_all$bin <- 1
+rps_all[which(rps_all$diff >= quantiles[2]),]$bin <- 2
+rps_all[which(rps_all$diff >= quantiles[3]),]$bin <- 3
+rps_all[which(rps_all$diff >= quantiles[4]),]$bin <- 4
 
-rps_baseline <- merge(rps_baseline, test_diffs, by.x='itemID', by.y='pairid')
-rps_baseline$bin <- 1
-rps_baseline[which(rps_baseline$diff >= -1.2),]$bin <- 2
-rps_baseline[which(rps_baseline$diff >= -0.14),]$bin <- 3
-rps_baseline[which(rps_baseline$diff >= 0.98),]$bin <- 4
+table(rps_all$bin)
 
-table(rps_baseline$bin)
-table(rps_irt$bin)
-
-Z.baseline <- rps_baseline %>% 
-  group_by(epoch,bin) %>%
-  summarize(mean=mean(correct==pred))
-
-rps_simple <- merge(rps_simple, test_diffs, by.x='itemID', by.y='pairid')
-rps_simple$bin <- 1
-rps_simple[which(rps_simple$diff >= -1.2),]$bin <- 2
-rps_simple[which(rps_simple$diff >= -0.14),]$bin <- 3
-rps_simple[which(rps_simple$diff >= 0.98),]$bin <- 4
-
-table(rps_simple$bin)
-table(rps_irt$bin)
-
-Z.simple <- rps_simple %>% 
-  group_by(epoch,bin) %>%
+Z <- rps_all %>% 
+  group_by(epoch,bin,exp) %>%
   summarize(mean=mean(correct==pred))
 
 
-ggplot(Z.irt,aes(x=epoch,y=mean,color=as.factor(bin))) + 
-  geom_line() + 
-  ggtitle("DCL-IRT") + 
-  geom_line(aes(x=epoch, y=mean, color=as.factor(bin)), Z.baseline, linetype=2) + 
-  geom_line(aes(x=epoch, y=mean, color=as.factor(bin)), Z.simple, linetype=3)
+ggplot(Z[which(Z$exp %in% c('baseline', 'Simple-MiddleOut')),],aes(x=epoch,y=mean,linetype=exp, color=as.factor(bin))) + 
+  geom_line() 
 
-
-ggplot(Z.baseline,aes(x=epoch,y=mean,color=as.factor(bin))) + 
-  geom_line() + 
-  ggtitle("Baseline")
-
-
-z.baseline.all <- rps_baseline %>% 
-  group_by(epoch) %>%
-  summarize(mean=mean(correct==pred))
-z.irt.all <- rps_irt %>% 
-  group_by(epoch) %>%
-  summarize(mean=mean(correct==pred))
-
-ggplot(z.irt.all, aes(x=epoch,y=mean)) + 
-  geom_line() + 
-  geom_line(aes(x=epoch,y=mean), z.baseline.all, linetype=2)
+Z[which(Z$exp=='baseline' & Z$epoch==135),]
+Z[which(Z$exp=='Simple-Easiest' & Z$epoch==188),]
+Z[which(Z$exp=='Theta' & Z$epoch==95),]
+Z[which(Z$exp=='Simple-MiddleOut' & Z$epoch==115),]
+Z[which(Z$exp=='Ordered' & Z$epoch==145),]
