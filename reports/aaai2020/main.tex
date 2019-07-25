@@ -379,5 +379,15 @@ Lots to do here. need a thorough lit review as part of this paper
 
 \section{Conclusion} 
 
+DCL-IRT is the first curriculum learning method to dynamically probe a model during training to estimate model ability at a point in time.
+Knowing the model's ability allows for data to be selected for training that is appropriate for the model and is not rigidly tied to a heuristic schedule.
+Learning with IRT CL strategies leads to more efficient models.
+Although performance is slightly lower, the gains in efficiency more than balance the trade-off.
+In actual fact the difference in one percentage point is small for many tasks, but being able to cut training data in half (or less) allows for the use of certain models in many more cases, and also allows for more researchers to work on problems where huge computing and storage resources may not be available.
+
+Even though it is dynamic, DCL-IRT employs a simple curriculum schedule: only include examples where difficulty is less than estimated ability.
+However, being able to estimate ability on the fly with IRT opens up as a research area the following: what is the best way to build a curriculum, knowing example difficulty and model ability?
+It may be the case that only data with difficulty within a range of ability (higher and lower) is better, and the training set shifts as the model improves.
+There are many directions to take this, and this will be an exciting area of work moving forward.
 
 \end{document}
