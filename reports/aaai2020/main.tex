@@ -83,6 +83,8 @@
 % \vspace{- -- No negative value may be used in proximity of a caption, figure, table, section, subsection, subsubsection, or reference
 % \vskip{- -- No negative value may be used to alter spacing above or below a caption, figure, table, section, subsection, subsubsection, or reference
 
+\usepackage{booktabs}
+
 \setcounter{secnumdepth}{0} %May be changed to 1 or 2 if section numbers are desired.
 
 % The file aaai20.sty is the style file for AAAI Press 
@@ -300,11 +302,69 @@ Performance for ordered is strange.
 Sometimes it works very well (SSTB), sometimes it doesn't work at all (SNLI).
 More work is required here to see what is going on (PUT IT IN THE ANALYSIS SECTION).
 
-Even though training with these curriculum use less data than the baseline, efficiency does not have a significant negative impact on generalizability in terms of test set performance (Table YY).
+Even though training with these curriculum use less data than the baseline, efficiency does not have a significant negative impact on generalizability in terms of test set performance (Table \ref{tab:costs}).
 The number of training examples required to reach convergence is lower than the baseline in each case for DCL-IRT.
 Change in performance compared to the baseline is often lower, but the delta is extremely small (usually XX or YY relative change). 
 In particular, the amount of data needed to achieve very high performance on the SSTB task is roughly 25\% of what a typical training regiment would require.
 
+
+\begin{table*}[t]
+	\centering 
+	\begin{tabular}{cccccc}
+		\toprule
+		Data Set & Experiment & Training Examples & $\Delta_b$ (\%) & Accuracy (\%) & $\Delta_b$ (\%)\\ 
+		\midrule
+		MNIST & Baseline & 10,320,000& 100.0&	99.26&	0
+		 \\
+		 \cmidrule{2-6}
+		& EasyFirst & 7,620,000&	73.84&	99.17&	-0.09
+		 \\
+		& MiddleOut & 6,420,000	&\bf 62.21	&99.2&	-0.06
+		 \\
+		& Ordered &10,020,000&	97.09&	97.06&	-2.22
+		 \\
+		& Theta& 8,986,612&	87.08&	99.23&	\bf -0.03
+		 \\
+		\midrule
+		CIFAR & Baseline &  6,750,000& 	100.0&	86.61&	0
+		 \\
+		 \cmidrule{2-6}
+		& EasyFirst & 6,900,000&	102.22&	85.54	&\bf -1.24
+		 \\
+		& MiddleOut & 3,250,000&	\bf 48.15&	85.54&	\bf -1.24
+		 \\
+		& Ordered &7,250,000&	107.41&	39.04	&-54.92
+		 \\
+		& Theta &3,671,016	&54.39&	83.32&	-3.80
+		 \\
+		\midrule
+		SSTB & Baseline &  8,687,892 	&100.0	&85.71&	0
+		\\
+		\cmidrule{2-6}
+		& EasyFirst & 2,912,757	&\bf 33.53&	85.38&	-0.39
+		 \\
+		& MiddleOut & 8,553,148	&98.45&	85.66&	-0.06
+		 \\
+		& Ordered & 2,155,136&	24.81&	86.92&	\bf 1.41
+		 \\
+		& Theta &2,993,225&	34.45&	85.32&	-0.46
+		 \\
+		\midrule
+		SNLI & Baseline &  10,983,680& 	100.0&	78.08&	0
+		 \\
+		 \cmidrule{2-6}
+		& EasyFirst & 25,839,060&	235.25&	77.64& \bf	-0.56
+		 \\
+		& MiddleOut &29,655,888&	270.00&	75.31&	-3.55
+		 \\
+		& Ordered & 98,853,120&	900.00&	11.86&	-84.81
+		 \\
+		& Theta& 14,118,510&	\bf 128.54&	77.34&	-0.95
+		 \\
+		\bottomrule 
+	\end{tabular}
+	\label{tab:costs}
+\end{table*}
 
 \subsection{Performance by Difficulty}
 Does using DCL-IRT for training lead to a more interpretable output in terms of test set performance?
