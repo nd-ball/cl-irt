@@ -119,43 +119,46 @@ def train(args, outwriter):
         # load training data for this epoch
 
         # estimate theta_hat 
-        examples = list(range(num_train))
-        rps = []
-        outs = []
-        correct = [] 
-        predictions = []
+        if args.strategy=='theta':
+            examples = list(range(num_train))
+            rps = []
+            outs = []
+            correct = [] 
+            predictions = []
 
-        k = 0
+            k = 0
 
-        for j in examples:
-            if k % batch_size == 0:
-                dy.renew_cg()
-                losses = []
-                outs = []
-            sent1 = train['phrase'][j]
-            lbl = train['lbls'][j]
-            correct.append(train['lbls'][j])
-            out = dnnmodel.forward(sent1, lbl)
-            outs.append(out)
+            for j in examples:
+                if k % batch_size == 0:
+                    dy.renew_cg()
+                    losses = []
+                    outs = []
+                sent1 = train['phrase'][j]
+                lbl = train['lbls'][j]
+                correct.append(train['lbls'][j])
+                out = dnnmodel.forward(sent1, lbl)
+                outs.append(out)
 
-            if k % batch_size == batch_size - 1:
+                if k % batch_size == batch_size - 1:
+                    dy.forward(outs)
+                    predictions.extend([o.npvalue() for o in outs])
+                    outs = []
+                k += 1
+
+            # need to do one last batch in case there are elements left over in a "last batch"
+            # final pass if there are unbatched values
+            if len(outs) > 0:
                 dy.forward(outs)
                 predictions.extend([o.npvalue() for o in outs])
-                outs = []
-            k += 1
-
-        # need to do one last batch in case there are elements left over in a "last batch"
-        # final pass if there are unbatched values
-        if len(outs) > 0:
-            dy.forward(outs)
-            predictions.extend([o.npvalue() for o in outs])
-        preds = np.argmax(np.array(predictions), axis=1)
-        rps = [int(p == c) for p, c in zip(preds, correct)] 
-        rps = [j if j==1 else -1 for j in rps] 
-        #print(rps) 
-        #print(train['difficulty']) 
-        theta_hat = calculate_theta(train['difficulty'], rps)[0] 
-        #print('estimated theta: {}'.format(theta_hat))     
+            preds = np.argmax(np.array(predictions), axis=1)
+            rps = [int(p == c) for p, c in zip(preds, correct)] 
+            rps = [j if j==1 else -1 for j in rps] 
+            #print(rps) 
+            #print(train['difficulty']) 
+            theta_hat = calculate_theta(train['difficulty'], rps)[0] 
+            #print('estimated theta: {}'.format(theta_hat))     
+        else:
+            theta_hat=0
 
         epoch_training_data = get_epoch_training_data(train, args, i, 'sstb', theta_hat, diffs_sorted_idx) 
         num_train_epoch = len(epoch_training_data['phrase'])

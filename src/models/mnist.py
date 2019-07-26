@@ -60,7 +60,9 @@ def train(args, model, device, train_data, test_loader,
         #print(train_diffs) 
         #print(train_rps) 
         theta_hat = calculate_theta(train_diffs, train_rps)[0] 
-        #print('estimated theta: {}'.format(theta_hat))     
+        #print('estimated theta: {}'.format(theta_hat))   
+    else:
+        theta_hat=0  
     
     model.train()
     imageIDs = []

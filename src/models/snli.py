@@ -164,40 +164,43 @@ def run():
     #print('training')
     for i in range(num_epoch):
         # estimate theta for current model parameters
-        labels = []
-        predictions = []
-        correct = []
-        pairIDs = []
-        outs = []
-        k = 0
-        for j in range(num_train):
-            if k % batch_size == 0:
-                dy.renew_cg()
-                outs = []
+        if args.strategy=='theta':
+            labels = []
+            predictions = []
+            correct = []
+            pairIDs = []
+            outs = []
+            k = 0
+            for j in range(num_train):
+                if k % batch_size == 0:
+                    dy.renew_cg()
+                    outs = []
 
-            sent1, sent2 = train['phrase'][j]
-            lbl = train['lbls'][j]
-            correct.append(lbl)
-            out = dy.softmax(dnnmodel.forward(sent1, sent2, lbl, False))
-            outs.append(out)
+                sent1, sent2 = train['phrase'][j]
+                lbl = train['lbls'][j]
+                correct.append(lbl)
+                out = dy.softmax(dnnmodel.forward(sent1, sent2, lbl, False))
+                outs.append(out)
 
-            if k % batch_size == batch_size - 1:
+                if k % batch_size == batch_size - 1:
+                    dy.forward(outs)
+                    predictions.extend([o.npvalue() for o in outs])
+                    outs = []
+                k += 1
+
+            # final pass if there are unbatched values
+            if len(outs) > 0:
                 dy.forward(outs)
                 predictions.extend([o.npvalue() for o in outs])
-                outs = []
-            k += 1
-
-        # final pass if there are unbatched values
-        if len(outs) > 0:
-            dy.forward(outs)
-            predictions.extend([o.npvalue() for o in outs])
-        preds = np.argmax(np.array(predictions), axis=1)
-        rps = [int(p == c) for p, c in zip(preds, correct)] 
-        rps = [j if j==1 else -1 for j in rps] 
-        #print(rps) 
-        #print(train['difficulty']) 
-        theta_hat = calculate_theta(train['difficulty'], rps)[0] 
-        #print('estimated theta: {}'.format(theta_hat))     
+            preds = np.argmax(np.array(predictions), axis=1)
+            rps = [int(p == c) for p, c in zip(preds, correct)] 
+            rps = [j if j==1 else -1 for j in rps] 
+            #print(rps) 
+            #print(train['difficulty']) 
+            theta_hat = calculate_theta(train['difficulty'], rps)[0] 
+            #print('estimated theta: {}'.format(theta_hat))     
+        else:
+            theta_hat=0
 
         loss = 0.0
         #print('train epoch {}'.format(i))

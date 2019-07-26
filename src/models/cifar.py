@@ -174,6 +174,8 @@ def train(epoch, outwriter):
         #print(train_rps) 
         theta_hat = calculate_theta(train_diffs, train_rps)[0] 
         #print('estimated theta: {}'.format(theta_hat)) 
+    else:
+        theta_hat = 0
     
     net.train()
     train_loss = 0
@@ -186,10 +188,7 @@ def train(epoch, outwriter):
     test_targets = []
     test_preds = []
 
-    if args.k > 0:
-        trainloader = get_epoch_training_data_vision(trainset, args, epoch, theta_hat, diffs_sorted_idx)
-    else:
-        trainloader = get_epoch_training_data_vision(trainset, args, epoch, theta_hat)
+    trainloader = get_epoch_training_data_vision(trainset, args, epoch, theta_hat, diffs_sorted_idx)
     train_length = len(trainloader.dataset) 
 
     #target_counts = collections.Counter([m[1] for m in trainset])

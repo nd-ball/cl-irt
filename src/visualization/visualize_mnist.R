@@ -58,8 +58,8 @@ ggplot(D, aes(x=epoch, y=test_acc, color=exp))  +
   ylab("Test accuracy") + 
   xlab("Epoch") + 
   scale_color_discrete(name='Experiment',
-                       breaks=c('baseline', 'easiest', 'irt', 'middleout'),
-                       labels=c('Baseline', 'EasyFirst', 'Theta', 'MiddleOut'))
+                       breaks=c('baseline', 'easiest', 'irt', 'middleout', 'ordered'),
+                       labels=c('Baseline', 'EasyFirst', 'Theta', 'MiddleOut', 'Ordered'))
 dev.off()
 
 ######### Table to show how much data was required to get to best acc #################
