@@ -414,7 +414,7 @@ def get_epoch_training_data_vision(ts, args, epoch, theta_hat=None, diffs_sorted
         raise NotImplementedError
 
     
-def k_sort(DD, k):
+def k_sort(D, k):
     '''
     take a fully sorted input and return a random shuffling that is k-sorted (each element is at most k away from the right spot)
     '''
