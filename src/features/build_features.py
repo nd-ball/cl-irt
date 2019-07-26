@@ -1,8 +1,10 @@
 # return features for the datasets we're working with 
+import copy 
 import gc 
 import numpy as np 
 import pandas as pd 
 import re 
+import time 
 
 import torch 
 
@@ -238,11 +240,13 @@ def load_sstb(data_dir):
 
 
 ####### Get CL Data per epoch ########
-def get_epoch_training_data(training_set, args, epoch, task, theta_hat=None, diffs_sorted_idx=None):
+def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_idx=None):
     if args.strategy == 'baseline':
         return training_set
     if args.strategy == 'theta':
         assert theta_hat is not None and args.ordering == 'easiest' 
+
+    training_set = copy.deepcopy(ts) 
  
 
     # set up CL
@@ -335,14 +339,17 @@ def get_epoch_training_data(training_set, args, epoch, task, theta_hat=None, dif
 
 
 ### CL for vision data sets (since they are built slightly differently)
-def get_epoch_training_data_vision(training_set, args, epoch, theta_hat=None, diffs_sorted_idx=None):
+def get_epoch_training_data_vision(ts, args, epoch, theta_hat=None, diffs_sorted_idx=None):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+
     if args.strategy == 'baseline':
-        return torch.utils.data.DataLoader(training_set,
+        return torch.utils.data.DataLoader(ts,
                 batch_size=args.batch_size, shuffle=True, **kwargs)  
     if args.strategy == 'theta':
         assert theta_hat is not None and args.ordering == 'easiest' 
+
+    training_set = copy.deepcopy(ts)
  
     # set up CL #     
     # how will we order the data before building curriculum?
@@ -407,17 +414,18 @@ def get_epoch_training_data_vision(training_set, args, epoch, theta_hat=None, di
         raise NotImplementedError
 
     
-def k_sort(D, k):
+def k_sort(DD, k):
     '''
     take a fully sorted input and return a random shuffling that is k-sorted (each element is at most k away from the right spot)
     '''
+    D = copy.deepcopy(DD) 
     D_shuffled = np.sort(D) 
     D_shuffled_idx = list(np.argsort(D)) 
     D_idx = list(range(len(D))) 
 
     k_sorted = False 
     for i in range(len(D_shuffled) - 1):
-        for j in range(len(D_shuffled) - 1):
+        for j in range(len(D_shuffled) - i - 1):
             if D[j] > D[j+1]:
                 D[j], D[j+1] = D[j+1], D[j]
                 D_idx[j], D_idx[j+1] = D_idx[j+1], D_idx[j] 
@@ -427,9 +435,19 @@ def k_sort(D, k):
                 continue 
             else:
                 k_sorted = False 
+                break 
         if k_sorted:
             break 
 
     result = D_idx  
 
     return result 
+
+startTime = time.time() 
+D = np.random.randn(5000) 
+#D = np.array([9,11,4,2,5])
+print(D) 
+D_sorted = k_sort(D, 1000) 
+
+print(D_sorted, D[[d for d in D_sorted]]) 
+print(time.time() - startTime, 'seconds') 

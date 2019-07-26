@@ -36,13 +36,15 @@ class Net(nn.Module):
 
 def train(args, model, device, train_data, test_loader, 
             optimizer, epoch, best_acc, outwriter, diffs_sorted_idx=None):
+
+    use_cuda = not args.no_cuda and torch.cuda.is_available()
+    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+
     if args.strategy == 'theta':
         # estimate theta for the model in its current state 
         model.eval() 
         train_diffs = [] 
         train_rps = []
-        use_cuda = not args.no_cuda and torch.cuda.is_available()
-        kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
         irt_trainloader = torch.utils.data.DataLoader(train_data,
                     batch_size=args.batch_size, shuffle=True, **kwargs)
