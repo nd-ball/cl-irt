@@ -414,15 +414,18 @@ def get_epoch_training_data_vision(ts, args, epoch, theta_hat=None, diffs_sorted
         raise NotImplementedError
 
     
-def k_sort(DD, k):
+def k_sort(D, k):
     '''
     take a fully sorted input and return a random shuffling that is k-sorted (each element is at most k away from the right spot)
     '''
-    D = copy.deepcopy(DD) 
-    D_shuffled = np.sort(D) 
     D_shuffled_idx = list(np.argsort(D)) 
-    D_idx = list(range(len(D))) 
 
+    for i in range(0, len(D_shuffled_idx), k):
+        lst_slice = D_shuffled_idx[i:i+k]
+        np.random.shuffle(lst_slice)
+        D_shuffled_idx[i:i+k] = lst_slice
+    
+    '''
     k_sorted = False 
     for i in range(len(D_shuffled) - 1):
         for j in range(len(D_shuffled) - i - 1):
@@ -438,16 +441,9 @@ def k_sort(DD, k):
                 break 
         if k_sorted:
             break 
+    ''' 
 
-    result = D_idx  
+    result = D_shuffled_idx  
 
     return result 
 
-startTime = time.time() 
-D = np.random.randn(5000) 
-#D = np.array([9,11,4,2,5])
-print(D) 
-D_sorted = k_sort(D, 1000) 
-
-print(D_sorted, D[[d for d in D_sorted]]) 
-print(time.time() - startTime, 'seconds') 
