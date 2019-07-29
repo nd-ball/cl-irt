@@ -95,5 +95,8 @@ target/
 
 # images (re-create them locally)
 *.png 
+
+# LaTeX
 *.pdf 
 *.gz 
+*.aux
