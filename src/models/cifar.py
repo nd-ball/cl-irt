@@ -140,6 +140,9 @@ optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5
 if args.k > 0:
     diffs = [img[3] for img in trainset]
     diffs_sorted_idx = k_sort(diffs, args.k) 
+else:
+    diffs_sorted_idx = None 
+
     
 # Training
 def train(epoch, outwriter):
