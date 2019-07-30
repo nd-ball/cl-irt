@@ -308,7 +308,7 @@ Change in performance compared to the baseline is often lower, but the delta is 
 In particular, the amount of data needed to achieve very high performance on the SSTB task is roughly 25\% of what a typical training regiment would require.
 
 
-\begin{table*}[t]
+\begin{table*}[h!]
 	\centering 
 	\begin{tabular}{cccccc}
 		\toprule
@@ -379,6 +379,16 @@ Lots to do here. need a thorough lit review as part of this paper
 
 Since it's original proposal, CL has become a well-studied area of machine learning (CITE BENGIO).
 The primary focus has been on new methods to identify easy and difficult examples in order to build a curriculum. 
+Originally, CL methods were evaluated on toy data sets with heuristic measures of difficulty.
+For example, on a shapes data set, shapes with more sides were considered more difficult than shapes with fewer sides.
+Similarly, sentences with more words were considered more difficult than sentences with fewer words.
+
+Further work on CL has looked at estimating example difficulty by querying the model being trained (CITE EXAMPLES).
+Model confidence, example entropy, and other metrics (LIST) have been considered as proxies for difficulty.
+However, these all assume that a model uncertainty is equivalent to difficulty.
+It is often the case, particularly in deep learning, that a model will overestimate confidence for examples due to the fact that the model is incentivized to push output probabilities to 1 for training examples (CITE ZOUBIN's work here).
+These output probabilities are not aligned with a notion of difficulty, and may negatively impact the estimation of such.
+What's more, most work relies on a rigid schedule that does not take into account the competency of the model at a point in the training process.
 
 Recent work has shown that spaced repetition strategies can be effective for improving model performance (CITE HADI).
 Instead of using a traditional CL setup, spaced repetition bins examples based on estimated difficulty.
