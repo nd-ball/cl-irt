@@ -377,6 +377,19 @@ The main difference is that for the baseline models, performance is stratified b
 
 Lots to do here. need a thorough lit review as part of this paper 
 
+Since it's original proposal, CL has become a well-studied area of machine learning (CITE BENGIO).
+The primary focus has been on new methods to identify easy and difficult examples in order to build a curriculum. 
+
+Recent work has shown that spaced repetition strategies can be effective for improving model performance (CITE HADI).
+Instead of using a traditional CL setup, spaced repetition bins examples based on estimated difficulty.
+The bins are shown to the model at differing intervals so that more difficult examples are seen more frequently than easier examples.
+This method has been shown to be effective for human learning, and results demonstrate effectiveness on NLP tasks as well.
+
+Recent work has shown that measuring model competence during training to determine which examples to include at a training epoch further improves performance by matching data to model competency (CITE ACL).
+However, in that work the model of competency is based on a heuristic rate of knowledge acquisition, and does not actually measure model competency.
+To the best of our knowledge this is the first work to match model ability at a point in training with appropriate training data in a curriculum learning framework.
+
+
 \section{Conclusion} 
 
 DCL-IRT is the first curriculum learning method to dynamically probe a model during training to estimate model ability at a point in time.
