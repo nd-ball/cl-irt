@@ -371,6 +371,63 @@ In particular, the amount of data needed to achieve very high performance on the
 	\label{tab:costs}
 \end{table*}
 
+
+\begin{table*}[h!]
+	\centering 
+	\begin{tabular}{cccc}
+		\toprule
+		Data Set & Experiment & Mean & Variance \\ 
+		\midrule
+		MNIST & Baseline & 99.24&	0.0003
+		\\
+		\cmidrule{2-4}
+		& EasyFirst & 99.17&	0.0004
+		\\
+		& MiddleOut & 99.13&	0.0005
+		\\
+		& Theta& 99.23&	 0.0003
+		\\
+		\midrule
+		CIFAR & Baseline & 85.85 &	0.412
+		\\
+		\cmidrule{2-4}
+		& EasyFirst & 85.53	&0.181
+		\\
+		& MiddleOut & 85.31&0.301
+		\\
+		& Theta &83.84& 0.278
+		\\
+		\midrule
+		SSTB & Baseline &  &	0
+		\\
+		\cmidrule{2-4}
+		& EasyFirst & &	-0.39
+		\\
+		& MiddleOut & &	-0.06
+		\\
+		& Ordered & &	 1.41
+		\\
+		& Theta &&	-0.46
+		\\
+		\midrule
+		SNLI & Baseline & &	0
+		\\
+		\cmidrule{2-4}
+		& EasyFirst & & 	-0.56
+		\\
+		& MiddleOut &&	-3.55
+		\\
+		& Ordered & &	-84.81
+		\\
+		& Theta& &	-0.95
+		\\
+		\bottomrule 
+	\end{tabular}
+	\label{tab:robustness}
+\end{table*}
+
+
+
 \subsection{Performance by Difficulty}
 Does using DCL-IRT for training lead to a more interpretable output in terms of test set performance?
 That is, when a curriculum is employed, does the model perform better on easier test examples than difficult ones?
