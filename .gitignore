@@ -100,3 +100,5 @@ target/
 *.pdf 
 *.gz 
 *.aux
+*.blg 
+*.bbl 
