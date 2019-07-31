@@ -83,7 +83,10 @@
 % \vspace{- -- No negative value may be used in proximity of a caption, figure, table, section, subsection, subsubsection, or reference
 % \vskip{- -- No negative value may be used to alter spacing above or below a caption, figure, table, section, subsection, subsubsection, or reference
 
+\usepackage{amsmath}
 \usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{subcaption}
 
 \setcounter{secnumdepth}{0} %May be changed to 1 or 2 if section numbers are desired.
 
@@ -178,11 +181,51 @@ Latent item parameters are estimated using an expectation maximization (EM) meth
 These methods assume human subjects, and were typically used for relatively small data sets of no more than a hundred items or so.
 A major bottleneck of using IRT methods on machine learning data sets is the fact that each subject would have to label each (or most of) the examples in order to have enough response patterns to estimate the latent parameters.
 Asking humans to annotate tens or hundreds of thousands of examples can't be done, but recent work has shown that the human subjects can be replaced with an ensemble of machine learning models, and the response patterns from this ``artificial crowd'' can be used to estimate item parameters.
-Such models can be fit using variational inference methods, where the latent parameters are estimated via variational distributions (CITE Minka and Us). 
+Such models can be fit using variational inference methods, where the latent parameters are estimated via variational distributions \cite{natesan_bayesian_2016} (CITE Minka and Us). 
 
 Estimating the ability of a model at a point in time is done with a ``scoring'' function. 
 Since the difficulties of the examples are known, we can maximize the likelihood of the data given the response patterns to obtain the ability estimate.
 All that is required is a single forward pass of the model on the data, as is typically done with a test set. 
+
+\begin{equation} 
+p(y_{ij} = 1 \vert \theta_j, b_i) = \frac{1}{1 + e^{-(\theta_j - b_i)}}
+\end{equation}
+
+The probability that subject $j$ will answer item $i$ incorrectly is:
+\begin{equation} 
+p(y_{ij} = 0 | \theta_j, b_i) = 1 - p(y_{ij} = 1 \vert \theta_j, b_i)
+\end{equation} 
+
+
+In order to learn an IRT model, one must have a set of $I$ items $\{i_0, i_1, \dots, i_I\}$, a set of $J$ subjects $\{j_0, j_1, \dots, j_J\}$, and the binary graded responses $y_{ij}$ of the subjects to each of the items.
+The likelihood of a dataset of response patterns $Y$ from multiple subjects to a set of items given the model parameters $\theta$ and $b$ is:
+\begin{align} 
+p(Y \vert \theta, b) &= \prod_{j=1}^J \prod_{i=1}^I p(Y_{ij}=y_{ij} \vert \theta_j, b_i)
+\end{align} 
+where $y_{ij} = 1$ if individual $j$ answers item $i$ correctly and $y_{ij} = 0$ if they do not.
+
+\subsubsection{IRT with VI} 
+Bayesian methods in IRT assume that the individual $\theta$ and $b$ parameters in Eq. (2) both follow Gaussian prior distributions and make inference through the resultant joint posterior distribution $\pi(\theta,b|Y)$. As this posterior is usually intractable, VI approximates it by the variational distribution:
+\begin{align} 
+q(\theta, b) &=  \prod_{j=1}^J \pi^\theta_j(\theta_j) \prod_{i=1}^I \pi^b_i(b_i)
+\end{align} 
+
+Where $\pi^\theta_j()$ and $\pi^b_i()$ denotes different Gaussian densities for different parameters whose means and variances are determined by minimizing the KL-Divergence between $q(\theta,b)$ and $\pi(\theta,b|Y)$.
+
+The choice of priors in Bayesian IRT can vary.
+Prior work has shown that vague and hierarchical priors are both effective \cite{natesan_bayesian_2016}.
+We experiment with both in this work. A vague prior assumes $\theta_j \sim N(0, 1)$ and $b_i \sim N(0, 10^3)$, where the large variance indicates a lack of information on the difficulty parameters.
+A hierarchical Bayesian model assumes
+\begin{align*}
+\theta_j\ |\ m_\theta, u_\theta &\sim N(m_{\theta}, u^{-1}_{\theta}) \\
+b_i\ |\ m_b, u_b &\sim N(m_b, u^{-1}_b) \\
+m_{\theta}, m_{b} &\sim N(0, 10^6) \\
+u_{\theta}, u_b &\sim \Gamma(1, 1)
+\end{align*}
+Our results for these two options were very similar, so we only report those for hierarchical priors.
+%To learn these parameters then involves minimizing the KL divergence between $q$ and $p$: $\min KL(q \vert \vert p)$. 
+
+% JL: if we have room, add ELBO 
 
 \subsection{Dynamic Curriculum Learning with IRT}
 
@@ -288,6 +331,47 @@ Each model was trained for 200 epochs.
 - experiments: ordered vs simple vs irt, balanced vs not balanced 
 
 \section{Results} 
+
+
+\captionsetup[subfigure]{labelformat=empty}
+\begin{figure*}[th!]
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth}
+		\centering
+		\includegraphics[width=0.9\columnwidth]{figs/cl_mnist}
+		\caption{\label{fig:cl_mnist}} 
+		\vspace{-2em} 
+	\end{subfigure} 
+	\begin{subfigure}[b]{0.45\textwidth}
+		\centering
+		\includegraphics[width=0.9\columnwidth]{figs/cl_cifar}
+		\caption{\label{fig:cl_cifar}} 
+		\vspace{-2em} 
+	\end{subfigure} 
+	
+	\caption{Test set accuracy as a function of training epoch.}
+	\label{fig:acc_viz}
+\end{figure*}
+
+\captionsetup[subfigure]{labelformat=empty}
+\begin{figure*}[th!]
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth}
+		\centering
+		\includegraphics[width=0.9\columnwidth]{figs/cl_snli}
+		\caption{\label{fig:cl_snli}} 
+		\vspace{-2em} 
+	\end{subfigure} 
+	\begin{subfigure}[b]{0.45\textwidth}
+		\centering
+		\includegraphics[width=0.9\columnwidth]{figs/cl_sstb}
+		\caption{\label{fig:cl_sstb}} 
+		\vspace{-2em} 
+	\end{subfigure} 
+	
+	\caption{Test set accuracy as a function of training epoch.}
+	\label{fig:acc_nlp}
+\end{figure*}
 
 - plots and tables 
 
@@ -457,7 +541,7 @@ Instead of using a traditional CL setup, spaced repetition bins examples based o
 The bins are shown to the model at differing intervals so that more difficult examples are seen more frequently than easier examples.
 This method has been shown to be effective for human learning, and results demonstrate effectiveness on NLP tasks as well.
 
-Recent work has shown that measuring model competence during training to determine which examples to include at a training epoch further improves performance by matching data to model competency (CITE ACL).
+Recent work has shown that measuring model competence during training to determine which examples to include at a training epoch further improves performance by matching data to model competency \cite{platanios_competence-based_2019}.
 However, in that work the model of competency is based on a heuristic rate of knowledge acquisition, and does not actually measure model competency.
 To the best of our knowledge this is the first work to match model ability at a point in training with appropriate training data in a curriculum learning framework.
 
@@ -474,5 +558,9 @@ Even though it is dynamic, DCL-IRT employs a simple curriculum schedule: only in
 However, being able to estimate ability on the fly with IRT opens up as a research area the following: what is the best way to build a curriculum, knowing example difficulty and model ability?
 It may be the case that only data with difficulty within a range of ability (higher and lower) is better, and the training set shifts as the model improves.
 There are many directions to take this, and this will be an exciting area of work moving forward.
+
+\bibliographystyle{aaai}
+\bibliography{library}
+
 
 \end{document}
