@@ -83,12 +83,13 @@
 % \vspace{- -- No negative value may be used in proximity of a caption, figure, table, section, subsection, subsubsection, or reference
 % \vskip{- -- No negative value may be used to alter spacing above or below a caption, figure, table, section, subsection, subsubsection, or reference
 
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 \usepackage{amsmath}
 \usepackage{booktabs}
-\usepackage{graphicx}
 \usepackage{subcaption}
 
-\setcounter{secnumdepth}{0} %May be changed to 1 or 2 if section numbers are desired.
+\setcounter{secnumdepth}{2} %May be changed to 1 or 2 if section numbers are desired.
 
 % The file aaai20.sty is the style file for AAAI Press 
 % proceedings, working notes, and technical reports.
@@ -134,22 +135,22 @@ Curriculum that is dynamically determined by the current competency of the model
 Curriculum learning is a well-studied area of artificial intelligence, with results demonstrating that building a curriculum of training data where easy examples are shown first can speed up learning and improve generalization, as has also been shown in humans. 
 The basic premise is that machine learning (ML) models are trained according to a ``curriculum'' that sorts training examples according to difficulty.
 At first, the model is trained with only the easiest examples, and more difficult examples are gradually added according to some schedule.
-A major gain for CL methods is that model convergence can often be quicker when the model is trained according to some curriculum (CITE a bunch of examples here).
-Model efficiency has always been a major aim of the research community (cite old papers), but recently with the size of models continuing to grow and better understanding of the impact of model training on the environment there is a renewed need for efficiency (CITE EMMA).
+A major gain for CL methods is that model convergence can often be quicker when the model is trained according to some curriculum \cite{bengio_curriculum_2009,platanios_competence-based_2019}.
+Model efficiency has always been a major aim of the research community (cite old papers), but recently with the size of models continuing to grow and better understanding of the impact of model training on the environment there is a renewed need for efficiency \cite{strubell_energy_2019}.
 
 A major drawback of existing CL techniques is that they rely on heuristics to measure the difficulty of data, and either ignore the competency of the model at its present state or rely on heuristics there as well.
-For example, often for natural language processing (NLP) tasks, sentence length is considered a proxy for difficulty (cite naacl19 and original paper).
-Similarly, the original CL paper used the number of objects in an image as a proxy for difficulty in an image recognition task (CCITE Bengio).
-Competency was recently introduced as a mechanism to dictate when new examples should be added to the training data (CITE NAACL 19), however in that work the competency schedule was ad hoc, and did not actually look at the competency of the model but assumed a schedule according to learning heuristics (CITE NAACL). 
+For example, often for natural language processing (NLP) tasks, sentence length is considered a proxy for difficulty \cite{bengio_curriculum_2009,platanios_competence-based_2019}.
+Similarly, the original CL paper used the number of objects in an image as a proxy for difficulty in an image recognition task \cite{bengio_curriculum_2009}.
+Competency was recently introduced as a mechanism to dictate when new examples should be added to the training data \cite{platanios_competence-based_2019}, however in that work the competency schedule was ad hoc, and did not actually look at the competency of the model but assumed a schedule according to learning heuristics. 
 It would be better if model competency was actually measured, so that the training data could be appropriately matched with the model at a given point in the training.
 
-Recent work has shown that it is possible to estimate both the difficulty of examples and the ability of deep learning models as latent variables based on model performance (cite emnlp19).
-Item Response Theory (IRT) is a well-studied methodology in the psychometric literature for test set construction and subject evaluation.
+Recent work has shown that it is possible to estimate both the difficulty of examples and the ability of deep learning models as latent variables based on model performance \cite{lalor_learning_2019}.
+Item Response Theory (IRT) is a well-studied methodology in the psychometric literature for test set construction and subject evaluation \cite{baker_item_2004}.
 A typical IRT model will estimate latent parameters such as difficulty for examples under consideration for inclusion in a test set.
 This is done by administering a test to a large number of human subjects, collecting and grading their responses as correct or incorrect, and using the student-response data matrix to estimate the latent traits of the data.
 Once learned, these latent parameters can be used to estimate latent ability parameters of future test-takers, based on their graded responses to the examples.
 IRT has not seen wide adoption in the ML community, primarily due to the fact that fitting IRT models typically requires a large amount of human annotated data for each example.
-However, recent work has shown that it is possible to fit IRT models using machine-generated data instead of human-generated data as the input to the IRT models (CITE US).
+However, recent work has shown that it is possible to fit IRT models using machine-generated data instead of human-generated data as the input to the IRT models.
 Because one can learn example difficulty and subject ability together, IRT is an interesting framework to consider for the problem of CL. 
 
 In this work we propose Dynamic Curriculum Learning with IRT (DCL-IRT), a novel framework that uses the estimated ability of a model at a specific point in the training process to identify appropriate training data.
@@ -175,36 +176,47 @@ In a traditional CL framework, training data examples are ordered according to s
 Typically, the model's current performance is not taken into account (CONFIRM THAT THIS IS TRUE FOR EVERYTHING BUT NAACL PAPER). Recent work has incorporated a notion of ``competency,'' but in actual fact just used a slightly more complex inclusion rate calculation that does not actually consider the competency of the model but simulates it.
 
 \subsection{Learning Latent Parameters with IRT}
-Learning the latent difficulty parameters of training examples can be done off-line using existing techniques (CITE EMNLP PAPER).
+Learning the latent difficulty parameters of training examples can be done off-line using existing techniques \cite{lalor_learning_2019}.
 Traditional IRT model fitting relies on marginal maximum likelihood (MML) estimation, where the latent ability parameters ($\theta$) are assumed to be random effects and integrated out.
-Latent item parameters are estimated using an expectation maximization (EM) method (CITE BOCK and AIKEN).
+Latent item parameters are estimated using an expectation maximization (EM) method \cite{bock_marginal_1981}.
 These methods assume human subjects, and were typically used for relatively small data sets of no more than a hundred items or so.
-A major bottleneck of using IRT methods on machine learning data sets is the fact that each subject would have to label each (or most of) the examples in order to have enough response patterns to estimate the latent parameters.
-Asking humans to annotate tens or hundreds of thousands of examples can't be done, but recent work has shown that the human subjects can be replaced with an ensemble of machine learning models, and the response patterns from this ``artificial crowd'' can be used to estimate item parameters.
-Such models can be fit using variational inference methods, where the latent parameters are estimated via variational distributions \cite{natesan_bayesian_2016} (CITE Minka and Us). 
-
-Estimating the ability of a model at a point in time is done with a ``scoring'' function. 
-Since the difficulties of the examples are known, we can maximize the likelihood of the data given the response patterns to obtain the ability estimate.
-All that is required is a single forward pass of the model on the data, as is typically done with a test set. 
 
 \begin{equation} 
-p(y_{ij} = 1 \vert \theta_j, b_i) = \frac{1}{1 + e^{-(\theta_j - b_i)}}
+p(z_{ij} = 1 \vert \theta_j, b_i) = \frac{1}{1 + e^{-(\theta_j - b_i)}}
 \end{equation}
 
 The probability that subject $j$ will answer item $i$ incorrectly is:
 \begin{equation} 
-p(y_{ij} = 0 | \theta_j, b_i) = 1 - p(y_{ij} = 1 \vert \theta_j, b_i)
+p(z_{ij} = 0 | \theta_j, b_i) = 1 - p(y_{ij} = 1 \vert \theta_j, b_i)
 \end{equation} 
 
-
-In order to learn an IRT model, one must have a set of $I$ items $\{i_0, i_1, \dots, i_I\}$, a set of $J$ subjects $\{j_0, j_1, \dots, j_J\}$, and the binary graded responses $y_{ij}$ of the subjects to each of the items.
-The likelihood of a dataset of response patterns $Y$ from multiple subjects to a set of items given the model parameters $\theta$ and $b$ is:
+In order to learn an IRT model, one must have a set of $I$ items $\{i_0, i_1, \dots, i_I\}$, a set of $J$ subjects $\{j_0, j_1, \dots, j_J\}$, and the binary graded responses $z_{ij}$ of the subjects to each of the items.
+The likelihood of a dataset of response patterns $Z$ from multiple subjects to a set of items given the model parameters $\theta$ and $b$ is:
 \begin{align} 
-p(Y \vert \theta, b) &= \prod_{j=1}^J \prod_{i=1}^I p(Y_{ij}=y_{ij} \vert \theta_j, b_i)
+p(Z \vert \theta, b) &= \prod_{j=1}^J \prod_{i=1}^I p(Z_{ij}=y_{ij} \vert \theta_j, b_i)
 \end{align} 
-where $y_{ij} = 1$ if individual $j$ answers item $i$ correctly and $y_{ij} = 0$ if they do not.
+where $z_{ij} = 1$ if individual $j$ answers item $i$ correctly and $z_{ij} = 0$ if they do not.
 
-\subsubsection{IRT with VI} 
+A major bottleneck of using IRT methods on machine learning data sets is the fact that each subject would have to label each (or most of) the examples in order to have enough response patterns to estimate the latent parameters.
+Asking humans to annotate tens or hundreds of thousands of examples can't be done, but recent work has shown that the human subjects can be replaced with an ensemble of machine learning models, and the response patterns from this ``artificial crowd'' can be used to estimate item parameters.
+Such models can be fit using variational inference methods, where the latent parameters are estimated via variational distributions \cite{natesan_bayesian_2016,lalor_learning_2019}. 
+
+\subsection{Scoring}
+\label{ssec:scoring}
+Estimating the ability of a model at a point in time is done with a ``scoring'' function. 
+Since the difficulties of the examples are known, we can maximize the likelihood of the data given the response patterns to obtain the ability estimate.
+All that is required is a single forward pass of the model on the data, as is typically done with a test set. 
+
+\begin{align}
+z_j &= \forall_{y \in Y} \mathbf{I}[y_i = \hat{y_i}] \\
+\hat{\theta_j} &=  \operatorname*{arg\,max}_\theta p(\theta \vert D, z_j )\\
+&= \operatorname*{arg\,max}_\theta p(Z \vert \theta, b)p(\theta)
+\end{align}
+
+% ADD MATH HERE 
+
+
+\subsection{IRT with VI} 
 Bayesian methods in IRT assume that the individual $\theta$ and $b$ parameters in Eq. (2) both follow Gaussian prior distributions and make inference through the resultant joint posterior distribution $\pi(\theta,b|Y)$. As this posterior is usually intractable, VI approximates it by the variational distribution:
 \begin{align} 
 q(\theta, b) &=  \prod_{j=1}^J \pi^\theta_j(\theta_j) \prod_{i=1}^I \pi^b_i(b_i)
@@ -222,8 +234,9 @@ b_i\ |\ m_b, u_b &\sim N(m_b, u^{-1}_b) \\
 m_{\theta}, m_{b} &\sim N(0, 10^6) \\
 u_{\theta}, u_b &\sim \Gamma(1, 1)
 \end{align*}
-Our results for these two options were very similar, so we only report those for hierarchical priors.
-%To learn these parameters then involves minimizing the KL divergence between $q$ and $p$: $\min KL(q \vert \vert p)$. 
+
+We follow the results of prior work where hierarchical priors were used \cite{lalor_learning_2019}.
+To learn these parameters then involves minimizing the KL divergence between $q$ and $p$: $\min KL(q \vert \vert p)$. 
 
 % JL: if we have room, add ELBO 
 
@@ -234,7 +247,7 @@ With DCL-IRT, model ability can be estimated according to a well-studied psychom
 At the same time, the estimated ability of the model ($\hat{\theta}$) is on the same scale as the difficulty parameters of the data, so there is a principled recipe for selecting data at any given training epoch.
 
 
-The first step of DCL-IRT is to estimate the ability of the model using the scoring function (Sec. above). 
+The first step of DCL-IRT is to estimate the ability of the model using the scoring function (\S \ref{ssec:scoring}). 
 To do this we use the full training set, but crucially, only to get response data, not to update parameters. 
 Model outputs are obtained for the training set, and graded as correct or incorrect as compared to the gold standard label. 
 This response pattern is then used to estimate model ability at the current epoch ($\hat{\theta_e}$).
@@ -250,6 +263,23 @@ At the same time, if estimated model ability is high, then more data can be adde
 
 Algorithm XX shows all of the steps for DCL-IRT. Code implementing DCL-IRT is included as supplemental material and will be released upon publication. 
 
+\begin{algorithm}
+	\caption{DCL}
+	\hspace*{\algorithmicindent}\textbf{Input:} (X, Y), model $\phi$, D \\
+	\hspace*{\algorithmicindent}\textbf{Output:} Learned model $\phi$ 
+	\begin{algorithmic}[1]
+		\While{True}
+			\State $\hat{Y} = \phi(X)$
+			\State $\hat{\theta_e} = score(Y, \hat{Y}, D)$
+			\State $X_e, Y_e = \{(x,y): d_x < \hat{\theta_e}\}$
+			\State $train(\phi, X_e, Y_e)$
+		\EndWhile 
+		\Procedure{score}{$Y, \hat{Y}, D$}
+			\State $Z = \forall_{y \in Y} \mathbf{I}[y_i = \hat{y_i}]$
+			\State $\hat{\theta_e} = \operatorname*{arg\,max}_\theta p(Z \vert \theta, b)p(\theta))$
+		\EndProcedure 
+	\end{algorithmic} 
+\end{algorithm} 
 
 \section{Data and experiments} 
 
@@ -283,13 +313,13 @@ There are 500,000 ish examples in the data set.
 In order to learn the difficulty parameters of the data we require a data set of response patterns.
 As previously mentioned, gathering enough labels for each example in the data sets to fit an IRT model would be prohibitively expensive if using humans.
 In addition, the annotation quality would be suspect due to the humans labeling tens of thousands of examples.
-Therefore we used artificial crowds to generate our response patterns (CITE EMNLP). 
+Therefore we used artificial crowds to generate our response patterns \cite{lalor_learning_2019}. 
 
 Briefly, for each data set an ensemble of neural network models are trained, using different subsets of the training data set.
 Training data is subsampled and corrupted (label flipping) so that performance across models in the ensemble is varied.
 Each trained model then labels the test set examples.
 These labels are graded correct/incorrect against the gold-standard test label and the output response patterns are used to fit an IRT model for the data.
-Prior work has shown that this is an effective way to generate a set of response patterns for fitting IRT models to machine learning data (cite us).
+Prior work has shown that this is an effective way to generate a set of response patterns for fitting IRT models to machine learning data \cite{lalor_learning_2019}.
 
 
 \subsection{Experiments} 
