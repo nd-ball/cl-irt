@@ -122,7 +122,7 @@ if args.strategy == 'theta':
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
-    irt_trainloader = torch.utils.data.DataLoader(trainset,
+    irt_trainloader = torch.utils.data.DataLoader(valset,
                 batch_size=args.batch_size, shuffle=False, **kwargs) 
 
 
