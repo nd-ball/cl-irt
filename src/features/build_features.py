@@ -412,12 +412,12 @@ def get_epoch_training_data_vision(ts, args, epoch, theta_hat=None, diffs_sorted
         return torch.utils.data.DataLoader(train,
                 batch_size=args.batch_size, shuffle=True, **kwargs)
     elif args.strategy == 'naacl-linear':
-        epoch_competency = np.min(1, epoch * ((1 - c_init)/args.competency) + c_init)
+        epoch_competency = np.min([1, epoch * ((1 - c_init)/args.competency) + c_init])
         train = [train_2[i] for i in range(int(epoch_competency * len(training_set)))]
         return torch.utils.data.DataLoader(train,
                 batch_size=args.batch_size, shuffle=True, **kwargs)
     elif args.strategy == 'naacl-root':
-        epoch_competency = np.min(1,np.sqrt(epoch * ((1 - c_init**2)/args.competency) + c_init**2))
+        epoch_competency = np.min([1,np.sqrt(epoch * ((1 - c_init**2)/args.competency) + c_init**2)])
         train = [train_2[i] for i in range(int(epoch_competency * len(training_set)))]
         return torch.utils.data.DataLoader(train,
                 batch_size=args.batch_size, shuffle=True, **kwargs)

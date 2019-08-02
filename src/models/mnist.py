@@ -235,7 +235,7 @@ def main():
 
     for epoch in range(0, args.num_epochs):             
         best_test, best_val = train(args, model, device, mnist_train, test_loader, val_loader, optimizer, epoch, best_test, best_val, outwriter, diffs_sorted_idx)
-    last_line = '{}, {}'.format(best_test, best_val)
+    last_line = '{}, {}'.format(best_val, best_test)
     print(last_line)
 
 if __name__ == '__main__':

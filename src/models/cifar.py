@@ -286,8 +286,8 @@ def train(epoch, outwriter, best_test, best_val):
 
 best_test, best_val = 0, 0
 for epoch in range(0, args.num_epochs):
-    ba, bva = train(epoch, outwriter, best_test, best_val)
+    best_test, best_val = train(epoch, outwriter, best_test, best_val)
     #test(epoch)
-print(ba, bva) 
+print(best_val, best_test) 
 #print(len(trainset))
 #print(target_counts)
