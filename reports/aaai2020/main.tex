@@ -87,6 +87,7 @@
 \usepackage{algpseudocode}
 \usepackage{amsmath}
 \usepackage{booktabs}
+\usepackage{microtype}
 \usepackage{subcaption}
 
 \setcounter{secnumdepth}{2} %May be changed to 1 or 2 if section numbers are desired.
@@ -119,11 +120,17 @@
 \begin{document}
 \maketitle 
 \begin{abstract}
-CL has been shown to be effective.
-Many measures of ``difficulty'' are based on heuristics and not on true difficulty.
-we want to change that by leveraging methods from psychometrics.
-Experiments on vision and language data show that using learned difficulty and ability to set up a curriculum is effective.
-Curriculum that is dynamically determined by the current competency of the model as estimated by Item Response Theory. 
+	Curriculum learning (CL) is a popular and well-studied method for machine learning model training.
+	However, most CL methods make assumptions (both implicit and explicit) about the easiness or difficulty of training examples when building curricula for learning.
+	In this work we show that modeling difficulty using psychometric methods is an effective way to train models more efficiently than baseline training.
+	We also introduce a dynamic curriculum learning strategy that probes model competency at each training epoch to select the best training examples at that point in time.
+	Analysis demonstrates that these methods are more efficient than existing CL methods (NEED TO SHOW THIS).
+	In particular, the dynamic model adds data at a rate commensurate with the model's capability, instead of restricting data due to an unneccarily restrictive heuristic.
+%CL has been shown to be effective.
+%Many measures of ``difficulty'' are based on heuristics and not on true difficulty.
+%we want to change that by leveraging methods from psychometrics.
+%Experiments on vision and language data show that using learned difficulty and ability to set up a curriculum is effective.
+%Curriculum that is dynamically determined by the current competency of the model as estimated by Item Response Theory. 
 \end{abstract}
 
 \section{Introduction}
@@ -358,7 +365,20 @@ For each data set a relatively simple model architecture was used.
 Performance in terms of test set accuracy is determined by using the development set accuracy as an early stopping indicator.
 Each model was trained for 200 epochs. 
 
-- experiments: ordered vs simple vs irt, balanced vs not balanced 
+- experiments: ordered vs simple vs irt, balanced vs not balanced
+
+To compare against the current state-of-the-art for CL \cite{platanios_competence-based_2019}, we also look at the following heuristics for measuring model competency, used for introducing training data into the curriculum.
+For the methods below, $t$ is the current time-step in training, $T$ is the point where the model is fully competent, $c_0$ is the initial competency. 
+
+\begin{itemize}
+	\item 
+	Linear: define the proportion of training examples to include at time $t$ as $c_{linear}(t) \overset{\Delta}{=} \text{min} (1, t\frac{1-c_0}{T} + c_0)$
+	\item 
+	Root: $c_{sqrt}(t) \overset{\Delta}{=} \text{min}(1, \sqrt{t\frac{1-c_0^2}{T} + c_0^2})$
+\end{itemize}
+
+It is worth noting here that neither Linear nor Root actually measure competency of the model at any point. 
+Instead it is assumed that the model becomes more and more competent over time.
 
 \section{Results} 
 
