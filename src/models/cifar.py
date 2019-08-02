@@ -109,8 +109,12 @@ transform_test = transforms.Compose([
 trainset = my_CIFAR10(root=args.data_dir + '/external/', train=True, download=True, 
                     transform=transform_train, diff_dir=args.data_dir + '/raw/')
 
-valset = trainset[50000:]
+valset = [img for img in trainset[50000:]]
 trainset = trainset[:50000]
+
+valset = [trainset[i] for i in range(50000,60000)]
+trainset = [trainset[i] for i in range(50000)]
+
 
 valloader = torch.utils.data.DataLoader(valset, batch_size=100, shuffle=False, num_workers=2)
 

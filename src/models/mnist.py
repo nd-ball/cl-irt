@@ -200,8 +200,9 @@ def main():
         print('no training data\n-1')
         return
 
-    mnist_val = mnist_train[40000:]
-    mnist_train = mnist_train[:40000] 
+
+    mnist_val = [mnist_train[i] for i in range(40000,50000)]
+    mnist_train = [mnist_train[i] for i in range(40000)]
     #print(len(mnist_train), len(mnist_val)) 
 
     val_loader = torch.utils.data.DataLoader(mnist_val,
