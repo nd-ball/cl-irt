@@ -34,8 +34,8 @@ class Net(nn.Module):
         return F.log_softmax(x, dim=1)
 
 
-def train(args, model, device, train_data, test_loader, 
-            optimizer, epoch, best_acc, outwriter, diffs_sorted_idx=None):
+def train(args, model, device, train_data, test_loader, val_loader, 
+            optimizer, epoch, best_acc, best_val, outwriter, diffs_sorted_idx=None):
 
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
@@ -92,12 +92,31 @@ def train(args, model, device, train_data, test_loader,
 
     model.eval()
     test_loss = 0
+    val_loss = 0
     correct = 0
+    val_correct = 0
     test_imageIDs = []
     test_targets = []
     test_preds = []
 
+    val_imageIDs = []
+    val_targets = []
+    val_preds = []
+
+
     with torch.no_grad():
+        for data, target, label, diff, _ in val_loader:
+            data, target, label = data.to(device), target.to(device), label.to(device)
+            output = model(data)
+            val_loss += F.nll_loss(output, target, reduction='sum').item() # sum up batch loss
+            pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
+            val_correct += pred.eq(target.view_as(pred)).sum().item()
+            val_imageIDs.extend(label)
+            val_targets.extend(target)
+            val_preds.extend(pred)
+
+        val_loss /= len(test_loader.dataset)
+        val_acc = 100. * val_correct / len(val_loader.dataset) 
         for data, target, label, diff, _ in test_loader:
             data, target, label = data.to(device), target.to(device), label.to(device)
             output = model(data)
@@ -108,25 +127,25 @@ def train(args, model, device, train_data, test_loader,
             test_targets.extend(target)
             test_preds.extend(pred)
 
-    test_loss /= len(test_loader.dataset)
-    test_acc = 100. * correct / len(test_loader.dataset) 
-    print('{},{},{},{},{}'.format(train_length, train_acc, test_loss, test_acc, theta_hat))
+        test_loss /= len(test_loader.dataset)
+        test_acc = 100. * correct / len(test_loader.dataset) 
+    print('{},{},{},{},{}'.format(train_length, train_acc, val_acc, test_acc, theta_hat))
     #print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
     #    test_loss, correct, len(test_loader.dataset),
     #    100. * correct / len(test_loader.dataset)))
-    epoch_test_acc = 100. * correct / len(test_loader.dataset)
-    if epoch_test_acc > best_acc:
+    if val_acc > best_val:
         #print('best test acc: {}, (epoch {})'.format(
         #    epoch_test_acc, epoch
         #))
-        best_acc = epoch_test_acc
+        best_acc = test_acc
+        best_val = val_acc 
 
     # write test predictions to file
     for i in range(len(test_preds)):
         row = [epoch, test_imageIDs[i].cpu().item(), test_targets[i].cpu().item(), test_preds[i].cpu().item()]
         outwriter.writerow(row) 
 
-    return best_acc
+    return best_acc, best_val 
 
 def main():
     # Training settings
@@ -181,6 +200,13 @@ def main():
         print('no training data\n-1')
         return
 
+    mnist_val = mnist_train[40000:]
+    mnist_train = mnist_train[:40000] 
+    #print(len(mnist_train), len(mnist_val)) 
+
+    val_loader = torch.utils.data.DataLoader(mnist_val,
+        batch_size=args.test_batch_size, shuffle=False, **kwargs)
+
     mnist_test = my_MNIST(
         args.data_dir + '/external/', train=False, transform=transforms.Compose([
             transforms.ToTensor(),
@@ -190,12 +216,13 @@ def main():
     )
 
     test_loader = torch.utils.data.DataLoader(mnist_test,
-        batch_size=args.test_batch_size, shuffle=True, **kwargs)
+        batch_size=args.test_batch_size, shuffle=False, **kwargs)
 
     model = Net().to(device)
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
     
     best_test = 0
+    best_val = 0 
 
     # if k is set, sort once
     if args.k > 0:
@@ -205,7 +232,7 @@ def main():
         diffs_sorted_idx = None 
 
     for epoch in range(0, args.num_epochs):             
-        best_test = train(args, model, device, mnist_train, test_loader, optimizer, epoch, best_test, outwriter, diffs_sorted_idx)
+        best_test, best_val = train(args, model, device, mnist_train, test_loader, val_loader, optimizer, epoch, best_test, best_val, outwriter, diffs_sorted_idx)
     last_line = '{}'.format(best_test)
     print(last_line)
 

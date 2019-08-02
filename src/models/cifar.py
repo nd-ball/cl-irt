@@ -109,9 +109,21 @@ transform_test = transforms.Compose([
 trainset = my_CIFAR10(root=args.data_dir + '/external/', train=True, download=True, 
                     transform=transform_train, diff_dir=args.data_dir + '/raw/')
 
+valset = trainset[50000:]
+trainset = trainset[:50000]
+
+valloader = torch.utils.data.DataLoader(valset, batch_size=100, shuffle=False, num_workers=2)
 
 testset = my_CIFAR10(root=args.data_dir + '/external/', train=False, download=True, transform=transform_test)
 testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=2)
+
+if args.strategy == 'theta':
+    use_cuda = not args.no_cuda and torch.cuda.is_available()
+    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+
+    irt_trainloader = torch.utils.data.DataLoader(trainset,
+                batch_size=args.batch_size, shuffle=False, **kwargs) 
+
 
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
@@ -145,7 +157,7 @@ else:
 
     
 # Training
-def train(epoch, outwriter):
+def train(epoch, outwriter, best_test, best_val):
     #print('\nEpoch: %d' % epoch)
     #print('Training')
 
@@ -157,11 +169,6 @@ def train(epoch, outwriter):
         total = 0
         train_diffs = [] 
         train_rps = []
-        use_cuda = not args.no_cuda and torch.cuda.is_available()
-        kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
-
-        irt_trainloader = torch.utils.data.DataLoader(trainset,
-                    batch_size=args.batch_size, shuffle=True, **kwargs) 
 
         with torch.no_grad():
             for batch_idx, (inputs, targets, label, diffs, _) in enumerate(irt_trainloader):
@@ -190,6 +197,9 @@ def train(epoch, outwriter):
     test_labels = []
     test_targets = []
     test_preds = []
+    val_labels = []
+    val_targets = []
+    val_preds = []
 
     trainloader = get_epoch_training_data_vision(trainset, args, epoch, theta_hat, diffs_sorted_idx)
     train_length = len(trainloader.dataset) 
@@ -223,7 +233,26 @@ def train(epoch, outwriter):
     test_loss = 0
     correct = 0
     total = 0
+    val_loss = 0
+    val_correct = 0
+    val_total = 0
     with torch.no_grad():
+        for batch_idx, (inputs, targets, label, _, _) in enumerate(valloader):
+            inputs, targets = inputs.to(device), targets.to(device)
+            outputs = net(inputs)
+            loss = criterion(outputs, targets)
+
+            val_loss += loss.item()
+            _, predicted = outputs.max(1)
+            val_total += targets.size(0)
+            val_correct += predicted.eq(targets).sum().item()
+            val_labels.extend(label)
+            val_targets.extend(targets)
+            val_preds.extend(predicted)
+        val_loss /= len(testloader.dataset)
+
+        # Save checkpoint.
+        val_acc = 100.*val_correct/val_total
         for batch_idx, (inputs, targets, label, _, _) in enumerate(testloader):
             inputs, targets = inputs.to(device), targets.to(device)
             outputs = net(inputs)
@@ -236,27 +265,28 @@ def train(epoch, outwriter):
             test_labels.extend(label)
             test_targets.extend(targets)
             test_preds.extend(predicted)
-    test_loss /= len(testloader.dataset)
+        test_loss /= len(testloader.dataset)
 
     # Save checkpoint.
     acc = 100.*correct/total
-    print('{},{},{},{},{}'.format(train_length, train_acc, test_loss, acc, theta_hat))
+    print('{},{},{},{},{}'.format(train_length, train_acc, val_acc, acc, theta_hat))
 
     # write test predictions to file
     for i in range(len(test_preds)):
         row = [epoch, test_labels[i].cpu().item(), test_targets[i].cpu().item(), test_preds[i].cpu().item()]
         outwriter.writerow(row) 
 
-    if acc > best_acc:
+    if val_acc > best_val:
         #print('Saving..')
-        best_acc = acc
+        best_val = val_acc
+        best_test = acc 
         #print('epoch: {}, best acc: {}'.format(epoch, best_acc))
-    return best_acc
+    return best_test, best_val 
 
-
+best_test, best_val = 0, 0
 for epoch in range(0, args.num_epochs):
-    ba = train(epoch, outwriter)
+    ba, bva = train(epoch, outwriter, best_test, best_val)
     #test(epoch)
-print(ba) 
+print(ba, bva) 
 #print(len(trainset))
 #print(target_counts)
