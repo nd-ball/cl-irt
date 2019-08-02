@@ -67,6 +67,6 @@ do
 done 
 
 # irt CL
-sbatch -p m40-long --gres=gpu:1 --mem=90gb --output=logs/irt_cl_mnist.log --wrap="python -u -m models.mnist --data-dir /mnt/nfs/work1/hongyu/lalor/data/cl-data/ --num-epochs $NUMEPOCHS --strategy theta --ordering easiest --min-train-length 500"
+sbatch -p m40-long --gres=gpu:1 --mem=90gb --output=logs/irt_cl_mnist_1000.log --wrap="python -u -m models.mnist --data-dir /mnt/nfs/work1/hongyu/lalor/data/cl-data/ --num-epochs $NUMEPOCHS --strategy theta --ordering easiest --min-train-length 1000"
 
-sbatch -p m40-long --gres=gpu:1 --mem=90gb --output=logs/irt_cl_cifar.log --wrap="python -u -m models.cifar --data-dir /mnt/nfs/work1/hongyu/lalor/data/cl-data/ --num-epochs $NUMEPOCHS --strategy theta --ordering easiest --min-train-length 500"
+sbatch -p m40-long --gres=gpu:1 --mem=90gb --output=logs/irt_cl_cifar_1000.log --wrap="python -u -m models.cifar --data-dir /mnt/nfs/work1/hongyu/lalor/data/cl-data/ --num-epochs $NUMEPOCHS --strategy theta --ordering easiest --min-train-length 1000"

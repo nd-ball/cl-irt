@@ -174,6 +174,7 @@ def main():
     parser.add_argument('--random', action='store_true') 
     parser.add_argument('--min-train-length', default=100, type=int)
     parser.add_argument('--k', default=0, type=int) 
+    parser.add_argument('--competency', default=50, type=int) 
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 

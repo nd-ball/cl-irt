@@ -342,6 +342,7 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
 def get_epoch_training_data_vision(ts, args, epoch, theta_hat=None, diffs_sorted_idx=None):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+    c_init = 0.01  # as per naacl19 paper 
 
     if args.strategy == 'baseline':
         return torch.utils.data.DataLoader(ts,
@@ -408,6 +409,16 @@ def get_epoch_training_data_vision(ts, args, epoch, theta_hat=None, diffs_sorted
         train = [train_2[i] for i in range(len(training_set)) if train_2[i][3] <= theta_hat]
         if len(train) < args.min_train_length:
             train = [train_2[i] for i in range(args.min_train_length)] 
+        return torch.utils.data.DataLoader(train,
+                batch_size=args.batch_size, shuffle=True, **kwargs)
+    elif args.strategy == 'naacl-linear':
+        epoch_competency = np.min(1, epoch * ((1 - c_init)/args.competency) + c_init)
+        train = [train_2[i] for i in range(int(epoch_competency * len(training_set)))]
+        return torch.utils.data.DataLoader(train,
+                batch_size=args.batch_size, shuffle=True, **kwargs)
+    elif args.strategy == 'naacl-root':
+        epoch_competency = np.min(1,np.sqrt(epoch * ((1 - c_init**2)/args.competency) + c_init**2))
+        train = [train_2[i] for i in range(int(epoch_competency * len(training_set)))]
         return torch.utils.data.DataLoader(train,
                 batch_size=args.batch_size, shuffle=True, **kwargs)
     else:

@@ -81,6 +81,7 @@ parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
 parser.add_argument('--min-train-length', default=100, type=int)
 parser.add_argument('--k', default=0, type=int) 
+parser.add_argument('--competency', default=50, type=int) 
 args = parser.parse_args()
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
