@@ -306,7 +306,7 @@ def run():
     parser.add_argument('--data-dir', help='path to SNLI dataset')
     parser.add_argument('--num-units', type=int, default=300, help='number of units per layer')
     parser.add_argument('--balanced', action='store_true') 
-    parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple', 'theta'],
+    parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple', 'theta', 'naacl-linear', 'naacl-root'],
                         help='CL data policy', default='simple')
     parser.add_argument('--ordering', choices=['easiest', 'hardest', 'middleout'], default='easiest') 
     parser.add_argument('--num-epochs', type=int, default=100) 
@@ -314,6 +314,7 @@ def run():
     parser.add_argument('--use-length', action='store_true')
     parser.add_argument('--min-train-length', default=100, type=int)
     parser.add_argument('--k', default=0, type=int) 
+    parser.add_argument('--competency', default=50, type=int) 
     args = parser.parse_args()
 
     preds_file = '{}processed/test_predictions/sstb_{}_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random, args.k) 

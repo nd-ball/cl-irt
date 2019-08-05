@@ -242,11 +242,12 @@ def load_sstb(data_dir):
 ####### Get CL Data per epoch ########
 def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_idx=None):
     if args.strategy == 'baseline':
-        return training_set
+        return ts 
     if args.strategy == 'theta':
         assert theta_hat is not None and args.ordering == 'easiest' 
 
     training_set = copy.deepcopy(ts) 
+    c_init = 0.01  # as per naacl19 paper 
  
 
     # set up CL
@@ -334,6 +335,18 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
         train['phrase'] = [train_2['phrase'][i] for i in train_idx] 
         train['difficulty'] = [train_2['difficulty'][i] for i in train_idx]
         return train 
+    elif args.strategy == 'naacl-linear':
+        epoch_competency = np.min([1, epoch * ((1 - c_init)/args.competency) + c_init])
+        train['lbls'] = [train_2['lbls'][i] for i in range(int(epoch_competency * len(training_set)))]
+        train['phrase'] = [train_2['phrase'][i] for i in range(int(epoch_competency * len(training_set)))]
+        train['difficulty'] = [train_2['difficulty'][i] for i in range(int(epoch_competency * len(training_set)))]
+        return train 
+    elif args.strategy == 'naacl-root':
+        epoch_competency = np.min([1,np.sqrt(epoch * ((1 - c_init**2)/args.competency) + c_init**2)])
+        train['lbls'] = [train_2['lbls'][i] for i in range(int(epoch_competency * len(training_set)))]
+        train['phrase'] = [train_2['phrase'][i] for i in range(int(epoch_competency * len(training_set)))]
+        train['difficulty'] = [train_2['difficulty'][i] for i in range(int(epoch_competency * len(training_set)))]
+        return train 
     else:
         raise NotImplementedError
 
@@ -349,6 +362,8 @@ def get_epoch_training_data_vision(ts, args, epoch, theta_hat=None, diffs_sorted
                 batch_size=args.batch_size, shuffle=True, **kwargs)  
     if args.strategy == 'theta':
         assert theta_hat is not None and args.ordering == 'easiest' 
+    if args.strategy == 'theta-hard':
+        assert theta_hat is not None and args.ordering == 'hardest' 
 
     training_set = copy.deepcopy(ts)
  
@@ -407,6 +422,12 @@ def get_epoch_training_data_vision(ts, args, epoch, theta_hat=None, diffs_sorted
                 batch_size=args.batch_size, shuffle=True, **kwargs)
     elif args.strategy == 'theta':
         train = [train_2[i] for i in range(len(training_set)) if train_2[i][3] <= theta_hat]
+        if len(train) < args.min_train_length:
+            train = [train_2[i] for i in range(args.min_train_length)] 
+        return torch.utils.data.DataLoader(train,
+                batch_size=args.batch_size, shuffle=True, **kwargs)
+    elif args.strategy == 'theta-hard':
+        train = [train_2[i] for i in range(len(training_set)) if train_2[i][3] >= theta_hat]
         if len(train) < args.min_train_length:
             train = [train_2[i] for i in range(args.min_train_length)] 
         return torch.utils.data.DataLoader(train,

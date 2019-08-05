@@ -25,7 +25,7 @@ parser.add_argument('--gpu', type=int, default=-1, help='use GPU?')
 parser.add_argument('--num-units', type=int, default=300, help='number of units per layer')
 parser.add_argument('--data-dir') 
 parser.add_argument('--balanced', action='store_true') 
-parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple', 'theta'],
+parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple', 'theta', 'naacl-linear', 'naacl-root'],
                     help='CL data policy', default='simple')
 parser.add_argument('--ordering', choices=['easiest', 'hardest', 'middleout'], default='easiest') 
 parser.add_argument('--num-epochs', type=int, default=100) 
@@ -33,6 +33,7 @@ parser.add_argument('--random', action='store_true')
 parser.add_argument('--use-length', action='store_true')
 parser.add_argument('--min-train-length', default=100, type=int)
 parser.add_argument('--k', default=0, type=int) 
+parser.add_argument('--competency', default=50, type=int) 
 args = parser.parse_args()
 
 print(args)
