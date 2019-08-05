@@ -118,7 +118,7 @@ valloader = torch.utils.data.DataLoader(valset, batch_size=100, shuffle=False, n
 testset = my_CIFAR10(root=args.data_dir + '/external/', train=False, download=True, transform=transform_test)
 testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=2)
 
-if args.strategy == 'theta':
+if args.strategy in ['theta', 'theta-hard']:
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
@@ -162,7 +162,7 @@ def train(epoch, outwriter, best_test, best_val):
     #print('\nEpoch: %d' % epoch)
     #print('Training')
 
-    if args.strategy == 'theta':
+    if args.strategy in ['theta', 'theta-hard']: 
         # get a theta estimate from entire training set 
         net.eval()
         test_loss = 0

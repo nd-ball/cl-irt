@@ -40,7 +40,7 @@ def train(args, model, device, train_data, test_loader, val_loader,
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
-    if args.strategy == 'theta':
+    if args.strategy in ['theta', 'theta-hard']:
         # estimate theta for the model in its current state 
         model.eval() 
         train_diffs = [] 
