@@ -72,7 +72,7 @@ parser.add_argument('--batch-size', type=int, default=128, metavar='N',
 parser.add_argument('--data-dir', help='path to SNLI dataset')
 parser.add_argument('--num-units', type=int, default=300, help='number of units per layer')
 parser.add_argument('--balanced', action='store_true') 
-parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple', 'theta', 'naacl-linear', 'naacl-root'],
+parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple', 'theta', 'naacl-linear', 'naacl-root', 'theta-hard'],
                     help='CL data policy', default='simple')
 parser.add_argument('--ordering', choices=['easiest', 'hardest', 'middleout'], default='easiest') 
 parser.add_argument('--num-epochs', type=int, default=50) 
