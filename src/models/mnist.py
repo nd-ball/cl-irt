@@ -50,7 +50,7 @@ def train(args, model, device, train_data, test_loader, val_loader,
                     batch_size=args.batch_size, shuffle=True, **kwargs)
 
         with torch.no_grad():
-            for batch_idx, (data, target, label, diff, _) in enumerate(val_loader):
+            for batch_idx, (data, target, label, diff, _) in enumerate(irt_trainloader):
                 data, target = data.to(device), target.to(device)
                 output = model(data)
                 pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
