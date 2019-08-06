@@ -245,6 +245,9 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
         return ts 
     if args.strategy == 'theta':
         assert theta_hat is not None and args.ordering == 'easiest' 
+    if args.strategy == 'theta-hard':
+        assert theta_hat is not None and args.ordering == 'hardest' 
+
 
     training_set = copy.deepcopy(ts) 
     c_init = 0.01  # as per naacl19 paper 
@@ -329,6 +332,14 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
         return train 
     elif args.strategy == 'theta':
         train_idx = [i for i in range(len(training_set['phrase'])) if train_2['difficulty'][i] <= theta_hat]
+        if len(train_idx) < args.min_train_length:
+            train_idx = [i for i in range(args.min_train_length)] 
+        train['lbls'] = [train_2['lbls'][i] for i in train_idx] 
+        train['phrase'] = [train_2['phrase'][i] for i in train_idx] 
+        train['difficulty'] = [train_2['difficulty'][i] for i in train_idx]
+        return train 
+    elif args.strategy == 'theta-hard':
+        train_idx = [i for i in range(len(training_set['phrase'])) if train_2['difficulty'][i] >= theta_hat]
         if len(train_idx) < args.min_train_length:
             train_idx = [i for i in range(args.min_train_length)] 
         train['lbls'] = [train_2['lbls'][i] for i in train_idx] 
