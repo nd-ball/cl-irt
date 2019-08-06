@@ -248,11 +248,9 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
     if args.strategy == 'theta-hard':
         assert theta_hat is not None and args.ordering == 'hardest' 
 
-
     training_set = copy.deepcopy(ts) 
     c_init = 0.01  # as per naacl19 paper 
  
-
     # set up CL
     train_2 = {
         'lbls':[],
@@ -348,15 +346,15 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
         return train 
     elif args.strategy == 'naacl-linear':
         epoch_competency = np.min([1, epoch * ((1 - c_init)/args.competency) + c_init])
-        train['lbls'] = [train_2['lbls'][i] for i in range(int(epoch_competency * len(training_set)))]
-        train['phrase'] = [train_2['phrase'][i] for i in range(int(epoch_competency * len(training_set)))]
-        train['difficulty'] = [train_2['difficulty'][i] for i in range(int(epoch_competency * len(training_set)))]
+        train['lbls'] = [train_2['lbls'][i] for i in range(int(epoch_competency * len(training_set['phrase'])))]
+        train['phrase'] = [train_2['phrase'][i] for i in range(int(epoch_competency * len(training_set['phrase'])))]
+        train['difficulty'] = [train_2['difficulty'][i] for i in range(int(epoch_competency * len(training_set['phrase'])))]
         return train 
     elif args.strategy == 'naacl-root':
         epoch_competency = np.min([1,np.sqrt(epoch * ((1 - c_init**2)/args.competency) + c_init**2)])
-        train['lbls'] = [train_2['lbls'][i] for i in range(int(epoch_competency * len(training_set)))]
-        train['phrase'] = [train_2['phrase'][i] for i in range(int(epoch_competency * len(training_set)))]
-        train['difficulty'] = [train_2['difficulty'][i] for i in range(int(epoch_competency * len(training_set)))]
+        train['lbls'] = [train_2['lbls'][i] for i in range(int(epoch_competency * len(training_set['phrase'])))]
+        train['phrase'] = [train_2['phrase'][i] for i in range(int(epoch_competency * len(training_set['phrase'])))]
+        train['difficulty'] = [train_2['difficulty'][i] for i in range(int(epoch_competency * len(training_set['phrase'])))]
         return train 
     else:
         raise NotImplementedError
