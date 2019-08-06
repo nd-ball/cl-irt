@@ -161,7 +161,6 @@ def train(args, outwriter):
             theta_hat=0
 
         epoch_training_data = get_epoch_training_data(train, args, i, 'sstb', theta_hat, diffs_sorted_idx) 
-        print(epoch_training_data)
         num_train_epoch = len(epoch_training_data['phrase'])
         #print('training set size: {}'.format(num_train_epoch))
         # shuffle training data
