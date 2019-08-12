@@ -367,6 +367,9 @@ In order to demonstrate the effectiveness of DCL-IRT we must show that the model
 Any gains in predictive performance are an additional benefit, but are not the main goal.
 With this in mind we performed the following experiment.
 
+\textbf{baseline, naacl results, dcl are the only things being compared in initial experiment}
+do a followup analysis with ordered (maybe) and hardest-first, middle out, 
+
 For each data set, we trained a standard model architecture for a set number of epochs. 
 We varied the training data available to the model at each epoch based on the type of curriculum applied:
 
@@ -410,7 +413,8 @@ For the methods below, $t$ is the current time-step in training, $T$ is the poin
 \end{itemize}
 
 It is worth noting here that neither Linear nor Root actually measure competency of the model at any point. 
-Instead it is assumed that the model becomes more and more competent over time.
+Instead it is assumed that the model becomes more and more competent over time, whereas with DCL-IRT model competency is probed at each training epoch and training data is selected based on this competency.
+This is critical because at a given training epoch, there is a chance that less training data is used than the prior epoch, if data was added too quickly.
 
 \section{Results} 
 
@@ -420,13 +424,13 @@ Instead it is assumed that the model becomes more and more competent over time.
 	\centering
 	\begin{subfigure}[b]{0.45\textwidth}
 		\centering
-		\includegraphics[width=0.9\columnwidth]{figs/cl_mnist}
+		\includegraphics[width=0.9\columnwidth]{figs/cl_irt_mnist}
 		\caption{\label{fig:cl_mnist}} 
 		\vspace{-2em} 
 	\end{subfigure} 
 	\begin{subfigure}[b]{0.45\textwidth}
 		\centering
-		\includegraphics[width=0.9\columnwidth]{figs/cl_cifar}
+		\includegraphics[width=0.9\columnwidth]{figs/cl_irt_cifar}
 		\caption{\label{fig:cl_cifar}} 
 		\vspace{-2em} 
 	\end{subfigure} 
@@ -459,7 +463,9 @@ Instead it is assumed that the model becomes more and more competent over time.
 
 - really show that using our method is efficient and practical 
 
-Using IRT leads to quicker convergence for the trained models (Figure XX).
+
+
+Using IRT leads to quicker convergence for the trained models (Figures \ref{fig:acc_viz} and \ref{fig:acc_nlp}).
 The vertical lines in each plot indicate the point at which the model has converged, based on early stopping using the development set accuracy.
 In most cases DCL-IRT leads to the fastest convergence, however for XX using the Simple-IRT curriculum ordered easiest to hardest leads to the fastest convergence.
 In all cases some use of IRT to determine the curriculum improves over the baseline training criterion. 

@@ -1,52 +1,46 @@
 library(tidyverse)
 
 # sstb
-data_dir <- 'G:/My Drive/data/curriculum_learning_irt/'
+data_dir <- 'G:/My Drive/2019/research/projects/cl_irt/aaai_logs/aaai_run2/'
 exp_type <- 'sstb'
 num_skip <- 18
-D.baseline <- read_csv(paste(data_dir, exp_type,'_baseline_easiest.log',sep=''), 
-                       col_names = c('a','b','train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
+D.baseline <- read_csv(paste(data_dir, exp_type,'-baseline.log',sep=''), 
+                       col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
                        skip=num_skip, n_max=200) 
 D.baseline$epoch <- c(1:200) 
 D.baseline$exp <- 'baseline'
 
-D.irt <- read_csv(paste(data_dir, 'irt_cl_', exp_type, '_5000.log', sep=''),
-                  col_names = c('a','b','train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
+D.irt <- read_csv(paste(data_dir, 'irt-cl-', exp_type, '-1000.log', sep=''),
+                  col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
                   skip=num_skip, n_max=200)
 D.irt$epoch <- c(1:200)
 D.irt$exp <- 'irt'
 
-D.easiest <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-simple-easiest.log',sep=''), 
-                      col_names = c('a','b','train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
-                      skip=num_skip, n_max=200) 
-D.easiest$epoch <- c(1:200) 
-D.easiest$exp <- 'easiest'
+D.linear.easiest <- read_csv(paste(data_dir,exp_type, '-naacl-linear-easiest.log',sep=''), 
+                             col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
+                             skip=num_skip, n_max=200) 
+D.linear.easiest$epoch <- c(1:200) 
+D.linear.easiest$exp <- 'naacl-linear-easiest'
 
-D.ordered <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-ordered-easiest.log',sep=''), 
-                      col_names = c('a','b','train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
-                      skip=num_skip, n_max=200) 
-D.ordered$epoch <- c(1:200) 
-D.ordered$exp <- 'ordered'
+D.root.easiest <- read_csv(paste(data_dir,exp_type, '-naacl-root-easiest.log',sep=''), 
+                           col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
+                           skip=num_skip, n_max=200) 
+D.root.easiest$epoch <- c(1:200) 
+D.root.easiest$exp <- 'naacl-root-easiest'
 
 
-D.middleout <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-simple-middleout.log',sep=''), 
-                        col_names = c('a','b','train_size', 'train_acc', 'test_loss', 'test_acc', 'theta'),
-                        skip=num_skip, n_max=200) 
-D.middleout$epoch <- c(1:200) 
-D.middleout$exp <- 'middleout'
 
-D <- rbind(D.baseline, D.irt, D.easiest, D.middleout, D.ordered)
+D <- rbind(D.baseline, D.irt, D.linear.easiest,D.root.easiest)
 filter <- D %>%
   group_by(exp) %>%
-  summarize(max=max(test_loss)) 
+  summarize(max=max(val_acc)) 
 
-max_epochs <- merge(D,filter, by.x=c('exp','test_loss'), by.y=c('exp','max'))
+max_epochs <- merge(D,filter, by.x=c('exp','val_acc'), by.y=c('exp','max'))
 
-which(D$exp=='baseline' & D$epoch==126)
-which(D$exp=='easiest' & D$epoch==93)
-which(D$exp=='irt' & D$epoch==46)
-which(D$exp=='middleout' & D$epoch==170)
-which(D$exp=='ordered' & D$epoch==32)
+which(D$exp=='baseline' & D$epoch==149)
+which(D$exp=='naacl-linear-easiest' & D$epoch==162)
+which(D$exp=='irt' & D$epoch==140)
+which(D$exp=='naacl-root-easiest' & D$epoch==183)
 
 png("../../reports/figures/cl_irt_sstb.png", width=1100, height=700)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
