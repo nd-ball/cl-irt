@@ -36,7 +36,7 @@ do
     sbatch -p titanx-long --gres=gpu:1 --mem=90gb --output=logs/irt-cl-$m-1000.log --wrap="python -u -m models.$m --dynet-autobatch 1 --dynet-gpu 1 --dynet-mem 11000 --gpu 0 --data-dir /mnt/nfs/work1/hongyu/lalor/data/cl-data/ --strategy theta --min-train-length 1000 --num-epochs $NUMEPOCHS"
 
     # irt CL (hard) 
-    sbatch -p titanx-long --gres=gpu:1 --mem=90gb --output=logs/irt-cl-$m-1000.log --wrap="python -u -m models.$m --dynet-autobatch 1 --dynet-gpu 1 --dynet-mem 11000 --gpu 0 --data-dir /mnt/nfs/work1/hongyu/lalor/data/cl-data/ --min-train-length 1000 --num-epochs $NUMEPOCHS --strategy theta-hard --ordering hardest"
+    sbatch -p titanx-long --gres=gpu:1 --mem=90gb --output=logs/irt-cl-hard-$m-1000.log --wrap="python -u -m models.$m --dynet-autobatch 1 --dynet-gpu 1 --dynet-mem 11000 --gpu 0 --data-dir /mnt/nfs/work1/hongyu/lalor/data/cl-data/ --min-train-length 1000 --num-epochs $NUMEPOCHS --strategy theta-hard --ordering hardest"
 
     # NAACL Baselines 
     for strat in naacl-linear naacl-root 
