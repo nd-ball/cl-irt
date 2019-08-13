@@ -1,7 +1,7 @@
 library(tidyverse)
 
 # sstb
-data_dir <- 'G:/My Drive/2019/research/projects/cl_irt/aaai_logs/aaai_run2/'
+data_dir <- 'G:/My Drive/2019/research/projects/cl_irt/sstb_run3/'
 exp_type <- 'sstb'
 num_skip <- 18
 D.baseline <- read_csv(paste(data_dir, exp_type,'-baseline.log',sep=''), 
@@ -16,44 +16,61 @@ D.irt <- read_csv(paste(data_dir, 'irt-cl-', exp_type, '-1000.log', sep=''),
 D.irt$epoch <- c(1:200)
 D.irt$exp <- 'irt'
 
-D.linear.easiest <- read_csv(paste(data_dir,exp_type, '-naacl-linear-easiest.log',sep=''), 
+D.linear.easiest.irt <- read_csv(paste(data_dir,exp_type, '-naacl-linear-easiest-irt.log',sep=''), 
                              col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
                              skip=num_skip, n_max=200) 
-D.linear.easiest$epoch <- c(1:200) 
-D.linear.easiest$exp <- 'naacl-linear-easiest'
+D.linear.easiest.irt$epoch <- c(1:200) 
+D.linear.easiest.irt$exp <- 'naacl-linear-easiest-irt'
 
-D.root.easiest <- read_csv(paste(data_dir,exp_type, '-naacl-root-easiest.log',sep=''), 
+D.root.easiest.irt <- read_csv(paste(data_dir,exp_type, '-naacl-root-easiest-irt.log',sep=''), 
                            col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
                            skip=num_skip, n_max=200) 
-D.root.easiest$epoch <- c(1:200) 
-D.root.easiest$exp <- 'naacl-root-easiest'
+D.root.easiest.irt$epoch <- c(1:200) 
+D.root.easiest.irt$exp <- 'naacl-root-easiest-irt'
+
+D.linear.easiest.length <- read_csv(paste(data_dir,exp_type, '-naacl-linear-easiest-length.log',sep=''), 
+                                 col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
+                                 skip=num_skip, n_max=200) 
+D.linear.easiest.length$epoch <- c(1:200) 
+D.linear.easiest.length$exp <- 'naacl-linear-easiest-length'
+
+D.root.easiest.length <- read_csv(paste(data_dir,exp_type, '-naacl-root-easiest-length.log',sep=''), 
+                               col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
+                               skip=num_skip, n_max=200) 
+D.root.easiest.length$epoch <- c(1:200) 
+D.root.easiest.length$exp <- 'naacl-root-easiest-length'
 
 
 
-D <- rbind(D.baseline, D.irt, D.linear.easiest,D.root.easiest)
+D <- rbind(D.baseline, D.irt, D.linear.easiest.irt,D.root.easiest.irt,D.linear.easiest.length,D.root.easiest.length)
 filter <- D %>%
   group_by(exp) %>%
-  summarize(max=max(val_acc)) 
+  summarize(max=max(dev_acc)) 
 
-max_epochs <- merge(D,filter, by.x=c('exp','val_acc'), by.y=c('exp','max'))
+max_epochs <- merge(D,filter, by.x=c('exp','dev_acc'), by.y=c('exp','max'))
 
-which(D$exp=='baseline' & D$epoch==149)
-which(D$exp=='naacl-linear-easiest' & D$epoch==162)
-which(D$exp=='irt' & D$epoch==140)
-which(D$exp=='naacl-root-easiest' & D$epoch==183)
+which(D$exp=='baseline' & D$epoch==96)
+which(D$exp=='irt' & D$epoch==12)
+which(D$exp=='naacl-linear-easiest-irt' & D$epoch==51)
+which(D$exp=='naacl-linear-easiest-length' & D$epoch==66)
+which(D$exp=='naacl-root-easiest-irt' & D$epoch==123)
+which(D$exp=='naacl-root-easiest-length' & D$epoch==158)
+
 
 png("../../reports/figures/cl_irt_sstb.png", width=1100, height=700)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
   geom_line() + 
   geom_line(aes(x=epoch, y=train_size/67348, color=exp),D, linetype=2) + 
-  geom_vline(aes(xintercept=epoch, color=exp ), D[c(126,493,246,770,832),]) + 
+  geom_vline(aes(xintercept=epoch, color=exp ), D[c(96,212,451,866,723,1158),]) + 
   theme_minimal() + 
   ggtitle("Comaprison of CL Strategies: SSTB") + 
   ylab("Test accuracy") + 
   xlab("Epoch") + 
   scale_color_discrete(name='Experiment',
-                       breaks=c('baseline', 'easiest', 'irt', 'middleout', 'ordered'),
-                       labels=c('Baseline', 'EasyFirst', 'Theta', 'MiddleOut','Ordered'))
+                       breaks=c('baseline', 'naacl-linear-easiest-irt', 'naacl-linear-easiest-length',
+                                'irt', 'naacl-root-easiest-irt', 'naacl-root-easiest-length'),
+                       labels=c('Baseline', 'NAACL-Linear-IRT', 'NAACL-Linear-Length', 
+                                'Theta', 'NAACL-Root-IRT', 'NAACL-Root-Length'))
 dev.off()
 
 

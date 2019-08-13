@@ -10,7 +10,7 @@ D.baseline <- read_csv(paste(data_dir, exp_type,'-baseline.log',sep=''),
 D.baseline$epoch <- c(1:200) 
 D.baseline$exp <- 'baseline'
 
-D.irt <- read_csv(paste(data_dir, 'irt-cl-', exp_type, '-1000.log', sep=''),
+D.irt <- read_csv(paste(data_dir, 'irt-cl-', exp_type, '-5000.log', sep=''),
                   col_names = c('train_size', 'train_acc', 'val_acc', 'test_acc', 'theta'),
                   skip=num_skip, n_max=200)
 D.irt$epoch <- c(1:200)
@@ -37,7 +37,7 @@ max_epochs <- merge(D,filter, by.x=c('exp','val_acc'), by.y=c('exp','max'))
 
 which(D$exp=='baseline' & D$epoch==182)
 which(D$exp=='naacl-linear-easiest' & D$epoch==168)
-which(D$exp=='irt' & D$epoch==177)
+which(D$exp=='irt' & D$epoch==107)
 which(D$exp=='naacl-root-easiest' & D$epoch==158)
 
 
@@ -45,7 +45,7 @@ png("../../reports/figures/cl_irt_cifar.png", width=1100, height=700)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
   geom_line() + 
   geom_line(aes(x=epoch, y=train_size/500, color=exp),D, linetype=2) + 
-  geom_vline(aes(xintercept=epoch, color=exp ), D[c(182,568,377,758),]) + 
+  geom_vline(aes(xintercept=epoch, color=exp ), D[c(182,568,307,758),]) + 
   theme_minimal() + 
   ggtitle("Comaprison of CL Strategies: CIFAR") + 
   ylab("Test accuracy") + 

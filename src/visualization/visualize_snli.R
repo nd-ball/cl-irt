@@ -1,7 +1,7 @@
 library(tidyverse)
 
 # sstb
-data_dir <- 'G:/My Drive/data/curriculum_learning_irt/'
+data_dir <- 'G:/My Drive/2019/research/projects/cl_irt/sstb_run3/'
 exp_type <- 'snli'
 num_skip <- 17
 D.baseline <- read_csv(paste(data_dir, exp_type,'_baseline.log',sep=''), 
