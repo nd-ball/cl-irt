@@ -87,6 +87,7 @@
 \usepackage{algpseudocode}
 \usepackage{amsmath}
 \usepackage{booktabs}
+\usepackage{comment}
 \usepackage{microtype}
 \usepackage{subcaption}
 
@@ -365,10 +366,8 @@ Prior work has shown that this is an effective way to generate a set of response
 
 In order to demonstrate the effectiveness of DCL-IRT we must show that the model is more efficient than standard supervised learning training while maintaining the level of performance in terms of test set accuracy. 
 Any gains in predictive performance are an additional benefit, but are not the main goal.
-With this in mind we performed the following experiment.
-
-\textbf{baseline, naacl results, dcl are the only things being compared in initial experiment}
-do a followup analysis with ordered (maybe) and hardest-first, middle out, 
+We will also compare DCL-IRT to a competency-based methods (CB) that uses a fixed schedule for adding training examples during training \cite{platanios_competence-based_2019}.
+For the CB methods below, $t$ is the current time-step in training, $T$ is the point where the model is fully competent, $c_0$ is the initial competency. 
 
 For each data set, we trained a standard model architecture for a set number of epochs. 
 We varied the training data available to the model at each epoch based on the type of curriculum applied:
@@ -377,48 +376,66 @@ We varied the training data available to the model at each epoch based on the ty
 	\item 
 	Baseline: At each epoch, the model has access to all of the data, shuffled and in mini-batches
 	\item 
-	Ordered: At each epoch, the model has access to all of the data, but here the data is ordered according to difficulty (i.e. not shuffled) 
+	CB-Linear: define the proportion of training examples to include at time $t$ as $c_{linear}(t) \overset{\Delta}{=} \text{min} (1, t\frac{1-c_0}{T} + c_0)$
 	\item 
-	Simple-IRT: At each epoch, the model has access to $\frac{e}{N}$ training examples, where $e$ is the current epoch and $N$ is the full training set size. 
-	This strategy ignores the competence of the model and only uses the example difficulty as inclusion criteria
+	CB-Root: $c_{sqrt}(t) \overset{\Delta}{=} \text{min}(1, \sqrt{t\frac{1-c_0^2}{T} + c_0^2})$
+	%\item 
+	%Ordered: At each epoch, the model has access to all of the data, but here the data is ordered according to difficulty (i.e. not shuffled) 
+	%\item 
+	%Simple-IRT: At each epoch, the model has access to $\frac{e}{N}$ training examples, where $e$ is the current epoch and $N$ is the full training set size. 
+	%This strategy ignores the competence of the model and only uses the example difficulty as inclusion criteria
 	\item 
 	DCL-IRT: At each epoch, model ability is estimated ($\hat{\theta_e}$, see \S above) and all training examples where difficulty is less that $\hat{\theta_e}$ are included.
 \end{itemize}
 
-For Ordered and Simple, there are several options available in terms of which examples are introduced first.
-For each method we experiment with ordering the data in three ways:
+It is worth noting here that neither CB-Linear nor CB-Root actually measure competency of the model at any point. 
+Instead it is assumed that the model becomes more and more competent over time, whereas with DCL-IRT model competency is probed at each training epoch and training data is selected based on this competency.
+This is critical because at a given training epoch, there is a chance that less training data is used than the prior epoch, if data was added too quickly.
+
+Performance in terms of test set accuracy is determined by using the development set accuracy as an early stopping indicator.
+Each model was trained for 200 epochs. 
+
+To determine the effectiveness of difficulty as estimated by IRT methods, we experiment with two versions of the competency-based models in our NLP tasks:
+
+\begin{itemize}
+	\item 
+	Length ($d_{length}$): using sentence length as a heuristic for difficulty, as in the prior work \cite{platanios_competence-based_2019}. For NLI, we use the length of the premise sentence to determine difficulty.
+	\item 
+	IRT-estimated difficulty ($d_{irt}$): difficulty as estimated by fitting an IRT model using the artificial crowd (\S \ref{ssec:irt}). 
+\end{itemize}
+
+To the best of our knowledge, most difficulty heuristics for image recognition are based on heuristics from a single model (e.g. confidence score), which we do not consider in this work. 
+
+\subsubsection{Curriculum Ordering}
+
+Typically in CL, examples are ordered from easiest to hardest.
+To assess the difficulty parameters learned from IRT and also to compare with other methods such as hard-example mining \cite{shrivastava_training_2016}, other example orderings were considered.
+
+For each CB method we experiment with ordering the data in three ways:
 \begin{itemize}
 	\item 
 	Easy-first: The data are ordered from easiest to hardest. At each epoch, more difficult examples are included in training
 	\item 
 	Hard-first: The data are ordered from hardest to easiest. At each epoch, easier examples are included in training
 	\item 
-	Middle-out: The data are ordered from smallest to largest in terms of the absolute value of the difficulty parameter. Recall that difficulty is roughly normally distributed (CLEAN THIS UP BECAUSE THAT ISN'T EXACTLY TRUE). At the first training epoch, data that are of an ``average'' difficulty are included in training. At each subsequent epoch, some data that are slightly easier and some data that are slightly harder are added to the training set.
+	Middle-out: The data are ordered from smallest to largest in terms of the absolute value of the difficulty parameter. Recall that difficulty values are centered around $0$. At the first training epoch, data that are of an ``average'' difficulty are included in training. At each subsequent epoch, some data that are slightly easier and some data that are slightly harder are added to the training set.
 \end{itemize}
 
-For each data set a relatively simple model architecture was used.
-Performance in terms of test set accuracy is determined by using the development set accuracy as an early stopping indicator.
-Each model was trained for 200 epochs. 
-
-- experiments: ordered vs simple vs irt, balanced vs not balanced
-
-To compare against the current state-of-the-art for CL \cite{platanios_competence-based_2019}, we also look at the following heuristics for measuring model competency, used for introducing training data into the curriculum.
-For the methods below, $t$ is the current time-step in training, $T$ is the point where the model is fully competent, $c_0$ is the initial competency. 
+For DCL-IRT we experimented with two strategies:
 
 \begin{itemize}
 	\item 
-	Linear: define the proportion of training examples to include at time $t$ as $c_{linear}(t) \overset{\Delta}{=} \text{min} (1, t\frac{1-c_0}{T} + c_0)$
+	Upper-bound: $\hat{\theta}_e$ is the upper bound for example difficulty at a given epoch, so only easy examples for the model are included
 	\item 
-	Root: $c_{sqrt}(t) \overset{\Delta}{=} \text{min}(1, \sqrt{t\frac{1-c_0^2}{T} + c_0^2})$
+	Lower-bound: $\hat{\theta}_e$ is the lower bound for example difficulty at a given epoch, so only hard examples for the model are included
 \end{itemize}
 
-It is worth noting here that neither Linear nor Root actually measure competency of the model at any point. 
-Instead it is assumed that the model becomes more and more competent over time, whereas with DCL-IRT model competency is probed at each training epoch and training data is selected based on this competency.
-This is critical because at a given training epoch, there is a chance that less training data is used than the prior epoch, if data was added too quickly.
+Table YY summarizes our experiments.
+
 
 \section{Results} 
 
-
+\subsection{Training with DCL-IRT is more efficient and effective}
 \captionsetup[subfigure]{labelformat=empty}
 \begin{figure*}[th!]
 	\centering
@@ -465,16 +482,25 @@ This is critical because at a given training epoch, there is a chance that less 
 
 
 
-Using IRT leads to quicker convergence for the trained models (Figures \ref{fig:acc_viz} and \ref{fig:acc_nlp}).
+Using IRT leads to quicker convergence for the trained models for both the vision and NLP experiments (Figures \ref{fig:acc_viz} and \ref{fig:acc_nlp}).
 The vertical lines in each plot indicate the point at which the model has converged, based on early stopping using the development set accuracy.
-In most cases DCL-IRT leads to the fastest convergence, however for XX using the Simple-IRT curriculum ordered easiest to hardest leads to the fastest convergence.
-In all cases some use of IRT to determine the curriculum improves over the baseline training criterion. 
+In all four cases DCL-IRT converges more quickly than the baseline models and the competency-schedule baselines.
+The dotted lines in each figure plot the percentage of training data used for each experiment at a give epoch.
+For the easier tasks (MNIST and SSTB), DCL-IRT adds training data much more quickly than the competency-schedule regimes (need a better word).
+Those are artificially holding model learning back due to the rigid structure.
+What's more, DCL-IRT training data curves are not monotonically increasing (Figures \ref{fig:acc_viz} and \ref{fig:acc_nlp}).
+If too much training data is added, and model performance suffers as a result (in terms of estimated ability), at the next epoch the hardest examples can be removed until the model is ready for them.
+This behavior goes against most all other CL strategies, where more data is added at each epoch. 
+
+Along with faster convergence, models trained with DCL-IRT also outperform the other models in terms of test set accuracy (Table XX TODO).
+In all cases, the models are more efficient (in terms of training data to convergence) and more effective (test set accuracy).
 
 By using DCL-IRT a curriculum can adapt during training according to the estimated ability of the model.
 DCL-IRT adds or removes training data based not on a fixed step schedule but rather by probing the model at each epoch and using the estimated ability to match data to the model (Figure XX).
 This way if a model has a high estimated ability early in training, then more data can be added to the training set more quickly, and learning isn't artificially slowed down due to the curriculum schedule.
 For each data set in question, DCL-IRT adds training data more quickly than a more traditional CL schedule, which leads to faster convergence.
 
+\subsection{Curriculum ordering}
 Performance for ordered is strange.
 Sometimes it works very well (SSTB), sometimes it doesn't work at all (SNLI).
 More work is required here to see what is going on (PUT IT IN THE ANALYSIS SECTION).
@@ -599,39 +625,63 @@ In particular, the amount of data needed to achieve very high performance on the
 \end{table*}
 
 
+\subsection{Discrepancies in difficulty}
+The differences in results between the methods that use $d_{length}$ and $d_{irt}$ for NLP indicate that there are cases where learned difficulty does not match the expectations of human heuristics.
+The cases where discrepancy is largest indicate clear patterns that are worth discussing (Table YY TODO).
+\textbf{finish this section once the analysis is complete} 
 
+\begin{comment} 
 \subsection{Performance by Difficulty}
 Does using DCL-IRT for training lead to a more interpretable output in terms of test set performance?
 That is, when a curriculum is employed, does the model perform better on easier test examples than difficult ones?
 A comparison of methods on test data binned by difficulty shows that model performance is similar when test set difficulty is taken into account (Figure XX).
 The main difference is that for the baseline models, performance is stratified by difficulty almost immediately, and there are small improvements across groups during training, while for the CL methods, there is consistent improvement across groups as training continues, and more data is added. 
-
+\end{comment} 
 
 \section{Related work}
 
-Lots to do here. need a thorough lit review as part of this paper 
-
-Since it's original proposal, CL has become a well-studied area of machine learning (CITE BENGIO).
-The primary focus has been on new methods to identify easy and difficult examples in order to build a curriculum. 
-Originally, CL methods were evaluated on toy data sets with heuristic measures of difficulty.
+Since it's original proposal, CL has become a well-studied area of machine learning \cite{bengio_curriculum_2009}.
+The primary focus has been on developing new heuristics to identify easy and difficult examples in order to build a curriculum. 
+Originally, CL methods were evaluated on toy data sets with heuristic measures of difficulty \cite{bengio_curriculum_2009}.
 For example, on a shapes data set, shapes with more sides were considered more difficult than shapes with fewer sides.
 Similarly, sentences with more words were considered more difficult than sentences with fewer words.
 
+\begin{comment}
 Further work on CL has looked at estimating example difficulty by querying the model being trained (CITE EXAMPLES).
 Model confidence, example entropy, and other metrics (LIST) have been considered as proxies for difficulty.
 However, these all assume that a model uncertainty is equivalent to difficulty.
 It is often the case, particularly in deep learning, that a model will overestimate confidence for examples due to the fact that the model is incentivized to push output probabilities to 1 for training examples (CITE ZOUBIN's work here).
 These output probabilities are not aligned with a notion of difficulty, and may negatively impact the estimation of such.
 What's more, most work relies on a rigid schedule that does not take into account the competency of the model at a point in the training process.
+\end{comment} 
 
-Recent work has shown that spaced repetition strategies can be effective for improving model performance (CITE HADI).
+Recent work has shown that spaced repetition strategies (SR) can be effective for improving model performance \cite{amiri_repeat_2017,amiri_neural_2019}.
 Instead of using a traditional CL setup, spaced repetition bins examples based on estimated difficulty.
 The bins are shown to the model at differing intervals so that more difficult examples are seen more frequently than easier examples.
 This method has been shown to be effective for human learning, and results demonstrate effectiveness on NLP tasks as well.
+Similarly to traditional CL frameworks, SR uses model-dependent heuristics for difficulty and rigid schedulers to determine when training examples should be re-introduced to the learner.
 
 Recent work has shown that measuring model competence during training to determine which examples to include at a training epoch further improves performance by matching data to model competency \cite{platanios_competence-based_2019}.
 However, in that work the model of competency is based on a heuristic rate of knowledge acquisition, and does not actually measure model competency.
 To the best of our knowledge this is the first work to match model ability at a point in training with appropriate training data in a curriculum learning framework.
+
+There has been recent work investigating the theory behind CL \cite{weinshall_curriculum_2018-1,hacohen_power_2019-2}, particularly around trying to define an ideal curriculum.
+The authors explicitly identify the two key aspects of CL, namely ``sorting by difficulty'' and ``pacing.''
+CL theoretically leads to a steeper optimization landscape (i.e. faster learning) while keeping the same global minimum of the task without CL.
+In that work there is still a reliance on ``pacing functions'' as opposed to an actual assessment of model ability at a point in time.
+
+The authors also demonstrated a key distinction between CL and similar methods such as self-paced learning \cite{kumar_self-paced_2010}, hard example mining \cite{shrivastava_training_2016}, and boosting \cite{freund_experiments_1996,freund_decision-theoretic_1997}: namely that the former considers difficulty with respect to the final hypothesis space (i.e. a model trained on the full data set) while the later methods consider ranking examples according to how difficult the current model determines them to be.
+DCL-IRT bridges a gap between these methods by probing model ability at the current point in training and using this estimated ability to identify appropriate training examples in terms of global difficulty.
+
+In addition, a key component of most prior work in CL is the notion of balance.
+When defining a curriculum, it is often the case that proportions are maintained between classes.
+That is, difficulty itself is not the only factor when building the curriculum.
+Instead, the easiest examples for each class are added so that the model is proportionally exposed to the data consistent with the full training set.
+DCL-IRT does not consider class labels when selecting examples for training.\footnote{It is important to note here that labels are used when learning difficulties, estimating ability, and actually updating parameters during training. They are not used to balance the curriculum.}
+In this way DCL-IRT is more closely aligned with a pure CL strategy that considers only the easiness/hardness of an example during training.
+This is an added benefit to the method as there is no need for class label accounting during training. 
+
+
 
 
 \section{Conclusion} 
