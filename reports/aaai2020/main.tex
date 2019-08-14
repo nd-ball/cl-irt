@@ -630,6 +630,72 @@ The differences in results between the methods that use $d_{length}$ and $d_{irt
 The cases where discrepancy is largest indicate clear patterns that are worth discussing (Table YY TODO).
 \textbf{finish this section once the analysis is complete} 
 
+
+\begin{table*}[ht]
+	\centering
+	\begin{tabular}{p{8cm}rrrr}
+		\hline
+		sentence & label & diff\_rank & length\_rank & rank\_difference \\ 
+		\hline
+		never having seen the first two films in the series , i ca n't compare friday after next to them , but nothing would change the fact that what we have here is a load of clams left in the broiling sun for a good three days . & 0.00 & 95.00 & 67148.50 & 67348.00 \\ 
+		is ... determined to treat its characters , weak and strong , as fallible human beings , not caricatures , and to carefully delineate the cost of the inevitable conflicts between human urges and an institution concerned with self-preservation . & 1.00 & 306.00 & 67273.50 & 67347.00 \\ 
+		exit & 0.00 & 67102.00 & 221.50 & 67346.00 \\ 
+		edge & 1.00 & 67079.00 & 221.50 & 67345.00 \\ 
+		so we got ten little indians meets friday the 13th by way of clean and sober , filmed on the set of carpenter 's the thing and loaded with actors you 're most likely to find on the next inevitable incarnation of the love boat . & 0.00 & 373.00 & 67178.50 & 67344.00 \\ 
+		pros & 1.00 & 67008.00 & 221.50 & 67343.00 \\ 
+		heart & 1.00 & 67296.00 & 557.50 & 67342.00 \\ 
+		has all the trappings of an energetic , extreme-sports adventure , but ends up more of a creaky `` pretty woman '' retread , with the emphasis on self-empowering schmaltz and big-wave surfing that gives pic its title an afterthought & 0.00 & 536.00 & 67216.50 & 67341.00 \\ 
+		solo & 1.00 & 66887.00 & 221.50 & 67340.00 \\ 
+		leaping from one arresting image to another , songs from the second floor has all the enjoyable randomness of a very lively dream and so manages to be compelling , amusing and unsettling at the same time . & 1.00 & 236.00 & 66897.50 & 67339.00 \\ 
+		cool & 1.00 & 66856.00 & 221.50 & 67338.00 \\ 
+		in theory , a middle-aged romance pairing clayburgh and tambor sounds promising , but in practice it 's something else altogether -- clownish and offensive and nothing at all like real life . & 0.00 & 27.00 & 66627.00 & 67337.00 \\ 
+		one can only assume that the jury who bestowed star hoffman 's brother gordy with the waldo salt screenwriting award at 2002 's sundance festival were honoring an attempt to do something different over actually pulling it off & 0.00 & 651.00 & 67165.50 & 67336.00 \\ 
+		donna & 1.00 & 67020.00 & 557.50 & 67335.00 \\ 
+		the year 's greatest adventure , and jackson 's limited but enthusiastic adaptation has made literature literal without killing its soul -- a feat any thinking person is bound to appreciate . & 1.00 & 256.00 & 66627.00 & 67334.00 \\ 
+		lush & 1.00 & 66578.00 & 221.50 & 67333.00 \\ 
+		hip ' & 1.00 & 66896.00 & 557.50 & 67332.00 \\ 
+		combines improbable melodrama ( gored bullfighters , comatose ballerinas ) with subtly kinky bedside vigils and sensational denouements , and yet at the end , we are undeniably touched . & 1.00 & 146.00 & 66476.50 & 67331.00 \\ 
+		there 's an admirable rigor to jimmy 's relentless anger , and to the script 's refusal of a happy ending , but as those monologues stretch on and on , you realize there 's no place for this story to go but down . & 0.00 & 758.00 & 67032.50 & 67330.00 \\ 
+		assert & 0.00 & 67299.00 & 1063.00 & 67329.00 \\ 
+		\hline
+	\end{tabular}
+	\caption{Examples from sstb with the largest disparities} 
+	\label{tab:differences_sstb}
+\end{table*}
+
+\begin{table*}[ht]
+	\centering
+	\begin{tabular}{lp{4cm}p{4cm}rrr}
+		\hline
+		gold\_label & sentence1 & sentence2 & diff\_rank & length\_rank & rank\_difference \\ 
+		\hline
+		neutral & Male musicians are playing a gig with one on the drums and the other on the guitar, with a backdrop of purple graphics apart of the light show. & Male musicians with long hair are playing a gig with one on the drums and the other on the guitar, with a backdrop of purple graphics apart of the light show. & 80.00 & 548732.00 & 549184.00 \\ 
+		neutral & A dog in a lake. & A dog is swimming. & 548735.00 & 203.00 & 549183.00 \\ 
+		neutral & a dog runs through the snow. & A dog walks. & 549146.00 & 814.00 & 549182.00 \\ 
+		neutral & A man rock-climbing & The man is outdoors. & 548901.00 & 651.00 & 549181.00 \\ 
+		entailment & Two dogs in the water. & They are swimming & 548434.00 & 651.00 & 549180.00 \\ 
+		contradiction & Two men in a jogging race on a black top street, one man wearing a black top and pants and the other is dressed as a nun with bright red tennis shoes, while onlookers stand in a grassy area and watch from behind a waist high metal railing. & There is no metal railing. & 201.00 & 547961.00 & 549179.00 \\ 
+		neutral & Dogs on grass. & Dogs in a field & 547785.00 & 53.50 & 549178.00 \\ 
+		neutral & A traveling boy looks sad. & A boy is outside & 548828.00 & 1294.50 & 549177.00 \\ 
+		neutral & A rock climber. & A man has on gear & 547574.00 & 121.00 & 549176.00 \\ 
+		neutral & a dog playing in the water & A dog playing. & 548106.00 & 814.00 & 549175.00 \\ 
+		neutral & Two dogs in the water. & Two dogs are outside. & 548864.00 & 1655.50 & 549174.00 \\ 
+		neutral & A dog chasing a ball. & A dog is outside. & 547679.00 & 519.50 & 549173.00 \\ 
+		neutral & A person jumps outside. & A man is jumping & 547746.00 & 651.00 & 549172.00 \\ 
+		neutral & Boy on playground equipment & A Boy is outside. & 548990.00 & 2094.00 & 549171.00 \\ 
+		entailment & a boy smiles underwater. & The boy is swimming & 548429.00 & 1655.50 & 549170.00 \\ 
+		neutral & A dog chases a ball. & A dog outside. & 546672.00 & 203.00 & 549169.00 \\ 
+		neutral & A group of people carrying boxes and bags are walking past some tall buildings and a short railing in what appears to be a big city. & A group of people carrying boxes and bags in the rain are walking past some tall buildings and a short railing in what appears to be a big city. & 2017.00 & 548280.50 & 549168.00 \\ 
+		neutral & A white dog running on snow. & A dog is running. & 548804.00 & 2631.00 & 549167.00 \\ 
+		entailment & A black dog in water. & The dog is swimming. & 547136.00 & 1018.50 & 549166.00 \\ 
+		neutral & A baseball player in red leaps into the air to avoid a player in blue, who is shortly behind him as he catches the ball, while other blue team members look on in the background. & The red team intercepts a pass intended for a blue team player. & 462.00 & 546576.50 & 549165.00 \\ 
+		\hline
+	\end{tabular}
+	\caption{Examples from snli with the largest disparities} 
+	\label{tab:differences_snli}
+\end{table*}
+
+
 \begin{comment} 
 \subsection{Performance by Difficulty}
 Does using DCL-IRT for training lead to a more interpretable output in terms of test set performance?
