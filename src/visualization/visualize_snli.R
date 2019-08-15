@@ -1,52 +1,60 @@
 library(tidyverse)
 
 # sstb
-data_dir <- 'G:/My Drive/2019/research/projects/cl_irt/sstb_run3/'
+data_dir <- 'G:/My Drive/2019/research/projects/cl_irt/snli_run3/'
 exp_type <- 'snli'
 num_skip <- 17
-D.baseline <- read_csv(paste(data_dir, exp_type,'_baseline.log',sep=''), 
+D.baseline <- read_csv(paste(data_dir, exp_type,'-baseline.log',sep=''), 
                        col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
                        skip=num_skip, n_max=200) 
 D.baseline$epoch <- c(1:200) 
 D.baseline$exp <- 'baseline'
 
-D.irt <- read_csv(paste(data_dir, 'irt_cl_', exp_type, '_5000.log', sep=''),
+D.irt <- read_csv(paste(data_dir, 'irt-cl-', exp_type, '-1000.log', sep=''),
                   col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
                   skip=num_skip, n_max=200)
-D.irt$epoch <- c(1:118)
+D.irt$epoch <- c(1:156)
 D.irt$exp <- 'irt'
 
-D.easiest <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-simple-easiest.log',sep=''), 
-                      col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
-                      skip=num_skip, n_max=200) 
-D.easiest$epoch <- c(1:200) 
-D.easiest$exp <- 'easiest'
+D.linear.easiest.irt <- read_csv(paste(data_dir,exp_type, '-naacl-linear-easiest-irt.log',sep=''), 
+                                 col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
+                                 skip=num_skip, n_max=200) 
+D.linear.easiest.irt$epoch <- c(1:200) 
+D.linear.easiest.irt$exp <- 'naacl-linear-easiest-irt'
 
-D.ordered <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-ordered-easiest.log',sep=''), 
-                      col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
-                      skip=num_skip, n_max=200) 
-D.ordered$epoch <- c(1:200) 
-D.ordered$exp <- 'ordered'
+D.root.easiest.irt <- read_csv(paste(data_dir,exp_type, '-naacl-root-easiest-irt.log',sep=''), 
+                               col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
+                               skip=num_skip, n_max=200) 
+D.root.easiest.irt$epoch <- c(1:200) 
+D.root.easiest.irt$exp <- 'naacl-root-easiest-irt'
+
+D.linear.easiest.length <- read_csv(paste(data_dir,exp_type, '-naacl-linear-easiest-length.log',sep=''), 
+                                    col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
+                                    skip=num_skip, n_max=200) 
+D.linear.easiest.length$epoch <- c(1:200) 
+D.linear.easiest.length$exp <- 'naacl-linear-easiest-length'
+
+D.root.easiest.length <- read_csv(paste(data_dir,exp_type, '-naacl-root-easiest-length.log',sep=''), 
+                                  col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
+                                  skip=num_skip, n_max=200) 
+D.root.easiest.length$epoch <- c(1:200) 
+D.root.easiest.length$exp <- 'naacl-root-easiest-length'
 
 
-D.middleout <- read_csv(paste(data_dir,exp_type, '_cl_not_balanced-simple-middleout.log',sep=''), 
-                        col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
-                        skip=num_skip, n_max=200) 
-D.middleout$epoch <- c(1:200) 
-D.middleout$exp <- 'middleout'
 
-D <- rbind(D.baseline, D.irt, D.easiest, D.middleout,D.ordered)
+D <- rbind(D.baseline, D.irt, D.linear.easiest.irt,D.root.easiest.irt,D.linear.easiest.length,D.root.easiest.length)
 filter <- D %>%
   group_by(exp) %>%
   summarize(max=max(dev_acc)) 
 
 max_epochs <- merge(D,filter, by.x=c('exp','dev_acc'), by.y=c('exp','max'))
 
-which(D$exp=='baseline' & D$epoch==20)
-which(D$exp=='easiest' & D$epoch==97)
-which(D$exp=='irt' & D$epoch==31)
-which(D$exp=='middleout' & D$epoch==104)
-which(D$exp=='ordered' & D$epoch==180)
+which(D$exp=='baseline' & D$epoch==96)
+which(D$exp=='irt' & D$epoch==12)
+which(D$exp=='naacl-linear-easiest-irt' & D$epoch==51)
+which(D$exp=='naacl-linear-easiest-length' & D$epoch==66)
+which(D$exp=='naacl-root-easiest-irt' & D$epoch==123)
+which(D$exp=='naacl-root-easiest-length' & D$epoch==158)
 
 
 png("../../reports/figures/cl_irt_snli.png", width=1100, height=700)
@@ -66,7 +74,6 @@ dev.off()
 ######### Table to show how much data was required to get to best acc #################
 sum(D[which(D$exp=='baseline'&D$epoch <= max_epochs[which(max_epochs$exp=='baseline'),]$epoch),]$train_size)
 sum(D[which(D$exp=='irt'&D$epoch <= max_epochs[which(max_epochs$exp=='irt'),]$epoch),]$train_size)
-sum(D[which(D$exp=='easiest'&D$epoch <= max_epochs[which(max_epochs$exp=='easiest'),]$epoch),]$train_size)
-sum(D[which(D$exp=='middleout'&D$epoch <= max_epochs[which(max_epochs$exp=='middleout'),]$epoch),]$train_size)
-sum(D[which(D$exp=='ordered'&D$epoch <= max_epochs[which(max_epochs$exp=='ordered'),]$epoch),]$train_size)
+sum(D[which(D$exp=='naacl-linear-easiest-irt'&D$epoch <= max_epochs[which(max_epochs$exp=='naacl-linear-easiest-irt'),]$epoch),]$train_size)
+sum(D[which(D$exp=='naacl-root-easiest-irt'&D$epoch <= max_epochs[which(max_epochs$exp=='naacl-root-easiest-irt'),]$epoch),]$train_size)
 
