@@ -58,6 +58,7 @@ dev.off()
 
 ######### Table to show how much data was required to get to best acc #################
 sum(D[which(D$exp=='baseline'&D$epoch <= max_epochs[which(max_epochs$exp=='baseline'),]$epoch),]$train_size)
+sum(D[which(D$exp=='baseline'&D$epoch <= 149),]$train_size)
 sum(D[which(D$exp=='irt'&D$epoch <= max_epochs[which(max_epochs$exp=='irt'),]$epoch),]$train_size)
 sum(D[which(D$exp=='naacl-linear-easiest'&D$epoch <= max_epochs[which(max_epochs$exp=='naacl-linear-easiest'),]$epoch),]$train_size)
 sum(D[which(D$exp=='naacl-root-easiest'&D$epoch <= max_epochs[which(max_epochs$exp=='naacl-root-easiest'),]$epoch),]$train_size)

@@ -10,7 +10,7 @@ D.baseline <- read_csv(paste(data_dir, exp_type,'-baseline.log',sep=''),
 D.baseline$epoch <- c(1:200) 
 D.baseline$exp <- 'baseline'
 
-D.irt <- read_csv(paste(data_dir, 'irt-cl-', exp_type, '-5000.log', sep=''),
+D.irt <- read_csv(paste(data_dir, 'irt-cl-', exp_type, '-2500.log', sep=''),
                   col_names = c('train_size', 'train_acc', 'val_acc', 'test_acc', 'theta'),
                   skip=num_skip, n_max=200)
 D.irt$epoch <- c(1:200)
