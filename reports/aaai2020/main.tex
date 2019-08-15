@@ -122,42 +122,40 @@
 \maketitle 
 \begin{abstract}
 	Curriculum learning (CL) is a popular and well-studied method for machine learning model training.
-	However, most CL methods make assumptions (both implicit and explicit) about the easiness or difficulty of training examples when building curricula for learning.
+	However, most CL methods make assumptions (both implicit and explicit) and rely on heuristics about the easiness or difficulty of training examples when building curricula for learning.
 	In this work we show that modeling difficulty using psychometric methods is more effective than baseline training and CL with heuristic measures of difficulty such as sentence length.
-	We introduce a dynamic curriculum learning strategy that probes model competency at each training epoch to select the best training examples at that point in time.
-	The dynamic model adds data at a rate commensurate with the model's capability, instead of restricting data due to an unnecessarily restrictive heuristic.
-	Analysis demonstrates that these methods are more efficient than existing CL methods and capture instances of easy items that are overlooked by existing heuristics (e.g. long sentences that are easy).
-%CL has been shown to be effective.
-%Many measures of ``difficulty'' are based on heuristics and not on true difficulty.
-%we want to change that by leveraging methods from psychometrics.
-%Experiments on vision and language data show that using learned difficulty and ability to set up a curriculum is effective.
-%Curriculum that is dynamically determined by the current competency of the model as estimated by Item Response Theory. 
+	We introduce a dynamic curriculum learning strategy that probes model ability at each training epoch to select the best training examples at that point in time.
+	The dynamic model adds data at a rate commensurate with the model's capability, in contrast to scheduled curricula that add data at a predetermined rate.
+	Analysis demonstrates that these methods are more efficient and effective than existing CL methods, outperforming competitive baselines by between XX and YY \%.  
+	We also show instances of easy items that are overlooked by existing heuristics (e.g. long sentences that are easy).
 \end{abstract}
 
 \section{Introduction}
-- go over CL
-- why it works
-- why there are currently issues with it (heuristics)
-- bottlenecks to some of the existing approaches
-
-Curriculum learning is a well-studied area of machine learning.
-Prior work has shown that building a curriculum of training data where easy examples are shown first can speed up learning and improve generalization, a result that has also been shown in humans \cite{bengio_curriculum_2009,platanios_competence-based_2019} (also cite hadi). 
-The basic premise is that machine learning (ML) models are trained according to a ``curriculum'' that sorts training examples according to difficulty.
+%Curriculum learning is a well-studied area of machine learning.
+Prior work has shown that curriculum learning (CL), building a curriculum of training data where easy examples are shown first, can speed up learning and improve generalization, a result that has also been shown in humans \cite{bengio_curriculum_2009,amiri_repeat_2017,platanios_competence-based_2019}. 
+The basic premise is that machine learning (ML) models are trained according to a curriculum that sorts training examples according to difficulty.
 At first, the model is trained with only the easiest examples, and more difficult examples are gradually added according to some schedule.
-A major gain for CL methods is that model convergence can often be quicker when the model is trained according to some curriculum \cite{bengio_curriculum_2009,platanios_competence-based_2019}.
+A benefit of CL methods is that model convergence can often be quicker when the model is trained according to some curriculum \cite{bengio_curriculum_2009,platanios_competence-based_2019}.
 Model efficiency has always been a major aim of the research community (\textbf{cite old papers}), but recently with the size of models continuing to grow and better understanding of the impact of model training on the environment there is a renewed need for efficiency \cite{strubell_energy_2019}.
 
 A major drawback of existing CL techniques is that they rely on heuristics to measure the difficulty of data, and either ignore the competency of the model at its present state or rely on heuristics there as well.
 For example, often for natural language processing (NLP) tasks, sentence length is considered a proxy for difficulty \cite{bengio_curriculum_2009,platanios_competence-based_2019}.
 Similarly, the original CL paper used the number of objects in an image as a proxy for difficulty in an image recognition task \cite{bengio_curriculum_2009}.
+These heuristics can be useful but have limitations.
+First, a model's notion of difficulty may not align with the heuristic imposed by a human developing the model.
+It could be the case that examples that are difficult for the human are in fact very easy for the model to learn.
+Second, the heuristic chosen may not actually be a proxy for difficulty.
+For example, often times sentence length is used as a proxy for difficulty in NLP tasks.
+However, depending on the task, long sequences could signal easier or harder examples, or have no signal at all.
+
 Competency was recently introduced as a mechanism to determine when new examples should be added to the training data \cite{platanios_competence-based_2019}, however in that work the competency schedule was ad hoc, and did not actually look at the competency of the model but assumed a schedule according to learning heuristics. 
 Ideally, model competency would be measured, so that the training data could be appropriately matched with the model at a given point in the training.
 
-Recent work has shown that it is possible to estimate both the difficulty of examples and the ability of deep learning models as latent variables based on model performance using Item Response Theory (IRT) \cite{lalor_learning_2019}.
+It is possible to estimate both the difficulty of examples and the ability of deep learning models as latent variables based on model performance using Item Response Theory (IRT) \cite{lalor_learning_2019}.
 IRT is a well-studied methodology in the psychometric literature for test set construction and subject evaluation \cite{baker_item_2004}.
-A typical IRT model will estimate latent parameters such as difficulty for examples under consideration for inclusion in a test set and a latent ability parameters for individuals taking the test.
+A typical IRT model will estimate latent parameters such as difficulty for examples under consideration for inclusion in a test set and a latent ability parameter for individuals taking the test.
 This is done by administering a test to a large number of human subjects, collecting and grading their responses as correct or incorrect, and using the student-response data matrix to estimate the latent traits of the data.
-Once learned, these latent parameters can be used to estimate latent ability parameters of future test-takers, based on their graded responses to the examples.
+Once learned, these parameters can be used to estimate latent ability parameters of future test-takers, based on their graded responses to the examples.
 IRT has not seen wide adoption in the ML community, primarily due to the fact that fitting IRT models requires a large amount of human annotated data for each example.
 However, recent work has shown that it is possible to fit IRT models using machine-generated data instead of human-generated data as the input to the IRT models \cite{lalor_learning_2019}.
 Because one can learn example difficulty and subject ability together, IRT is an interesting framework to consider for the problem of CL. 
@@ -167,7 +165,7 @@ At each training epoch, the latent ability of the model is estimated.
 Based on this estimate, only training data that the model has a reasonable chance of labeling correctly is included in training.
 As the model improves, the estimated ability will improve, and more training examples will be added.
 
-Our contributions are as follows: (i) we propose a novel CL framework, DCL-IRT, which automatically selects training data based on the estimated ability of the model, (b) we show that model training using DCL-IRT leads to faster convergence than traditional training and better performance than baseline CL methods, (c) we provide an analysis of the DCL-IRT training regime to show why certain training examples hurt instead of help generalization.
+Our contributions are as follows: (i) we propose a novel CL framework, DCL-IRT, which automatically selects training data based on the estimated ability of the model, (b) we show that model training using DCL-IRT leads to faster convergence and better performance than traditional training and baseline CL methods, (c) we analyze DCL-IRT to show why certain training examples hurt instead of help generalization.
 This is the first work to learn a model competency during training that is directly comparable to the difficulty of the training data pool.
 
 Code used for this work will be released upon publication, and is included as supplemental material.
@@ -190,14 +188,15 @@ Learning IRT models for machine-learning scale data sets with variational infere
 In a traditional CL framework, training data examples are ordered according to some notion of difficulty, and the training set shown to the learner is augmented at a set pace with more and more difficult examples (Fig. \ref{fig:cl_framework}).
 
 Typically, the model's current performance is not taken into account. 
-Recent work has incorporated a notion of ``competency'' to CL \cite{platanios_competence-based_2019}.
+Recent work has incorporated a notion of competency to CL \cite{platanios_competence-based_2019}.
 In that work the authors structure the rate at which training examples are added based on an assumption that model competency is modeled by either a linear or root function of the training epoch.
 However there are two issues with such an approach.
 First, this notion of competency is artificially rigid.
 If a model's competency improves quickly, more data cannot be added more quickly because the rate is predetermined.
 On the other hand, if a model is slow to improve, it may struggle because more data is being added too quickly.
 Second, the formulation of competency proposed by the authors reduces to a competency-free CL rate with a tuneable parameter for inclusion speed.
-This heuristic notion of competency aligns with typical heuristic notions of difficulty used for CL, but in this work we do away with the heuristics and instead measure difficulty and competency directly. 
+Once this parameter is set, there is no check of model ability during training to assess competency and update training data examples.
+In this work we do away with the heuristics and instead measure difficulty and competency directly. 
 
 \subsection{Item Response Theory}
 \label{ssec:irt} 
@@ -209,6 +208,7 @@ For a model $j$ and an example $i$, the probability that $j$ answers $i$ correct
 The one-parameter logistic (1PL) model, also known as a Rasch model, assumes a single latent difficulty parameter for examples, $b_i$ \cite{rasch_studies_1960,baker_item_2004}:
 \begin{equation} 
 p(z_{ij} = 1 \vert \theta_j, b_i) = \frac{1}{1 + e^{-(\theta_j - b_i)}}
+\label{eq:irt}
 \end{equation}
 
 The probability that subject $j$ will answer item $i$ incorrectly ($z_{ij}=0$) is:
@@ -217,51 +217,21 @@ p(z_{ij} = 0 | \theta_j, b_i) = 1 - p(y_{ij} = 1 \vert \theta_j, b_i)
 \end{equation} 
 
 With a 1PL model, there is an intuitive relationship between difficulty and ability.
-A model has a 50\% chance of answering an example correctly when model ability is equal to example difficulty ($\theta_j = b_i$).
+An example's difficulty value $b$ can be thought of as the point on the ability scale where an individual (or model) has a 50\% chance of answering correctly.
+Put another way, a model has a 50\% chance of answering an example correctly when model ability is equal to example difficulty (if $\theta_j = b_i$ in Equation \ref{eq:irt}).
 
-More advanced IRT models that include additional latent parameters for examples such as guessing exist, but in this work we focus on the 1PL model because we are primarily interested in example difficulty.
+More advanced IRT models that include additional latent parameters such as a guessing parameter for examples exist, but in this work we focus on the 1PL model because we are primarily interested in example difficulty.
 
-Learning a 1PL model requires a set of $I$ examples $\{i_0, i_1, \dots, i_I\}$, a set of $J$ models $\{j_0, j_1, \dots, j_J\}$, and the binary graded responses $Z = \{\forall_{i \in I} \forall_{j \in J}: z_{ij}\}$ of the subjects to each of the items.
-The likelihood of a dataset of response patterns $Z$ from multiple subjects to a set of items given the model parameters $\theta$ and $b$ is:
+Fitting a 1PL model requires a set of $I$ examples $\{i_0, i_1, \dots, i_I\}$, a set of $J$ models $\{j_0, j_1, \dots, j_J\}$, and the binary graded responses $Z = \{\forall_{i \in I} \forall_{j \in J}: z_{ij}\}$ of the models to each of the examples.
+The likelihood of a data set of response patterns $Z$ from multiple subjects to a set of items given the parameters $\Theta$ and $B$ is:
 \begin{align} 
-p(Z \vert \theta, b) &= \prod_{j=1}^J \prod_{i=1}^I p(Z_{ij}=y_{ij} \vert \theta_j, b_i)
+p(Z \vert \Theta, B) &= \prod_{j=1}^J \prod_{i=1}^I p(Z_{ij}=y_{ij} \vert \theta_j, b_i)
 \end{align} 
 where $z_{ij} = 1$ if individual $j$ answers item $i$ correctly and $z_{ij} = 0$ if they do not.
 
 Typically, IRT models are fit using marginal maximum likelihood (MML) estimation, where the latent ability parameters ($\theta$) are assumed to be random effects and integrated out.
-Latent item parameters are estimated using an expectation maximization (EM) method \cite{bock_marginal_1981}.
+Latent difficulty parameters for examples are estimated using an expectation maximization (EM) method \cite{bock_marginal_1981}.
 These methods assume human subjects, and were typically used for relatively small data sets of no more than a hundred examples or so.
-
-
-\subsubsection{IRT with VI} 
-A major bottleneck of using IRT methods on machine learning data sets is the fact that each subject would have to label each (or most of) the examples in order to have enough response patterns to estimate the latent parameters.
-Having humans annotate all examples in an ML data set can't be done, but recent work has shown that the human subjects can be replaced with an ensemble of machine learning models. 
-The response patterns from this ``artificial crowd'' can be used to estimate item parameters by fitting IRT models using variational inference (VI) methods.
-With VI, latent parameters are estimated via variational distributions \cite{natesan_bayesian_2016,lalor_learning_2019}. 
-
-Learning the latent difficulty parameters of training examples can be done off-line using existing techniques \cite{natesan_bayesian_2016,lalor_learning_2019}.
-Bayesian methods in IRT assume that the individual $\theta$ and $b$ parameters in Eq. (2) both follow Gaussian prior distributions and make inference through the resultant joint posterior distribution $\pi(\theta,b|Y)$. As this posterior is usually intractable, VI approximates it by the variational distribution:
-\begin{align} 
-q(\theta, b) &=  \prod_{j=1}^J \pi^\theta_j(\theta_j) \prod_{i=1}^I \pi^b_i(b_i)
-\end{align} 
-
-Where $\pi^\theta_j()$ and $\pi^b_i()$ denotes different Gaussian densities for different parameters whose means and variances are determined by minimizing the KL-Divergence between $q(\theta,b)$ and $\pi(\theta,b|Y)$.
-
-The choice of priors in Bayesian IRT can vary.
-Prior work has shown that vague and hierarchical priors are both effective \cite{natesan_bayesian_2016}.
-We experiment with both in this work. A vague prior assumes $\theta_j \sim N(0, 1)$ and $b_i \sim N(0, 10^3)$, where the large variance indicates a lack of information on the difficulty parameters.
-A hierarchical Bayesian model assumes
-\begin{align*}
-\theta_j\ |\ m_\theta, u_\theta &\sim N(m_{\theta}, u^{-1}_{\theta}) \\
-b_i\ |\ m_b, u_b &\sim N(m_b, u^{-1}_b) \\
-m_{\theta}, m_{b} &\sim N(0, 10^6) \\
-u_{\theta}, u_b &\sim \Gamma(1, 1)
-\end{align*}
-
-We follow the results of prior work where hierarchical priors were used \cite{lalor_learning_2019}.
-To learn these parameters then involves minimizing the KL divergence between $q$ and $p$: $\min KL(q \vert \vert p)$. 
-
-% JL: if we have room, add ELBO 
 
 \subsubsection{Scoring}
 \label{ssec:scoring}
@@ -272,20 +242,65 @@ All that is required is a single forward pass of the model on the data, as is ty
 \begin{align}
 Z_j &= \forall_{y \in Y} \mathbf{I}[y_i = \hat{y_i}] \\
 L(\theta_j \vert Z_j) &= p(Z_j \vert \theta_j)  \\
-&= \prod_{i=1}^I p(z_{ij}=y_{ij} \vert \theta_j) 
+\hat{\theta}_j &= \operatorname*{arg\,max}_{\theta_j}  \prod_{i=1}^I p(z_{ij}=y_{ij} \vert \theta_j) 
 \end{align}
 
 % ADD MATH HERE 
 
+\subsubsection{IRT with VI} 
+A major bottleneck of using IRT methods on machine learning data sets is the fact that each human subject would have to label each (or most of) the examples in order to have enough response patterns to estimate the latent parameters.
+Having humans annotate all examples in an ML data set can't be done, but recent work has shown that the human subjects can be replaced with an ensemble of machine learning models. 
+The response patterns from this ``artificial crowd'' can be used to estimate item parameters by fitting IRT models using variational inference (VI) methods.
+With VI, latent parameters are estimated via variational distributions \cite{natesan_bayesian_2016,lalor_learning_2019}. 
+
+Bayesian methods in IRT assume that the individual $\theta$ and $b$ parameters in Eq. (2) both follow Gaussian prior distributions and make inference through the resultant joint posterior distribution $\pi(\theta,b|Y)$. As this posterior is usually intractable, VI approximates it by the variational distribution:
+\begin{align} 
+q(\theta, b) &=  \prod_{j=1}^J \pi^\theta_j(\theta_j) \prod_{i=1}^I \pi^b_i(b_i)
+\end{align} 
+
+Where $\pi^\theta_j()$ and $\pi^b_i()$ denotes different Gaussian densities for different parameters whose means and variances are determined by minimizing the KL-Divergence between $q(\theta,b)$ and $\pi(\theta,b|Y)$.
+
+The choice of priors in Bayesian IRT can vary.
+Prior work has shown that vague and hierarchical priors are both effective \cite{natesan_bayesian_2016}.
+We follow the results of prior work where hierarchical priors were used \cite{lalor_learning_2019}.
+A hierarchical Bayesian model assumes
+\begin{align*}
+\theta_j\ |\ m_\theta, u_\theta &\sim N(m_{\theta}, u^{-1}_{\theta}) \\
+b_i\ |\ m_b, u_b &\sim N(m_b, u^{-1}_b) \\
+m_{\theta}, m_{b} &\sim N(0, 10^6) \\
+u_{\theta}, u_b &\sim \Gamma(1, 1)
+\end{align*}
+
+To learn these parameters then involves minimizing the KL divergence between $q$ and $p$: $\min KL(q \vert \vert p)$. 
+
 \subsection{Dynamic Curriculum Learning with IRT}
-
-We propose DCL-IRT, where training examples are selected dynamically at each training epoch based on the estimated ability of the model at that point.
+\label{ssec:dcl}
+\begin{algorithm}[t]
+	\caption{Dynamic Curriculum Learning with IRT}
+	\hspace*{\algorithmicindent}\textbf{Input:} (X, Y), model $\phi$, D \\
+	\hspace*{\algorithmicindent}\textbf{Output:} Learned model $\phi$ 
+	\begin{algorithmic}[1]
+		\While{True}
+		\State $\hat{Y} = \phi(X)$
+		\State $\hat{\theta_e} = score(Y, \hat{Y}, D)$
+		\State $X_e, Y_e = \{(x,y): d_x < \hat{\theta_e}\}$
+		\State $train(\phi, X_e, Y_e)$
+		\EndWhile 
+		\Procedure{score}{$Y, \hat{Y}, D$}
+		\State $Z = \forall_{y \in Y} \mathbf{I}[y_i = \hat{y_i}]$
+		\State $\hat{\theta}_e = \operatorname*{arg\,max}_\theta p(Z \vert \theta, b)$
+		\EndProcedure 
+	\end{algorithmic} 
+	\label{alg:dcl}
+\end{algorithm} 
+We propose DCL-IRT, where training examples are selected dynamically at each training epoch based on the estimated ability of the model at that epoch.
 With DCL-IRT, model ability can be estimated according to a well-studied psychometric framework as opposed to heuristics.
-At the same time, the estimated ability of the model ($\hat{\theta}_e$) is on the same scale as the difficulty parameters of the data, so there is a principled recipe for selecting data at any given training epoch.
-
+The estimated ability of the model ($\hat{\theta}_e$) is on the same scale as the difficulty parameters of the data, so there is a principled approach for selecting data at any given training epoch.
 
 The first step of DCL-IRT is to estimate the ability of the model using the scoring function (\S \ref{ssec:scoring}). 
-To do this we use the full training set, but crucially, only to get response data, not to update parameters. 
+To do this we use the full training set, but crucially, only to get response data, not to update parameters (i.e., no backward pass). 
+We do not use a held out development set for estimating ability because we do not want the development set to influence training.
+In our experiments the development set is only used for early stopping.
 Model outputs are obtained for the training set, and graded as correct or incorrect as compared to the gold standard label. 
 This response pattern is then used to estimate model ability at the current epoch ($\hat{\theta}_e$).
 
@@ -300,25 +315,6 @@ At the same time, if estimated model ability is high, then more data can be adde
 
 Algorithm \ref{alg:dcl} shows all of the steps for DCL-IRT. Code implementing DCL-IRT is included as supplemental material and will be released upon publication. 
 
-\begin{algorithm}
-	\caption{Dynamic Curriculum Learning with IRT}
-	\hspace*{\algorithmicindent}\textbf{Input:} (X, Y), model $\phi$, D \\
-	\hspace*{\algorithmicindent}\textbf{Output:} Learned model $\phi$ 
-	\begin{algorithmic}[1]
-		\While{True}
-			\State $\hat{Y} = \phi(X)$
-			\State $\hat{\theta_e} = score(Y, \hat{Y}, D)$
-			\State $X_e, Y_e = \{(x,y): d_x < \hat{\theta_e}\}$
-			\State $train(\phi, X_e, Y_e)$
-		\EndWhile 
-		\Procedure{score}{$Y, \hat{Y}, D$}
-			\State $Z = \forall_{y \in Y} \mathbf{I}[y_i = \hat{y_i}]$
-			\State $\hat{\theta_e} = \operatorname*{arg\,max}_\theta p(Z \vert \theta, b)p(\theta))$
-		\EndProcedure 
-	\end{algorithmic} 
-	\label{alg:dcl}
-\end{algorithm} 
-
 \section{Data and experiments} 
 
 We experiment with four data sets, two from vision and two from NLP, to demonstrate the effectiveness of DCL-IRT across multiple domains: handwritten digit recognition, image recognition, sentiment analysis, and natural language inference.
@@ -326,22 +322,24 @@ We experiment with four data sets, two from vision and two from NLP, to demonstr
 \subsection{Data}
 \subsubsection{MNIST}
 
-MNIST is a popular handwritten digit recognition data set \cite{lecun_mnist_nodate}.
-There are 60,000 training examples and 10,000 test examples in the data set.
+MNIST is a popular handwritten digit recognition data set \cite{lecun_mnist_1998}.
+There are 60,000 training examples and 10,000 test examples in the data set, distributed across 10 classes (1 per digit).
 We split the training set and use the first 50,000 examples for training and the last 10,000 examples as a validation set.
 MNIST is a commonly used first-pass data set for machine learning experiments, but is not enough for all evaluation as performance on the data set has been above 99\% for some time.
-We include MNIST as a toy example to validate our hypotheses.
+We include MNIST as a first example to validate our hypotheses.
 
 \subsubsection{CIFAR} 
 
-CIFAR is an image recognition data set across 10 classes \cite{krizhevsky_learning_2009}.
-There are 50,000 training example and 10,000 test examples in the data set.
+CIFAR is an image recognition data set \cite{krizhevsky_learning_2009}.
+It is a labeled subset of the 80 million tiny images data set \cite{torralba_80_2008}.
+There are 50,000 training example and 10,000 test examples across 10 classes in the data set.
 We split the training set and use the first 40,000 for training and the last 10,000 as a validation set. 
 
 \subsubsection{SSTB} 
 
 SSTB is an English-language sentiment analysis data set that consists of text excerpts from IMDB movie reviews with corresponding human-annotated sentiment labels \cite{socher_recursive_2013}.
 There are 67,349/872/1821 examples in the SSTB training/validation/test sets respectively.
+In this work we consider the binary (positive/negative) classification task.
 
 \subsubsection{SNLI} 
 
@@ -356,7 +354,7 @@ In addition, the annotation quality would be suspect due to the humans labeling 
 Therefore we used artificial crowds to generate our response patterns \cite{lalor_learning_2019}. 
 
 Briefly, for each data set an ensemble of neural network models are trained, using different subsets of the training data set.
-Training data is subsampled and corrupted (label flipping) so that performance across models in the ensemble is varied.
+Training data is subsampled and corrupted via label flipping so that performance across models in the ensemble is varied.
 Each trained model then labels all of the examples (train/validation/test).
 These labels are graded correct/incorrect against the gold-standard label and the output response patterns are used to fit an IRT model for the data (\S \ref{ssec:irt}).
 Prior work has shown that this is an effective way to generate a set of response patterns for fitting IRT models to machine learning data \cite{lalor_learning_2019}.
@@ -376,16 +374,16 @@ We varied the training data available to the model at each epoch based on the ty
 	\item 
 	Baseline: At each epoch, the model has access to all of the data, shuffled and in mini-batches
 	\item 
-	CB-Linear: define the proportion of training examples to include at time $t$ as $c_{linear}(t) \overset{\Delta}{=} \text{min} (1, t\frac{1-c_0}{T} + c_0)$
+	CB-Linear: The proportion of training examples to include at time $t$ is $c_{linear}(t) \overset{\Delta}{=} \text{min} (1, t\frac{1-c_0}{T} + c_0)$
 	\item 
-	CB-Root: $c_{sqrt}(t) \overset{\Delta}{=} \text{min}(1, \sqrt{t\frac{1-c_0^2}{T} + c_0^2})$
+	CB-Root: The proportion of training examples to include at time $t$ is $c_{sqrt}(t) \overset{\Delta}{=} \text{min}(1, \sqrt{t\frac{1-c_0^2}{T} + c_0^2})$
 	%\item 
 	%Ordered: At each epoch, the model has access to all of the data, but here the data is ordered according to difficulty (i.e. not shuffled) 
 	%\item 
 	%Simple-IRT: At each epoch, the model has access to $\frac{e}{N}$ training examples, where $e$ is the current epoch and $N$ is the full training set size. 
 	%This strategy ignores the competence of the model and only uses the example difficulty as inclusion criteria
 	\item 
-	DCL-IRT: At each epoch, model ability is estimated ($\hat{\theta_e}$, see \S above) and all training examples where difficulty is less that $\hat{\theta_e}$ are included.
+	DCL-IRT: At each epoch, model ability is estimated ($\hat{\theta_e}$, see \S \ref{ssec:dcl}) and all training examples where difficulty is less that $\hat{\theta_e}$ are included.
 \end{itemize}
 
 It is worth noting here that neither CB-Linear nor CB-Root actually measure competency of the model at any point. 
@@ -393,7 +391,14 @@ Instead it is assumed that the model becomes more and more competent over time, 
 This is critical because at a given training epoch, there is a chance that less training data is used than the prior epoch, if data was added too quickly.
 
 Performance in terms of test set accuracy is determined by using the development set accuracy as an early stopping indicator.
-Each model was trained for 200 epochs. 
+For the NLP tasks we trained a simple LSTM model \cite{hochreiter_long_1997}.
+For SNLI, the model consists of two LSTM sequence-embedding models, one to encode the premise and another to encode the hypothesis.
+The two sentence encodings are then concatenated and passed through three tanh layers.
+Finally, the output is passed to a softmax classifier layer to output class probabilities.
+For SSTB, we used a single LSTM model without the concatenation step.
+For MNIST we trained a two-layer convolutional neural network (CNN) and for CIFAR we trained a VGG network \cite{simonyan_very_2014,lecun_deep_2015}. 
+All models were trained for 200 epochs with development set accuracy used for early stopping.
+
 
 To determine the effectiveness of difficulty as estimated by IRT methods, we experiment with two versions of the competency-based models in our NLP tasks:
 
@@ -420,7 +425,7 @@ For each CB method we experiment with ordering the data in three ways:
 	\item 
 	Middle-out: The data are ordered from smallest to largest in terms of the absolute value of the difficulty parameter. Recall that difficulty values are centered around $0$. At the first training epoch, data that are of an ``average'' difficulty are included in training. At each subsequent epoch, some data that are slightly easier and some data that are slightly harder are added to the training set.
 \end{itemize}
-
+%
 For DCL-IRT we experimented with two strategies:
 
 \begin{itemize}
@@ -435,68 +440,69 @@ Table YY summarizes our experiments.
 
 \section{Results} 
 
-\subsection{Training with DCL-IRT is more efficient and effective}
+\subsection{DCL-IRT is more efficient and effective}
 \captionsetup[subfigure]{labelformat=empty}
-\begin{figure*}[th!]
+\begin{figure*}[h!]
 	\centering
-	\begin{subfigure}[b]{0.45\textwidth}
+	\begin{subfigure}[b]{0.49\textwidth}
 		\centering
-		\includegraphics[width=0.9\columnwidth]{figs/cl_irt_mnist}
+		\includegraphics[width=\columnwidth]{figs/cl_irt_mnist}
 		\caption{\label{fig:cl_mnist}} 
 		\vspace{-2em} 
 	\end{subfigure} 
-	\begin{subfigure}[b]{0.45\textwidth}
+	\begin{subfigure}[b]{0.49\textwidth}
 		\centering
-		\includegraphics[width=0.9\columnwidth]{figs/cl_irt_cifar}
+		\includegraphics[width=\columnwidth]{figs/cl_irt_cifar}
 		\caption{\label{fig:cl_cifar}} 
 		\vspace{-2em} 
 	\end{subfigure} 
 	
-	\caption{Test set accuracy as a function of training epoch.}
-	\label{fig:acc_viz}
-\end{figure*}
 
-\captionsetup[subfigure]{labelformat=empty}
-\begin{figure*}[th!]
-	\centering
-	\begin{subfigure}[b]{0.45\textwidth}
+	\begin{subfigure}[b]{0.49\textwidth}
 		\centering
-		\includegraphics[width=0.9\columnwidth]{figs/cl_snli}
+		\includegraphics[width=\columnwidth]{figs/cl_snli}
 		\caption{\label{fig:cl_snli}} 
 		\vspace{-2em} 
 	\end{subfigure} 
-	\begin{subfigure}[b]{0.45\textwidth}
+	\begin{subfigure}[b]{0.49\textwidth}
 		\centering
-		\includegraphics[width=0.9\columnwidth]{figs/cl_irt_sstb}
+		\includegraphics[width=\columnwidth]{figs/cl_irt_sstb}
 		\caption{\label{fig:cl_sstb}} 
 		\vspace{-2em} 
 	\end{subfigure} 
 	
 	\caption{Test set accuracy as a function of training epoch.}
-	\label{fig:acc_nlp}
+	\label{fig:accuracies}
 \end{figure*}
 
-- plots and tables 
+%\caption{Test set accuracy as a function of training epoch.}
+%\label{fig:acc_viz}
+%\end{figure*}
 
-- really show that using our method is efficient and practical 
+%\captionsetup[subfigure]{labelformat=empty}
+%\begin{figure*}[th!]
+%\centering
 
-
-
-Using IRT leads to quicker convergence for the trained models for both the vision and NLP experiments (Figures \ref{fig:acc_viz} and \ref{fig:acc_nlp}).
+Using IRT leads to quicker convergence for the trained models for both the vision and NLP experiments (Figure \ref{fig:accuracies}).
 The vertical lines in each plot indicate the point at which the model has converged, based on early stopping using the development set accuracy.
 In all four cases DCL-IRT converges more quickly than the baseline models and the competency-schedule baselines.
 The dotted lines in each figure plot the percentage of training data used for each experiment at a give epoch.
-For the easier tasks (MNIST and SSTB), DCL-IRT adds training data much more quickly than the competency-schedule regimes (need a better word).
+For the easier tasks (MNIST and SSTB), DCL-IRT adds training data much more quickly than the competency schedules.
 Those are artificially holding model learning back due to the rigid structure.
-What's more, DCL-IRT training data curves are not monotonically increasing (Figures \ref{fig:acc_viz} and \ref{fig:acc_nlp}).
+What's more, DCL-IRT training data curves are not monotonically increasing (Figure \ref{fig:accuracies}).
 If too much training data is added, and model performance suffers as a result (in terms of estimated ability), at the next epoch the hardest examples can be removed until the model is ready for them.
 This behavior goes against most all other CL strategies, where more data is added at each epoch. 
 
 Along with faster convergence, models trained with DCL-IRT also outperform the other models in terms of test set accuracy (Table XX TODO).
 In all cases, the models are more efficient (in terms of training data to convergence) and more effective (test set accuracy).
+Even though training with these curriculum use less data than the baseline, efficiency does not have a significant negative impact on generalizability in terms of test set performance (Table \ref{tab:costs}).
+The number of training examples required to reach convergence is lower than the baseline in each case for DCL-IRT.
+Change in performance compared to the baseline is often lower, but the delta is extremely small (usually XX or YY relative change). 
+In particular, the amount of data needed to achieve very high performance on the SSTB task is roughly 25\% of what a typical training regiment would require.
+
 
 By using DCL-IRT a curriculum can adapt during training according to the estimated ability of the model.
-DCL-IRT adds or removes training data based not on a fixed step schedule but rather by probing the model at each epoch and using the estimated ability to match data to the model (Figure XX).
+DCL-IRT adds or removes training data based not on a fixed step schedule but rather by probing the model at each epoch and using the estimated ability to match data to the model (Figure \ref{fig:accuracies}).
 This way if a model has a high estimated ability early in training, then more data can be added to the training set more quickly, and learning isn't artificially slowed down due to the curriculum schedule.
 For each data set in question, DCL-IRT adds training data more quickly than a more traditional CL schedule, which leads to faster convergence.
 
@@ -505,73 +511,34 @@ Performance for ordered is strange.
 Sometimes it works very well (SSTB), sometimes it doesn't work at all (SNLI).
 More work is required here to see what is going on (PUT IT IN THE ANALYSIS SECTION).
 
-Even though training with these curriculum use less data than the baseline, efficiency does not have a significant negative impact on generalizability in terms of test set performance (Table \ref{tab:costs}).
-The number of training examples required to reach convergence is lower than the baseline in each case for DCL-IRT.
-Change in performance compared to the baseline is often lower, but the delta is extremely small (usually XX or YY relative change). 
-In particular, the amount of data needed to achieve very high performance on the SSTB task is roughly 25\% of what a typical training regiment would require.
 
 
-\begin{table*}[h!]
+\begin{table}[h!]
 	\centering 
+	\small 
 	\begin{tabular}{cccccc}
 		\toprule
-		Data Set & Experiment & Training Examples & $\Delta_b$ (\%) & Accuracy (\%) & $\Delta_b$ (\%)\\ 
+		Metric&Experiment  &MNIST & CIFAR & SSTB & SNLI \\
 		\midrule
-		MNIST & Baseline & 10,320,000& 100.0&	99.26&	0
-		 \\
-		 \cmidrule{2-6}
-		& EasyFirst & 7,620,000&	73.84&	99.17&	-0.09
-		 \\
-		& MiddleOut & 6,420,000	&\bf 62.21	&99.2&	-0.06
-		 \\
-		& Ordered &10,020,000&	97.09&	97.06&	-2.22
-		 \\
-		& Theta& 8,986,612&	87.08&	99.23&	\bf -0.03
-		 \\
-		\midrule
-		CIFAR & Baseline &  6,750,000& 	100.0&	86.61&	0
-		 \\
-		 \cmidrule{2-6}
-		& EasyFirst & 6,900,000&	102.22&	85.54	&\bf -1.24
-		 \\
-		& MiddleOut & 3,250,000&	\bf 48.15&	85.54&	\bf -1.24
-		 \\
-		& Ordered &7,250,000&	107.41&	39.04	&-54.92
-		 \\
-		& Theta &3,671,016	&54.39&	83.32&	-3.80
-		 \\
-		\midrule
-		SSTB & Baseline &  8,687,892 	&100.0	&85.71&	0
-		\\
-		\cmidrule{2-6}
-		& EasyFirst & 2,912,757	&\bf 33.53&	85.38&	-0.39
-		 \\
-		& MiddleOut & 8,553,148	&98.45&	85.66&	-0.06
-		 \\
-		& Ordered & 2,155,136&	24.81&	86.92&	\bf 1.41
-		 \\
-		& Theta &2,993,225&	34.45&	85.32&	-0.46
-		 \\
-		\midrule
-		SNLI & Baseline &  10,983,680& 	100.0&	78.08&	0
-		 \\
-		 \cmidrule{2-6}
-		& EasyFirst & 25,839,060&	235.25&	77.64& \bf	-0.56
-		 \\
-		& MiddleOut &29,655,888&	270.00&	75.31&	-3.55
-		 \\
-		& Ordered & 98,853,120&	900.00&	11.86&	-84.81
-		 \\
-		& Theta& 14,118,510&	\bf 128.54&	77.34&	-0.95
-		 \\
+		 \%$\Delta$ & Baseline &0&0&0&\bf 0\\ 
+		 Train Size&DCL &\bf -9.37&\bf -53.71&\bf -88.68&59.37\\ 
+		 &CB Lin &-8.22&-21.56&-73.17&38.07\\ 
+		 &CB Root &11.29&-22.63&10.23&60.08 \\
+		 \midrule
+		 \%$\Delta$ & Baseline &\bf 0&0&0&0\\ 
+		 Accuracy&DCL &-0.17&\bf 0.66&\bf 0.45&-1.74\\ 
+		 &CB Lin &-0.01&-0.90&-0.18&\bf 0.69\\ 
+		 &CB Root &-0.06&0.13&-0.38&-0.37 \\
 		\bottomrule 
 	\end{tabular}
+	\caption{Percent change in training size (lower is better) and test set accuracy (higher is better) for each CL method tested.}
 	\label{tab:costs}
-\end{table*}
+\end{table}
 
-
+\begin{comment}  
 \begin{table*}[h!]
 	\centering 
+	\small 
 	\begin{tabular}{cccc}
 		\toprule
 		Data Set & Experiment & Mean & Variance \\ 
@@ -623,16 +590,25 @@ In particular, the amount of data needed to achieve very high performance on the
 	\end{tabular}
 	\label{tab:robustness}
 \end{table*}
-
+\end{comment} 
 
 \subsection{Discrepancies in difficulty}
 The differences in results between the methods that use $d_{length}$ and $d_{irt}$ for NLP indicate that there are cases where learned difficulty does not match the expectations of human heuristics.
 The cases where discrepancy is largest indicate clear patterns that are worth discussing (Table YY TODO).
 \textbf{finish this section once the analysis is complete} 
 
+For sentiment analysis, there are a number of easy to classify examples that are very long.
+The authors of these review snippets are clear in their like/dislike for a particular film, but use a lot of words to get to their point.
+These are interesting examples because they could be very useful for a model early in training to identify patterns of long-but-easy reviews.
+On the other hand, there are one-word snippets that are very difficult to classify and would cause problems for a model if introduced very early during training.
+
+For NLI, some of the biggest discrepancies come from short, neutral examples.
+Models find these very difficult because there is not enough information to determine that the premise neither entails nor contradicts the hypothesis.
+On the other hand, examples with very long premises are easier to deal with because either (a) there is a short but clear contradiction in the hypothesis or (b) the hypothesis is neutral and irrelevant.
 
 \begin{table*}[ht]
 	\centering
+	\small 
 	\begin{tabular}{p{8cm}rrrr}
 		\hline
 		sentence & label & diff\_rank & length\_rank & rank\_difference \\ 
@@ -665,6 +641,7 @@ The cases where discrepancy is largest indicate clear patterns that are worth di
 
 \begin{table*}[ht]
 	\centering
+	\small
 	\begin{tabular}{lp{4cm}p{4cm}rrr}
 		\hline
 		gold\_label & sentence1 & sentence2 & diff\_rank & length\_rank & rank\_difference \\ 
