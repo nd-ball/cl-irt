@@ -10,10 +10,10 @@ D.baseline <- read_csv(paste(data_dir, exp_type,'-baseline.log',sep=''),
 D.baseline$epoch <- c(1:200) 
 D.baseline$exp <- 'baseline'
 
-D.irt <- read_csv(paste(data_dir, 'irt-cl-', exp_type, '-1000.log', sep=''),
+D.irt <- read_csv(paste(data_dir, 'irt-cl-', exp_type, '-5000.log', sep=''),
                   col_names = c('a','b','train_size', 'train_acc', 'dev_acc', 'test_acc', 'theta'),
                   skip=num_skip, n_max=200)
-D.irt$epoch <- c(1:156)
+D.irt$epoch <- c(1:200)
 D.irt$exp <- 'irt'
 
 D.linear.easiest.irt <- read_csv(paste(data_dir,exp_type, '-naacl-linear-easiest-irt.log',sep=''), 
@@ -49,26 +49,28 @@ filter <- D %>%
 
 max_epochs <- merge(D,filter, by.x=c('exp','dev_acc'), by.y=c('exp','max'))
 
-which(D$exp=='baseline' & D$epoch==96)
-which(D$exp=='irt' & D$epoch==12)
-which(D$exp=='naacl-linear-easiest-irt' & D$epoch==51)
-which(D$exp=='naacl-linear-easiest-length' & D$epoch==66)
-which(D$exp=='naacl-root-easiest-irt' & D$epoch==123)
-which(D$exp=='naacl-root-easiest-length' & D$epoch==158)
+which(D$exp=='baseline' & D$epoch==23)
+which(D$exp=='irt' & D$epoch==36)
+which(D$exp=='naacl-linear-easiest-irt' & D$epoch==57)
+which(D$exp=='naacl-linear-easiest-length' & D$epoch==55)
+which(D$exp=='naacl-root-easiest-irt' & D$epoch==54)
+which(D$exp=='naacl-root-easiest-length' & D$epoch==32)
 
 
 png("../../reports/figures/cl_irt_snli.png", width=1100, height=700)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
   geom_line() + 
   geom_line(aes(x=epoch, y=train_size/549184, color=exp),D, linetype=2) + 
-  geom_vline(aes(xintercept=epoch, color=exp ), D[c(20,415,231,622,898),]) + 
+  geom_vline(aes(xintercept=epoch, color=exp ), D[c(23,236,457,855,654,1032),]) + 
   theme_minimal() + 
   ggtitle("Comaprison of CL Strategies: SNLI") + 
   ylab("Test accuracy") + 
   xlab("Epoch") + 
   scale_color_discrete(name='Experiment',
-                       breaks=c('baseline', 'easiest', 'irt', 'middleout', 'ordered'),
-                       labels=c('Baseline', 'EasyFirst', 'Theta', 'MiddleOut', 'Ordered'))
+                       breaks=c('baseline', 'naacl-linear-easiest-irt', 'naacl-linear-easiest-length',
+                                'irt', 'naacl-root-easiest-irt', 'naacl-root-easiest-length'),
+                       labels=c('Baseline', 'NAACL-Linear-IRT', 'NAACL-Linear-Length', 
+                                'Theta', 'NAACL-Root-IRT', 'NAACL-Root-Length'))
 dev.off()
 
 ######### Table to show how much data was required to get to best acc #################
