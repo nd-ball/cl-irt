@@ -69,8 +69,8 @@ ggplot(D, aes(x=epoch, y=test_acc, color=exp))  +
   scale_color_discrete(name='Experiment',
                        breaks=c('baseline', 'naacl-linear-easiest-irt', 'naacl-linear-easiest-length',
                                 'irt', 'naacl-root-easiest-irt', 'naacl-root-easiest-length'),
-                       labels=c('Baseline', 'NAACL-Linear-IRT', 'NAACL-Linear-Length', 
-                                'Theta', 'NAACL-Root-IRT', 'NAACL-Root-Length'))
+                       labels=c('Baseline', 'CB-L-IRT', 'CB-L-Length', 
+                                'DCL', 'CB-R-IRT', 'CB-R-Length'))
 dev.off()
 
 ######### Table to show how much data was required to get to best acc #################

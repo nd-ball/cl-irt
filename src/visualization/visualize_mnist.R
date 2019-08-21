@@ -53,7 +53,7 @@ ggplot(D, aes(x=epoch, y=test_acc, color=exp))  +
   xlab("Epoch") + 
   scale_color_discrete(name='Experiment',
                        breaks=c('baseline', 'naacl-linear-easiest', 'irt', 'naacl-root-easiest'),
-                       labels=c('Baseline', 'NAACL-Linear', 'Theta', 'NAACL-Root'))
+                       labels=c('Baseline', 'CB-L', 'DCL', 'CB-R'))
 dev.off()
 
 ######### Table to show how much data was required to get to best acc #################
