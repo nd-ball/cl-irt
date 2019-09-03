@@ -16,6 +16,7 @@ D.irt <- read_csv(paste(data_dir, 'irt-cl-', exp_type, '-2500.log', sep=''),
 D.irt$epoch <- c(1:200)
 D.irt$exp <- 'irt'
 
+
 D.linear.easiest <- read_csv(paste(data_dir,exp_type, '-naacl-linear-easiest.log',sep=''), 
                              col_names = c('train_size', 'train_acc', 'val_acc', 'test_acc', 'theta'),
                              skip=num_skip, n_max=200) 
@@ -28,7 +29,7 @@ D.root.easiest <- read_csv(paste(data_dir,exp_type, '-naacl-root-easiest.log',se
 D.root.easiest$epoch <- c(1:200) 
 D.root.easiest$exp <- 'naacl-root-easiest'
 
-D <- rbind(D.baseline, D.irt, D.linear.easiest,D.root.easiest)
+D <- rbind(D.baseline, D.irt, D.linear.easiest,D.root.easiest, D.irt.hard)
 filter <- D %>%
   group_by(exp) %>%
   summarize(max=max(val_acc)) 
@@ -41,18 +42,19 @@ which(D$exp=='irt' & D$epoch==107)
 which(D$exp=='naacl-root-easiest' & D$epoch==158)
 
 
-png("../../reports/figures/cl_irt_cifar.png", width=1100, height=700)
+png("../../reports/figures/cl_irt_cifar.png" , width=500, height=300)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
   geom_line() + 
-  geom_line(aes(x=epoch, y=train_size/500, color=exp),D, linetype=2) + 
+  geom_line(aes(x=epoch, y=train_size/400, color=exp),D, linetype=2) + 
   geom_vline(aes(xintercept=epoch, color=exp ), D[c(182,568,307,758),]) + 
   theme_minimal() + 
   ggtitle("Comaprison of CL Strategies: CIFAR") + 
-  ylab("Test accuracy") + 
+  ylab("Test accuracy (%)") + 
   xlab("Epoch") + 
+  ylim(50,100) +
   scale_color_discrete(name='Experiment',
                        breaks=c('baseline', 'naacl-linear-easiest', 'irt', 'naacl-root-easiest'),
-                       labels=c('Baseline', 'CB-L', 'DCL', 'CB-R'))
+                       labels=c('Baseline', 'CB-L', 'DDaCLAE', 'CB-R'))
 dev.off() 
 
 ######### Table to show how much data was required to get to best acc #################
@@ -118,3 +120,11 @@ Z[which(Z$exp=='Simple-Easiest' & Z$epoch==188),]
 Z[which(Z$exp=='Theta' & Z$epoch==95),]
 Z[which(Z$exp=='Simple-MiddleOut' & Z$epoch==115),]
 Z[which(Z$exp=='Ordered' & Z$epoch==145),]
+
+
+D.irt.hard <- read_csv(paste(data_dir, 'irt-cl-hard-', exp_type, '-1000.log', sep=''),
+                  col_names = c('train_size', 'train_acc', 'val_acc', 'test_acc', 'theta'),
+                  skip=num_skip, n_max=200)
+D.irt.hard$epoch <- c(1:200)
+D.irt.hard$exp <- 'irt.hard'
+

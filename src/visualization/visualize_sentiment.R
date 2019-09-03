@@ -57,20 +57,21 @@ which(D$exp=='naacl-root-easiest-irt' & D$epoch==123)
 which(D$exp=='naacl-root-easiest-length' & D$epoch==158)
 
 
-png("../../reports/figures/cl_irt_sstb.png", width=1100, height=700)
-ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
+png("../../reports/figures/cl_irt_sstb.png", width=500, height=300)
+ggplot(D, aes(x=epoch, y=test_acc*100, color=exp))  + 
   geom_line() + 
-  geom_line(aes(x=epoch, y=train_size/67348, color=exp),D, linetype=2) + 
+  geom_line(aes(x=epoch, y=train_size/673.48, color=exp),D, linetype=2) + 
   geom_vline(aes(xintercept=epoch, color=exp ), D[c(96,212,451,866,723,1158),]) + 
   theme_minimal() + 
   ggtitle("Comaprison of CL Strategies: SSTB") + 
   ylab("Test accuracy") + 
   xlab("Epoch") + 
+  ylim(60,100) +
   scale_color_discrete(name='Experiment',
                        breaks=c('baseline', 'naacl-linear-easiest-irt', 'naacl-linear-easiest-length',
                                 'irt', 'naacl-root-easiest-irt', 'naacl-root-easiest-length'),
                        labels=c('Baseline', 'CB-L-IRT', 'CB-L-Length', 
-                                'DCL', 'CB-R-IRT', 'CB-R-Length'))
+                                'DDaCLAE', 'CB-R-IRT', 'CB-R-Length'))
 dev.off()
 
 
