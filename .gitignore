@@ -105,3 +105,6 @@ target/
 
 ## don't add the bib file because it is a direct export from Zotero, so I'll be able to grab it wherever.
 *.bib 
+
+
+*.zip

@@ -25,8 +25,6 @@ def main(data_path):
     trainfile = 'snli_1.0_train.txt'
     devfile = 'snli_1.0_dev.txt'
     testfile_snli = 'snli_1.0_test.txt'
-    #raw_data_path = '/mnt/nfs/work1/hongyu/lalor/data/cl-data/raw/'
-    #processed_data_path = '/mnt/nfs/work1/hongyu/lalor/data/cl-data/processed/'
     raw_data_path = data_path + '/raw/'
     processed_data_path = data_path + '/processed/' 
 

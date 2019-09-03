@@ -41,4 +41,4 @@ def test():
     rp = [1.] * 2500 + [-1.] * 7500 
     print(calculate_theta(diffs, rp)) 
 
-#test() 
+test() 
