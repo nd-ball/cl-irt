@@ -57,7 +57,7 @@ which(D$exp=='naacl-root-easiest-irt' & D$epoch==54)
 which(D$exp=='naacl-root-easiest-length' & D$epoch==32)
 
 
-png("../../reports/figures/cl_irt_snli.png", width=1100, height=700)
+png("../../reports/figures/cl_irt_snli.png", width=500, height=300)
 ggplot(D, aes(x=epoch, y=test_acc*100, color=exp))  + 
   geom_line() + 
   geom_line(aes(x=epoch, y=train_size/5491.84, color=exp),D, linetype=2) + 

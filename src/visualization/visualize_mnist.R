@@ -122,3 +122,10 @@ Z[which(Z$exp=='Simple-Easiest' & Z$epoch==177),]
 Z[which(Z$exp=='Theta' & Z$epoch==158),]
 Z[which(Z$exp=='Simple-MiddleOut' & Z$epoch==157),]
 Z[which(Z$exp=='Ordered' & Z$epoch==167),]
+
+
+D.irt.hard <- read_csv(paste(data_dir, 'irt-cl-hard-', exp_type, '-1000.log', sep=''),
+                  col_names = c('train_size', 'train_acc', 'val_acc', 'test_acc', 'theta'),
+                  skip=num_skip, n_max=200)
+D.irt.hard$epoch <- c(1:200)
+D.irt.hard$exp <- 'irt.hard'

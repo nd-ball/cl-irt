@@ -29,7 +29,7 @@ D.root.easiest <- read_csv(paste(data_dir,exp_type, '-naacl-root-easiest.log',se
 D.root.easiest$epoch <- c(1:200) 
 D.root.easiest$exp <- 'naacl-root-easiest'
 
-D <- rbind(D.baseline, D.irt, D.linear.easiest,D.root.easiest, D.irt.hard)
+D <- rbind(D.baseline, D.irt, D.linear.easiest,D.root.easiest)
 filter <- D %>%
   group_by(exp) %>%
   summarize(max=max(val_acc)) 
