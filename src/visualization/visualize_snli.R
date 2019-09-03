@@ -56,22 +56,24 @@ which(D$exp=='naacl-linear-easiest-length' & D$epoch==55)
 which(D$exp=='naacl-root-easiest-irt' & D$epoch==54)
 which(D$exp=='naacl-root-easiest-length' & D$epoch==32)
 
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-png("../../reports/figures/cl_irt_snli.png", width=500, height=300)
+png("../../reports/figures/cl_irt_snli.png", width=400, height=200)
 ggplot(D, aes(x=epoch, y=test_acc*100, color=exp))  + 
-  geom_line() + 
-  geom_line(aes(x=epoch, y=train_size/5491.84, color=exp),D, linetype=2) + 
-  geom_vline(aes(xintercept=epoch, color=exp ), D[c(23,236,457,855,654,1032),]) + 
+  geom_line(show.legend = F) + 
+  geom_line(aes(x=epoch, y=train_size/5491.84, color=exp),D, linetype=2, show.legend = F) + 
+  geom_vline(aes(xintercept=epoch, color=exp ), D[c(23,236,457,855,654,1032),], show.legend = F) + 
   theme_minimal() + 
   ggtitle("Comaprison of CL Strategies: SNLI") + 
   ylab("Test accuracy") + 
   xlab("Epoch") + 
   ylim(50,100) +
-  scale_color_discrete(name='Experiment',
+  scale_color_manual(name='Experiment',
                        breaks=c('baseline', 'naacl-linear-easiest-irt', 'naacl-linear-easiest-length',
                                 'irt', 'naacl-root-easiest-irt', 'naacl-root-easiest-length'),
                        labels=c('Baseline', 'CB-L-IRT', 'CB-L-Length', 
-                                'DDaCLAE', 'CB-R-IRT', 'CB-R-Length'))
+                                'DDaCLAE', 'CB-R-IRT', 'CB-R-Length'),
+                       values=cbbPalette)
 dev.off()
 
 ######### Table to show how much data was required to get to best acc #################

@@ -42,19 +42,22 @@ which(D$exp=='naacl-linear-easiest' & D$epoch==162)
 which(D$exp=='irt' & D$epoch==140)
 which(D$exp=='naacl-root-easiest' & D$epoch==183)
 
-png("../../reports/figures/cl_irt_mnist.png", width=500, height=300)
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+png("../../reports/figures/cl_irt_mnist.png", width=400, height=200)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
-  geom_line() + 
-  geom_line(aes(x=epoch, y=train_size/500, color=exp),D, linetype=2) + 
-  geom_vline(aes(xintercept=epoch, color=exp ), D[c(149,562,340,783),]) + 
+  geom_line(show.legend = F) + 
+  geom_line(aes(x=epoch, y=train_size/500, color=exp),D, linetype=2, show.legend = F) + 
+  geom_vline(aes(xintercept=epoch, color=exp ), D[c(149,562,340,783),], show.legend = F) + 
   theme_minimal() + 
   ggtitle("Comaprison of CL Strategies: MNIST") + 
   ylab("Test accuracy (%)") + 
   xlab("Epoch") + 
   ylim(90,100) +
-  scale_color_discrete(name='Experiment',
+  scale_color_manual(name='Experiment',
                        breaks=c('baseline', 'naacl-linear-easiest', 'irt', 'naacl-root-easiest'),
-                       labels=c('Baseline', 'CB-L', 'DDaCLAE', 'CB-R'))
+                       labels=c('Baseline', 'CB-L', 'DDaCLAE', 'CB-R'),
+                     values=cbbPalette)
 dev.off()
 
 ######### Table to show how much data was required to get to best acc #################

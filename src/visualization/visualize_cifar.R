@@ -41,8 +41,9 @@ which(D$exp=='naacl-linear-easiest' & D$epoch==168)
 which(D$exp=='irt' & D$epoch==107)
 which(D$exp=='naacl-root-easiest' & D$epoch==158)
 
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-png("../../reports/figures/cl_irt_cifar.png" , width=500, height=300)
+png("../../reports/figures/cl_irt_cifar.png" , width=400, height=200)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
   geom_line() + 
   geom_line(aes(x=epoch, y=train_size/400, color=exp),D, linetype=2) + 
@@ -52,9 +53,10 @@ ggplot(D, aes(x=epoch, y=test_acc, color=exp))  +
   ylab("Test accuracy (%)") + 
   xlab("Epoch") + 
   ylim(50,100) +
-  scale_color_discrete(name='Experiment',
+  scale_color_manual(name='Experiment',
                        breaks=c('baseline', 'naacl-linear-easiest', 'irt', 'naacl-root-easiest'),
-                       labels=c('Baseline', 'CB-L', 'DDaCLAE', 'CB-R'))
+                       labels=c('Baseline', 'CB-L', 'DDaCLAE', 'CB-R'),
+                       values=cbbPalette) 
 dev.off() 
 
 ######### Table to show how much data was required to get to best acc #################
