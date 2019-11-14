@@ -21,12 +21,18 @@ def theta_fn(difficulties, student_prior, response_pattern):
     return fn 
 
 
-def calculate_theta(difficulties, response_pattern):
+def calculate_theta(difficulties, response_pattern, num_obs=-1):
     """
     given learned item difficulties and a model response pattern, estimate theta
+    if num_obs > 0, then sample from the observed values for a computational speedup
     """ 
 
     student_prior = norm(loc=0., scale=1.) 
+    if num_obs > 0:
+        samples = np.random.choice(len(difficulties), num_obs)
+        difficulties = [difficulties[s] for s in samples] 
+        response_pattern = [response_pattern[s] for s in samples] 
+
     fn = theta_fn(difficulties, student_prior, response_pattern) 
     result = minimize(fn, [0.1], method='Nelder-Mead') 
     return result['x']
@@ -47,8 +53,9 @@ def test():
     #diffs = [-1.0, -0.75, 0.02, 1.4, 3.2]
     rp = [1, -1, 1, 1, -1]
     #rp = [0,0,0,0,0]
-    diffs = np.random.rand(10000) - 2.
-    rp = [1.] * 2500 + [-1.] * 7500 
+    diffs = np.random.rand(500000) - 2.
+    rp = [1.] * 250000 + [-1.] * 250000 
     print(calculate_theta(diffs, rp)) 
+    print(calculate_theta(diffs, rp, 1000)) 
 
-#test() 
+test() 

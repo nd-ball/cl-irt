@@ -82,7 +82,7 @@ parser.add_argument('--no-cuda', action='store_true', default=False,
 parser.add_argument('--min-train-length', default=100, type=int)
 parser.add_argument('--k', default=0, type=int) 
 parser.add_argument('--competency', default=50, type=int) 
-parser.add_argument('--p-correct', default=0.5, help="P(correct) to filter training data for IRT")
+parser.add_argument('--p-correct', default=0.5, type=float, help="P(correct) to filter training data for IRT")
 args = parser.parse_args()
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
