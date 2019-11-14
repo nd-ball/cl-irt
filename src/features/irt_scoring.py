@@ -32,6 +32,16 @@ def calculate_theta(difficulties, response_pattern):
     return result['x']
 
 
+
+def calculate_diff_threshold(p_correct, theta):
+    '''
+    calculate the difficulty threshold where the probability correct given theta is equal to p_correct
+    p_correct: the desired probability threshold
+    theta: estimated model ability at current timestep
+    '''
+    return np.log(1/p_correct - 1) + theta 
+
+
 def test():
     diffs = [-3., -2., -2., -1., -3.]
     #diffs = [-1.0, -0.75, 0.02, 1.4, 3.2]
@@ -41,4 +51,4 @@ def test():
     rp = [1.] * 2500 + [-1.] * 7500 
     print(calculate_theta(diffs, rp)) 
 
-test() 
+#test() 

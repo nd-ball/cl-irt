@@ -12,7 +12,7 @@ from torchvision import datasets, transforms
 from data.my_data_downloaders import my_MNIST
 
 from features.build_features import get_epoch_training_data_vision, k_sort 
-from features.irt_scoring import calculate_theta 
+from features.irt_scoring import calculate_theta, calculate_diff_threshold 
 
 
 class Net(nn.Module):
@@ -63,6 +63,9 @@ def train(args, model, device, train_data, test_loader, val_loader,
         #print(train_rps) 
         theta_hat = calculate_theta(train_diffs, train_rps)[0] 
         #print('estimated theta: {}'.format(theta_hat))   
+        # calculate the difficulty value required for such that 
+        # we only include items where p_correct >= args.p_correct
+        theta_hat = calculate_diff_threshold(args.p_correct, theta_hat)
     else:
         theta_hat=0  
     
@@ -175,6 +178,7 @@ def main():
     parser.add_argument('--min-train-length', default=100, type=int)
     parser.add_argument('--k', default=0, type=int) 
     parser.add_argument('--competency', default=50, type=int) 
+    parser.add_argument('--p-correct', default=0.5, help="P(correct) to filter training data for IRT")
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 

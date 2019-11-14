@@ -11,7 +11,7 @@ import pandas as pd
 from sklearn.metrics import accuracy_score
 
 from features.build_features import load_snli, get_epoch_training_data, k_sort 
-from features.irt_scoring import calculate_theta 
+from features.irt_scoring import calculate_theta, calculate_diff_threshold 
 
 
 parser = argparse.ArgumentParser()
@@ -34,6 +34,7 @@ parser.add_argument('--use-length', action='store_true')
 parser.add_argument('--min-train-length', default=100, type=int)
 parser.add_argument('--k', default=0, type=int) 
 parser.add_argument('--competency', default=50, type=int) 
+parser.add_argument('--p-correct', default=0.5, help="P(correct) to filter training data for IRT")
 args = parser.parse_args()
 
 print(args)
@@ -200,6 +201,9 @@ def run():
             #print(train['difficulty']) 
             theta_hat = calculate_theta(train['difficulty'], rps)[0] 
             #print('estimated theta: {}'.format(theta_hat))     
+            # calculate the difficulty value required for such that 
+            # we only include items where p_correct >= args.p_correct
+            theta_hat = calculate_diff_threshold(args.p_correct, theta_hat)
         else:
             theta_hat=0
 
