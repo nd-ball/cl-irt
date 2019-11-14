@@ -54,8 +54,8 @@ def test():
     rp = [1, -1, 1, 1, -1]
     #rp = [0,0,0,0,0]
     diffs = np.random.rand(500000) - 2.
-    rp = [1.] * 250000 + [-1.] * 250000 
+    rp = [1.] * 100000 + [-1.] * 400000 
     print(calculate_theta(diffs, rp)) 
-    print(calculate_theta(diffs, rp, 1000)) 
+    print(calculate_theta(diffs, rp, 10000)) 
 
-test() 
+#test() 
