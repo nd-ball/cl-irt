@@ -3,6 +3,7 @@
 source activate dynet2.0
 
 export LD_LIBRARY_PATH=/home/lalor/bin/dynet-base-py3/dynet/build/dynet/:$LD_LIBRARY_PATH
+NUMEPOCHS=200
 
 # irt CL
 
