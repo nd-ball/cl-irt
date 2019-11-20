@@ -50,7 +50,7 @@ ggplot(D, aes(x=epoch, y=test_acc, color=exp))  +
   geom_line(aes(x=epoch, y=train_size/500, color=exp),D, linetype=2, show.legend = T) + 
   geom_vline(aes(xintercept=epoch, color=exp ), D[c(149,562,340,783),], show.legend = T) + 
   theme_minimal() + 
-  ggtitle("Comaprison of CL Strategies: MNIST") + 
+  ggtitle("Comparison of CL Strategies: MNIST") + 
   ylab("Test accuracy (%)") + 
   xlab("Epoch") + 
   ylim(90,100) +

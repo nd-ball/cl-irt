@@ -64,7 +64,7 @@ ggplot(D, aes(x=epoch, y=test_acc*100, color=exp))  +
   geom_line(aes(x=epoch, y=train_size/5491.84, color=exp),D, linetype=2, show.legend = T) + 
   geom_vline(aes(xintercept=epoch, color=exp ), D[c(23,236,457,855,654,1032),], show.legend = T) + 
   theme_minimal() + 
-  ggtitle("Comaprison of CL Strategies: SNLI") + 
+  ggtitle("Comparison of CL Strategies: SNLI") + 
   ylab("Test accuracy") + 
   xlab("Epoch") + 
   ylim(50,100) +
