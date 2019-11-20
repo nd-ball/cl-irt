@@ -58,16 +58,17 @@ which(D$exp=='naacl-root-easiest-length' & D$epoch==32)
 
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-png("../../reports/figures/cl_irt_snli.png", width=400, height=200)
+png("../../reports/figures/cl_irt_snli.png", width=800, height=400)
 ggplot(D, aes(x=epoch, y=test_acc*100, color=exp))  + 
-  geom_line(show.legend = F) + 
-  geom_line(aes(x=epoch, y=train_size/5491.84, color=exp),D, linetype=2, show.legend = F) + 
-  geom_vline(aes(xintercept=epoch, color=exp ), D[c(23,236,457,855,654,1032),], show.legend = F) + 
+  geom_line(show.legend = T) + 
+  geom_line(aes(x=epoch, y=train_size/5491.84, color=exp),D, linetype=2, show.legend = T) + 
+  geom_vline(aes(xintercept=epoch, color=exp ), D[c(23,236,457,855,654,1032),], show.legend = T) + 
   theme_minimal() + 
   ggtitle("Comaprison of CL Strategies: SNLI") + 
   ylab("Test accuracy") + 
   xlab("Epoch") + 
   ylim(50,100) +
+  xlim(0, 100) +
   scale_color_manual(name='Experiment',
                        breaks=c('baseline', 'naacl-linear-easiest-irt', 'naacl-linear-easiest-length',
                                 'irt', 'naacl-root-easiest-irt', 'naacl-root-easiest-length'),

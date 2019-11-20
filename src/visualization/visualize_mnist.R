@@ -44,11 +44,11 @@ which(D$exp=='naacl-root-easiest' & D$epoch==183)
 
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-png("../../reports/figures/cl_irt_mnist.png", width=400, height=200)
+png("../../reports/figures/cl_irt_mnist.png", width=800, height=400)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
-  geom_line(show.legend = F) + 
-  geom_line(aes(x=epoch, y=train_size/500, color=exp),D, linetype=2, show.legend = F) + 
-  geom_vline(aes(xintercept=epoch, color=exp ), D[c(149,562,340,783),], show.legend = F) + 
+  geom_line(show.legend = T) + 
+  geom_line(aes(x=epoch, y=train_size/500, color=exp),D, linetype=2, show.legend = T) + 
+  geom_vline(aes(xintercept=epoch, color=exp ), D[c(149,562,340,783),], show.legend = T) + 
   theme_minimal() + 
   ggtitle("Comaprison of CL Strategies: MNIST") + 
   ylab("Test accuracy (%)") + 

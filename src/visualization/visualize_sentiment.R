@@ -58,7 +58,7 @@ which(D$exp=='naacl-root-easiest-length' & D$epoch==158)
 
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-png("../../reports/figures/cl_irt_sstb.png", width=400, height=200)
+png("../../reports/figures/cl_irt_sstb.png", width=800, height=400)
 ggplot(D, aes(x=epoch, y=test_acc*100, color=exp))  + 
   geom_line() + 
   geom_line(aes(x=epoch, y=train_size/673.48, color=exp),D, linetype=2) + 

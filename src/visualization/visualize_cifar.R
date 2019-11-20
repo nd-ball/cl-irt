@@ -43,13 +43,13 @@ which(D$exp=='naacl-root-easiest' & D$epoch==158)
 
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-png("../../reports/figures/cl_irt_cifar.png" , width=400, height=200)
+png("../../reports/figures/cl_irt_cifar.png" , width=800, height=400)
 ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
   geom_line() + 
   geom_line(aes(x=epoch, y=train_size/400, color=exp),D, linetype=2) + 
   geom_vline(aes(xintercept=epoch, color=exp ), D[c(182,568,307,758),]) + 
   theme_minimal() + 
-  ggtitle("Comaprison of CL Strategies: CIFAR") + 
+  ggtitle("Comparison of CL Strategies: CIFAR") + 
   ylab("Test accuracy (%)") + 
   xlab("Epoch") + 
   ylim(50,100) +
