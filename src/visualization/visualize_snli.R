@@ -77,6 +77,35 @@ ggplot(D, aes(x=epoch, y=test_acc*100, color=exp))  +
                        values=cbbPalette)
 dev.off()
 
+# new plot for acl 2020 submission 
+D.acl <- D[which(D$exp %in% c('baseline', 'naacl-linear-easiest-irt', 
+                              'naacl-root-easiest-irt', 'irt')),]
+
+png("../../reports/figures/cl_irt_snli_acl2020.png", width=400, height=200)
+ggplot(D.acl, aes(x=epoch, y=train_size/5491.84, color=exp, linetype=exp))  + 
+  geom_line(show.legend = T) + 
+  theme_minimal() + 
+  ggtitle("Training Data Use: SNLI") + 
+  ylab("Training data used (%)") + 
+  xlab("Epoch") + 
+  ylim(50,100) +
+  xlim(0, 75) +
+  scale_linetype_manual(
+    name='Experiment',
+    breaks=c('baseline', 'naacl-linear-easiest-irt', 
+             'naacl-root-easiest-irt', 'irt'),
+    labels=c('Baseline', 'CB-L',  
+             'CB-R', 'DDaCLAE'),
+    values=c(1,2,3,4)) + 
+  scale_color_manual(name='Experiment',
+                     breaks=c('baseline', 'naacl-linear-easiest-irt', 
+                              'naacl-root-easiest-irt', 'irt'),
+                     labels=c('Baseline', 'CB-L',  
+                              'CB-R', 'DDaCLAE'),
+                     values=cbbPalette)
+dev.off()
+
+
 ######### Table to show how much data was required to get to best acc #################
 sum(D[which(D$exp=='baseline'&D$epoch <= max_epochs[which(max_epochs$exp=='baseline'),]$epoch),]$train_size)
 sum(D[which(D$exp=='irt'&D$epoch <= max_epochs[which(max_epochs$exp=='irt'),]$epoch),]$train_size)
