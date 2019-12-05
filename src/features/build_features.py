@@ -36,7 +36,7 @@ def tokenize(sent):
     return ' '.join([x.strip() for x in re.split('(\W+)?', sent) if x.strip()])
 
 
-def preprocess(X, train=False): 
+def preprocess(X, train=False, bert=False): 
     lbls = []
     data = []
     pids = []
@@ -48,8 +48,12 @@ def preprocess(X, train=False):
         try:
             label_set = ['entailment', 'contradiction', 'neutral']
             lbl = row.gold_label
-            s1 = tokenize(row.sentence1).split(' ')
-            s2 = tokenize(row.sentence2).split(' ')
+            if not bert:
+                s1 = tokenize(row.sentence1).split(' ')
+                s2 = tokenize(row.sentence2).split(' ')
+            else:
+                s1 = row.sentence1 
+                s2 = row.sentence2 
             pid = row.pairID 
             if train:
                 pair_diff = row.difficulty 
@@ -150,6 +154,41 @@ def load_snli(data_dir):
     gc.collect()
     #print('dict size: {}'.format(len(w2i)))
     return train, dev, test, w2i, i2w, vectors
+
+
+def load_snli_bert(data_dir):
+    # get data
+    '''
+    Load some subset of the SNLI dataset, based on diff threshold 
+    '''
+    # load data files
+    #print('loading SNLI data')
+    # train_size = 10000
+    trainfile = 'snli_1.0_train_diff.txt'
+    devfile = 'snli_1.0_dev.txt'
+    testfile = 'snli_1.0_test.txt'
+    train = pd.read_csv(data_dir +'/processed/' + trainfile, sep='\t',
+                        usecols=['gold_label', 'sentence1', 'sentence2', 'pairID', 'difficulty'])
+    dev = pd.read_csv(data_dir + '/raw/' + devfile, sep='\t',
+                      usecols=['gold_label', 'sentence1', 'sentence2', 'pairID'])
+    test = pd.read_csv(data_dir + '/raw/' + testfile, sep='\t',
+                            usecols=['gold_label', 'sentence1', 'sentence2', 'pairID'])
+
+    #print(train['sentence1'][0])
+
+    # preprocess them as necessary
+    # create the vocab for all of the data for consistency
+    #print('generating vocab...')
+    #vocab = all_vocab(train) | all_vocab(dev) | all_vocab(test)
+    #vocab_size = len(vocab)
+
+    #print('preprocessing data...')
+    out_train = preprocess(train, train=True, bert=True)
+    out_dev = preprocess(dev, bert=True)
+    out_test = preprocess(test, bert=True)
+    gc.collect()
+
+    return out_train, out_dev, out_test
 
 
 ############# SSTB ################
