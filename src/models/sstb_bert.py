@@ -218,8 +218,10 @@ def train(args): #, outwriter):
                         'token_type_ids': batch[2],
                         'labels': batch[3]
                     }
+            print(inputs) 
             outputs = model(**inputs) 
             loss = outputs[0]
+            print(loss.item()) 
             loss.backward() 
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm) 
             optimizer.step() 

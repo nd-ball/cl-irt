@@ -128,7 +128,7 @@ def run():
             train['pairID'][i],
             train['phrase'][i][0],
             train['phrase'][i][1],
-            train['labels'][i]
+            train['lbls'][i]
         )
         full_train_examples.append(next_example) 
     features_train = generate_features(full_train_examples, tokenizer)
@@ -139,7 +139,7 @@ def run():
             dev['pairID'][i],
             dev['phrase'][i][0],
             dev['phrase'][i][1],
-            dev['labels'][i]
+            dev['lbls'][i]
         )
         dev_examples.append(next_example) 
     features_dev = generate_features(dev_examples, tokenizer) 
@@ -150,7 +150,7 @@ def run():
             test['pairID'][i],
             test['phrase'][i][0],
             test['phrase'][i][1],
-            test['labels'][i]
+            test['lbls'][i]
         )
         test_examples.append(next_example) 
     features_test = generate_features(test_examples, tokenizer)
@@ -233,7 +233,7 @@ def run():
                 epoch_training_data['pairID'][i],
                 epoch_training_data['phrase'][i][0],
                 epoch_training_data['phrase'][i][1],
-                epoch_training_data['labels'][i]
+                epoch_training_data['lbls'][i]
             )
             train_examples.append(next_example) 
         features_train_epoch = generate_features(train_examples, tokenizer)
