@@ -229,7 +229,7 @@ def train(args): #, outwriter):
             outputs = model(**inputs) 
             loss = outputs[0]
             loss.backward() 
-            torch.nn.utils.clip_grap_norm_(model.parameters(), max_grad_norm) 
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm) 
             optimizer.step() 
             scheduler.step()
             model.zero_grad() 
