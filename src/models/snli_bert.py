@@ -228,7 +228,7 @@ def run():
 
         # per epoch training set
         train_examples = []
-        for i in range(len(train['phrase'])):
+        for i in range(num_train_epoch):
             next_example = utils.InputExample(
                 epoch_training_data['pairID'][i],
                 epoch_training_data['phrase'][i][0],

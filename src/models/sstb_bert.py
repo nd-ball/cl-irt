@@ -204,7 +204,7 @@ def train(args): #, outwriter):
         # shuffle training data
         # per epoch training set
         train_examples = []
-        for j in range(len(train['phrase'])):
+        for j in range(num_train_epoch):
             next_example = utils.InputExample(
                 epoch_training_data['pairID'][i],
                 epoch_training_data['phrase'][j],
