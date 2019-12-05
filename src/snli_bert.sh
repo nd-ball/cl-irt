@@ -18,5 +18,5 @@ NUMEPOCHS=10  # max num epochs, using early stopping though
 #done
 
 
-sbatch -p titanx-long --gres=gpu:1 --mem=90gb --output=logs/bert/bert-sstb-test-length.log --wrap="python -u -m models.sstb_bert --gpu 0 --data-dir /mnt/nfs/work1/hongyu/lalor/data/cl-data/ --strategy naacl-root --use-length --ordering easiest --num-epochs $NUMEPOCHS --cache-dir /mnt/nfs/work1/hongyu/lalor/data/bert/"
+sbatch -p titanx-long --gres=gpu:1 --mem=90gb --output=logs/bert/bert-sstb-test-length.log --wrap="python -u -m models.sstb_bert --gpu 0 --data-dir /mnt/nfs/work1/hongyu/lalor/data/cl-data/ --strategy baseline --use-length --ordering easiest --num-epochs $NUMEPOCHS --cache-dir /mnt/nfs/work1/hongyu/lalor/data/bert/"
 
