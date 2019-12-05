@@ -182,8 +182,8 @@ def run():
         # estimate theta for current model parameters
         if args.strategy in ['theta', 'theta-hard']:
 
-            theta_sampler = SequentialSampler(full_train_examples)
-            theta_dataloader = DataLoader(full_train_examples, sampler=theta_sampler, batch_size=batch_size)
+            theta_sampler = SequentialSampler(features_train)
+            theta_dataloader = DataLoader(features_train, sampler=theta_sampler, batch_size=batch_size)
             preds = None 
             for batch in theta_dataloader:
                 model.eval() 
@@ -262,8 +262,8 @@ def run():
         #print("Training accuracy: {}, epoch: {}, num examples: {}".format(acc_train, i, len(preds)))
 
         # Dev
-        dev_sampler = SequentialSampler(dev_examples)
-        dev_dataloader = DataLoader(dev_examples, sampler=dev_sampler, batch_size=batch_size)
+        dev_sampler = SequentialSampler(features_dev)
+        dev_dataloader = DataLoader(features_dev, sampler=dev_sampler, batch_size=batch_size)
         preds = None 
         for batch in dev_dataloader:
             model.eval() 
@@ -291,8 +291,8 @@ def run():
         dev_acc = np.mean(rps) 
         
         # Test (SNLI)
-        test_sampler = SequentialSampler(test_examples)
-        test_dataloader = DataLoader(test_examples, sampler=test_sampler, batch_size=batch_size)
+        test_sampler = SequentialSampler(features_test)
+        test_dataloader = DataLoader(features_test, sampler=test_sampler, batch_size=batch_size)
         preds = None 
         for batch in test_dataloader:
             model.eval() 
