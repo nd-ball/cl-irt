@@ -93,7 +93,7 @@ def train(args): #, outwriter):
     full_train_examples = []
     for i in range(len(train['phrase'])):
         next_example = utils.InputExample(
-            train['itemID'][i],
+            train['pairID'][i],
             train['phrase'][i],
             label=train['lbls'][i]
         )
@@ -103,7 +103,7 @@ def train(args): #, outwriter):
     dev_examples = []
     for i in range(len(dev['phrase'])):
         next_example = utils.InputExample(
-            dev['itemID'][i],
+            dev['pairID'][i],
             dev['phrase'][i],
             label=dev['lbls'][i]
         )
@@ -113,7 +113,7 @@ def train(args): #, outwriter):
     test_examples = []
     for i in range(len(test['phrase'])):
         next_example = utils.InputExample(
-            test['itemID'][i],
+            test['pairID'][i],
             test['phrase'][i],
             label=test['lbls'][i]
         )
@@ -204,11 +204,11 @@ def train(args): #, outwriter):
         # shuffle training data
         # per epoch training set
         train_examples = []
-        for i in range(len(train['phrase'])):
+        for j in range(len(train['phrase'])):
             next_example = utils.InputExample(
-                epoch_training_data['itemID'][i],
-                epoch_training_data['phrase'][i],
-                label=epoch_training_data['lbls'][i]
+                epoch_training_data['pairID'][i],
+                epoch_training_data['phrase'][j],
+                label=epoch_training_data['lbls'][j]
             )
             train_examples.append(next_example) 
         features_train_epoch = generate_features(train_examples, tokenizer)

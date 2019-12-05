@@ -125,7 +125,7 @@ def run():
     full_train_examples = []
     for i in range(len(train['phrase'])):
         next_example = utils.InputExample(
-            train['pairIDs'][i],
+            train['pairID'][i],
             train['phrase'][i][0],
             train['phrase'][i][1],
             train['labels'][i]
@@ -136,7 +136,7 @@ def run():
     dev_examples = []
     for i in range(len(dev['phrase'])):
         next_example = utils.InputExample(
-            dev['pairIDs'][i],
+            dev['pairID'][i],
             dev['phrase'][i][0],
             dev['phrase'][i][1],
             dev['labels'][i]
@@ -147,7 +147,7 @@ def run():
     test_examples = []
     for i in range(len(test['phrase'])):
         next_example = utils.InputExample(
-            test['pairIDs'][i],
+            test['pairID'][i],
             test['phrase'][i][0],
             test['phrase'][i][1],
             test['labels'][i]
@@ -230,7 +230,7 @@ def run():
         train_examples = []
         for i in range(len(train['phrase'])):
             next_example = utils.InputExample(
-                epoch_training_data['pairIDs'][i],
+                epoch_training_data['pairID'][i],
                 epoch_training_data['phrase'][i][0],
                 epoch_training_data['phrase'][i][1],
                 epoch_training_data['labels'][i]

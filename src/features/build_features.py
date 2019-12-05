@@ -75,7 +75,7 @@ def preprocess(X, train=False, bert=False):
     #print('error count: {}'.format(error_count))
     
     #print(len(data), len(lbls))
-    result = {'phrase': data, 'labels': lbls, 'pairIDs': pids, 'difficulty': diffs}
+    result = {'phrase': data, 'labels': lbls, 'pairID': pids, 'difficulty': diffs}
     return result
 
 
@@ -211,19 +211,19 @@ def load_sstb(data_dir):
         train['lbls'] = [] 
         train['phrase'] = [] 
         train['difficulty'] = []
-        train['itemID'] = []
+        train['pairID'] = []
         for i in range(TRAIN_SIZE):
             train['lbls'].append(eval(training_data[i][1]))
             train['phrase'].append(tokenize(training_data[i][0].strip()).split(' ')) 
             train['difficulty'].append(eval(training_data[i][3])) 
-            train['itemID'].append(eval(training_data[i][2]))
+            train['pairID'].append(eval(training_data[i][2]))
 
     with open(data_dir + '/raw/' + devfile, 'r') as infile:
         dev_data = infile.readlines()[1:]
         dev = {}
         dev['lbls'] = [eval(l.split('\t')[1]) for l in dev_data]
         dev['phrase'] = [tokenize(l.split('\t')[0].strip()).split(' ') for l in dev_data]
-        dev['itemID'] = list(range(len(dev['phrase'])))
+        dev['pairID'] = list(range(len(dev['phrase'])))
 
     with open(data_dir + '/raw/' + testfile, 'r') as infile:
         test_data = infile.readlines()[1:]
@@ -231,7 +231,7 @@ def load_sstb(data_dir):
         test['lbls'] = [eval(l[0]) for l in test_data]
         #test['lbls'] = [0] * len(test_data)  # for now
         test['phrase'] = [tokenize(l[1:].strip()).split(' ') for l in test_data]
-        test['itemID'] = list(range(len(test['phrase']))) 
+        test['pairID'] = list(range(len(test['phrase']))) 
 
     # build vocab
     vocab = set()
@@ -297,19 +297,19 @@ def load_sstb_bert(data_dir):
         train['lbls'] = [] 
         train['phrase'] = [] 
         train['difficulty'] = []
-        train['itemID'] = []
+        train['pairID'] = []
         for i in range(TRAIN_SIZE):
             train['lbls'].append(eval(training_data[i][1]))
             train['phrase'].append(training_data[i][0]) 
             train['difficulty'].append(eval(training_data[i][3])) 
-            train['itemID'].append(eval(training_data[i][2]))
+            train['pairID'].append(eval(training_data[i][2]))
 
     with open(data_dir + '/raw/' + devfile, 'r') as infile:
         dev_data = infile.readlines()[1:]
         dev = {}
         dev['lbls'] = [eval(l.split('\t')[1]) for l in dev_data]
         dev['phrase'] = [l.split('\t')[0] for l in dev_data]
-        dev['itemID'] = list(range(len(dev['phrase'])))
+        dev['pairID'] = list(range(len(dev['phrase'])))
 
     with open(data_dir + '/raw/' + testfile, 'r') as infile:
         test_data = infile.readlines()[1:]
@@ -317,7 +317,7 @@ def load_sstb_bert(data_dir):
         test['lbls'] = [eval(l[0]) for l in test_data]
         #test['lbls'] = [0] * len(test_data)  # for now
         test['phrase'] = [l[1:] for l in test_data]
-        test['itemID'] = list(range(len(test['phrase']))) 
+        test['pairID'] = list(range(len(test['phrase']))) 
 
     out_train = train
     out_dev = dev
@@ -343,11 +343,13 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
  
     # set up CL
     train_2 = {
+        'pairID': [],
         'lbls':[],
         'phrase':[ ],
         'difficulty': []
     }
     train = {
+        'pairID': [],
         'lbls':[],
         'phrase':[ ],
         'difficulty': []
@@ -381,6 +383,7 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
         train_2['phrase'] = [training_set['phrase'][d] for d in diffs_sorted_idx] 
         train_2['lbls'] = [training_set['lbls'][d] for d in diffs_sorted_idx] 
         train_2['difficulty'] = [training_set['difficulty'][d] for d in diffs_sorted_idx]
+        train_2['pairID'] = [training_set['pairID'][d] for d in diffs_sorted_idx]
     else:
         per_label_lists = {
             0:[], 1:[]
@@ -402,6 +405,7 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
         train_2['phrase'] = [training_set['phrase'][z] for z in train_2_idx]
         train_2['lbls'] = [training_set['lbls'][z] for z in train_2_idx]
         train_2['difficulty'] = [training_set['difficulty'][z] for z in train_2_idx]
+        train_2['pairID'] = [training_set['pairID'][z] for z in train_2_idx]
 
     # based on strategy, select our training set for this epoch
     if args.strategy == 'ordered':
@@ -417,6 +421,7 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
         train['lbls'] = [train_2['lbls'][i] for i in range(num_train)] 
         train['phrase'] = [train_2['phrase'][i] for i in range(num_train)] 
         train['difficulty'] = [train_2['difficulty'][i] for i in range(num_train)]
+        train['pairID'] = [train_2['pairID'][i] for i in range(num_train)]
         return train 
     elif args.strategy == 'theta':
         train_idx = [i for i in range(len(training_set['phrase'])) if train_2['difficulty'][i] <= theta_hat]
@@ -425,6 +430,7 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
         train['lbls'] = [train_2['lbls'][i] for i in train_idx] 
         train['phrase'] = [train_2['phrase'][i] for i in train_idx] 
         train['difficulty'] = [train_2['difficulty'][i] for i in train_idx]
+        train['pairID'] = [train_2['pairID'][i] for i in train_idx]
         return train 
     elif args.strategy == 'theta-hard':
         train_idx = [i for i in range(len(training_set['phrase'])) if train_2['difficulty'][i] >= theta_hat]
@@ -433,18 +439,21 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
         train['lbls'] = [train_2['lbls'][i] for i in train_idx] 
         train['phrase'] = [train_2['phrase'][i] for i in train_idx] 
         train['difficulty'] = [train_2['difficulty'][i] for i in train_idx]
+        train['pairID'] = [train_2['pairID'][i] for i in train_idx]
         return train 
     elif args.strategy == 'naacl-linear':
         epoch_competency = np.min([1, epoch * ((1 - c_init)/args.competency) + c_init])
         train['lbls'] = [train_2['lbls'][i] for i in range(int(epoch_competency * len(training_set['phrase'])))]
         train['phrase'] = [train_2['phrase'][i] for i in range(int(epoch_competency * len(training_set['phrase'])))]
         train['difficulty'] = [train_2['difficulty'][i] for i in range(int(epoch_competency * len(training_set['phrase'])))]
+        train['pairID'] = [train_2['pairID'][i] for i in range(int(epoch_competency * len(training_set['phrase'])))]
         return train 
     elif args.strategy == 'naacl-root':
         epoch_competency = np.min([1,np.sqrt(epoch * ((1 - c_init**2)/args.competency) + c_init**2)])
         train['lbls'] = [train_2['lbls'][i] for i in range(int(epoch_competency * len(training_set['phrase'])))]
         train['phrase'] = [train_2['phrase'][i] for i in range(int(epoch_competency * len(training_set['phrase'])))]
         train['difficulty'] = [train_2['difficulty'][i] for i in range(int(epoch_competency * len(training_set['phrase'])))]
+        train['pairID'] = [train_2['pairID'][i] for i in range(int(epoch_competency * len(training_set['phrase'])))]
         return train 
     else:
         raise NotImplementedError
