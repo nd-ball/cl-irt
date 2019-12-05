@@ -217,7 +217,7 @@ def train(args): #, outwriter):
         train_dataloader = DataLoader(features_train_epoch, sampler=train_sampler, batch_size=batch_size) 
 
         model.zero_grad()
-        for i, batch in enumerate(train_dataloader):
+        for j, batch in enumerate(train_dataloader):
             model.train() 
             batch = tuple(t.to(device) for t in batch) 
             inputs = {
