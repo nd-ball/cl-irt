@@ -95,7 +95,7 @@ def train(args): #, outwriter):
         next_example = utils.InputExample(
             train['itemID'][i],
             train['phrase'][i],
-            label=train['labels'][i]
+            label=train['lbls'][i]
         )
         full_train_examples.append(next_example) 
     features_train = generate_features(full_train_examples, tokenizer)
@@ -105,7 +105,7 @@ def train(args): #, outwriter):
         next_example = utils.InputExample(
             dev['itemID'][i],
             dev['phrase'][i],
-            label=dev['labels'][i]
+            label=dev['lbls'][i]
         )
         dev_examples.append(next_example) 
     features_dev = generate_features(dev_examples, tokenizer) 
@@ -115,7 +115,7 @@ def train(args): #, outwriter):
         next_example = utils.InputExample(
             test['itemID'][i],
             test['phrase'][i],
-            label=test['labels'][i]
+            label=test['lbls'][i]
         )
         test_examples.append(next_example) 
     features_test = generate_features(test_examples, tokenizer)
@@ -208,7 +208,7 @@ def train(args): #, outwriter):
             next_example = utils.InputExample(
                 epoch_training_data['itemID'][i],
                 epoch_training_data['phrase'][i],
-                label=epoch_training_data['labels'][i]
+                label=epoch_training_data['lbls'][i]
             )
             train_examples.append(next_example) 
         features_train_epoch = generate_features(train_examples, tokenizer)
