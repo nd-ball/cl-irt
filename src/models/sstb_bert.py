@@ -126,7 +126,7 @@ def train(args): #, outwriter):
         {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
         ]
 
-    optimizer = AdamW(optimizer_grouped_parameters, lr=5e-5, eps=1e-8)
+    optimizer = AdamW(optimizer_grouped_parameters, lr=2e-5, eps=1e-8)
     scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=num_epoch)
 
 
@@ -146,6 +146,7 @@ def train(args): #, outwriter):
 
     print('Training model {}'.format(model))
     print('training')
+    model.zero_grad()
     for i in range(num_epoch):
         loss = 0.0
         #print('train epoch {}'.format(i))
@@ -208,7 +209,7 @@ def train(args): #, outwriter):
         train_sampler = RandomSampler(features_train_epoch)
         train_dataloader = DataLoader(features_train_epoch, sampler=train_sampler, batch_size=batch_size) 
 
-        model.zero_grad()
+        #model.zero_grad()
         for j, batch in enumerate(train_dataloader):
             model.train() 
             batch = tuple(t.to(device) for t in batch) 
@@ -218,7 +219,7 @@ def train(args): #, outwriter):
                         'token_type_ids': batch[2],
                         'labels': batch[3]
                     }
-            print(inputs) 
+            #print(inputs) 
             outputs = model(**inputs) 
             loss = outputs[0]
             print(loss.item()) 
@@ -234,6 +235,7 @@ def train(args): #, outwriter):
         dev_sampler = SequentialSampler(features_dev)
         dev_dataloader = DataLoader(features_dev, sampler=dev_sampler, batch_size=batch_size)
         preds = None 
+        dev_loss = 0
         for batch in dev_dataloader:
             model.eval() 
             batch = tuple(t.to(device) for t in batch) 
@@ -246,6 +248,7 @@ def train(args): #, outwriter):
                 }
                 outputs = model(**inputs) 
                 tmp_eval_loss, logits = outputs[:2]
+                dev_loss += tmp_eval_loss.item()
 
             if preds is None:
                 preds = logits.detach().cpu().numpy()
@@ -255,6 +258,7 @@ def train(args): #, outwriter):
                 out_label_ids = np.append(out_label_ids, inputs['labels'].detach().cpu().numpy(), axis=0) 
 
         preds = np.argmax(preds, axis=1) 
+        print('dev loss:{}'.format(dev_loss))
         
         rps = [int(p == c) for p, c in zip(preds, out_label_ids)] 
         print(rps) 
