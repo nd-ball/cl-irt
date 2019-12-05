@@ -67,7 +67,7 @@ def train(args): #, outwriter):
     tokenizer_class = BertTokenizer 
 
     config = config_class.from_pretrained('bert-base-uncased',
-                                            num_labels=3,
+                                            num_labels=out_dim,
                                             cache_dir=args.cache_dir)
     tokenizer = tokenizer_class.from_pretrained(
                                             'bert-base-uncased',
@@ -190,7 +190,7 @@ def train(args): #, outwriter):
             rps = [j if j==1 else -1 for j in rps] 
             #print(rps) 
             #print(train['difficulty']) 
-            theta_hat = calculate_theta(train['difficulty'], rps, num_obs=1000)[0] 
+            theta_hat = calculate_theta(train['difficulty'], rps, num_obs=args.num_obs)[0] 
             #print('estimated theta: {}'.format(theta_hat))     
             # calculate the difficulty value required for such that 
             # we only include items where p_correct >= args.p_correct
@@ -330,6 +330,7 @@ def run():
     parser.add_argument('--competency', default=50, type=int) 
     parser.add_argument('--p-correct', default=0.5, type=float, help="P(correct) to filter training data for IRT")
     parser.add_argument('--cache-dir', help='cache dir for bert models')
+    parser.add_argument('--num-obs', help='num obs for learning theta', default=1000)
     args = parser.parse_args()
 
     #preds_file = '{}processed/test_predictions/sstb_{}_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random, args.k) 
