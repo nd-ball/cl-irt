@@ -75,7 +75,7 @@ def preprocess(X, train=False, bert=False):
     #print('error count: {}'.format(error_count))
     
     #print(len(data), len(lbls))
-    result = {'phrase': data, 'labels': lbls, 'pairID': pids, 'difficulty': diffs}
+    result = {'phrase': data, 'lbls': lbls, 'pairID': pids, 'difficulty': diffs}
     return result
 
 

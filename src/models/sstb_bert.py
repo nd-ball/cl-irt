@@ -141,15 +141,7 @@ def train(args): #, outwriter):
     diffs_sorted_idx = None 
 
     
-    max_epoch = 0
-    max_train = 0
-    max_dev = 0
-    max_test = 0
     num_train = len(train['phrase'])
-    num_dev = len(dev['phrase'])
-    num_test = len(test['phrase'])
-    top_dev = 0.0
-    top_dev_epoch = 0
     top_dev_test = 0.0
 
     print('Training model {}'.format(model))
@@ -234,7 +226,6 @@ def train(args): #, outwriter):
             scheduler.step()
             model.zero_grad() 
 
-        
         #print("Training accuracy: {}, epoch: {}, num examples: {}".format(acc_train, i, len(preds)))
 
         # Dev
@@ -264,6 +255,8 @@ def train(args): #, outwriter):
         preds = np.argmax(preds, axis=1) 
         
         rps = [int(p == c) for p, c in zip(preds, out_label_ids)] 
+        print(rps) 
+        print('dev acc:{}'.format(np.mean(rps)))
         dev_acc = np.mean(rps) 
         
         # Test (SNLI)
@@ -293,6 +286,9 @@ def train(args): #, outwriter):
         preds = np.argmax(preds, axis=1) 
         
         rps = [int(p == c) for p, c in zip(preds, out_label_ids)] 
+        print(rps) 
+        print('test acc:{}'.format(np.mean(rps)))
+
         test_acc = np.mean(rps) 
 
         print('{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, dev_acc, test_acc, theta_hat))
