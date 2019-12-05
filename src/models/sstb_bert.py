@@ -126,9 +126,8 @@ def train(args): #, outwriter):
         {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
         ]
 
-    optimizer = AdamW(optimizer_grouped_parameters, lr=2e-5, eps=1e-8)
+    optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8)
     scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=num_epoch)
-
 
     if args.random:
         random.shuffle(train['difficulty'])
@@ -224,8 +223,8 @@ def train(args): #, outwriter):
             loss = outputs[0]
             print(loss.item()) 
             loss.backward() 
-            print(model.parameters())
-            print(optimizer_grouped_parameters)
+            #print(model.parameters())
+            #print(optimizer_grouped_parameters)
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm) 
             optimizer.step() 
             scheduler.step()
