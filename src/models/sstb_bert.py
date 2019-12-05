@@ -1,6 +1,3 @@
-# bert for snli
-# with ddaclae
-
 import numpy as np
 #import dynet as dy
 import argparse
@@ -11,8 +8,8 @@ import pandas as pd
 
 from sklearn.metrics import accuracy_score
 
-from features.build_features import load_snli_bert, get_epoch_training_data, k_sort 
-from features.irt_scoring import calculate_theta, calculate_diff_threshold 
+from features.build_features import load_sstb_bert, get_epoch_training_data, k_sort
+from features.irt_scoring import calculate_theta, calculate_diff_threshold
 
 # import required bert libraries
 
@@ -29,37 +26,8 @@ from transformers import glue_convert_examples_to_features as convert_examples_t
 
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--gpu', type=int, default=-1, help='use GPU?')
-parser.add_argument('--num-units', type=int, default=300, help='number of units per layer')
-parser.add_argument('--data-dir') 
-parser.add_argument('--balanced', action='store_true') 
-parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple', 'theta', 'naacl-linear', 'naacl-root', 'theta-hard'],
-                    help='CL data policy', default='simple')
-parser.add_argument('--ordering', choices=['easiest', 'hardest', 'middleout'], default='easiest') 
-parser.add_argument('--num-epochs', type=int, default=100) 
-parser.add_argument('--random', action='store_true') 
-parser.add_argument('--use-length', action='store_true')
-parser.add_argument('--min-train-length', default=100, type=int)
-parser.add_argument('--k', default=0, type=int) 
-parser.add_argument('--competency', default=50, type=int) 
-parser.add_argument('--p-correct', default=0.5, type=float, help="P(correct) to filter training data for IRT")
-parser.add_argument('--cache-dir', help='cache dir for bert models')
-args = parser.parse_args()
-
-print(args)
-
-VOCAB_SIZE = 0
-INPUT_DIM = 100
-
-preds_file = '{}processed/test_predictions/bert_snli_{}_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random, args.k) 
-outfile = open(preds_file, 'w') 
-outwriter = csv.writer(outfile, delimiter=',')
-outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])
-
-
 def generate_features(examples, tokenizer):
-    label_list = ['contradiction', 'entailment', 'neutral'] 
+    label_list = [0, 1] 
     max_seq_len = 128
     output_mode = 'classification'
     pad_on_left=False 
@@ -84,14 +52,12 @@ def generate_features(examples, tokenizer):
     dataset = TensorDataset(all_input_ids, all_attention_mask, all_token_type_ids, all_labels)
     return dataset
 
-
-
-def run():
+def train(args): #, outwriter): 
 
     # variables
     num_epoch = args.num_epochs
     batch_size = 8
-    out_dim = 3
+    out_dim = 2
     max_grad_norm = 1.0
 
     device = torch.device('cuda' if args.gpu else 'cpu') 
@@ -117,17 +83,19 @@ def run():
     model.to(device) 
 
     #print('num_epoch: {}\nbatch_size: {}'.format(num_epoch, batch_size))
+    # construct the exp label
+
     exp_label = 'bert_{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random)
 
-    train, dev, test = load_snli_bert(args.data_dir)  
+    train, dev, test = load_sstb_bert(args.data_dir)
+
     full_train_diffs = train['difficulty'] 
     full_train_examples = []
     for i in range(len(train['phrase'])):
         next_example = utils.InputExample(
             train['pairIDs'][i],
-            train['phrase'][i][0],
-            train['phrase'][i][1],
-            train['labels'][i]
+            train['phrase'][i],
+            label=train['labels'][i]
         )
         full_train_examples.append(next_example) 
     features_train = generate_features(full_train_examples, tokenizer)
@@ -136,9 +104,8 @@ def run():
     for i in range(len(dev['phrase'])):
         next_example = utils.InputExample(
             dev['pairIDs'][i],
-            dev['phrase'][i][0],
-            dev['phrase'][i][1],
-            dev['labels'][i]
+            dev['phrase'][i],
+            label=dev['labels'][i]
         )
         dev_examples.append(next_example) 
     features_dev = generate_features(dev_examples, tokenizer) 
@@ -147,9 +114,8 @@ def run():
     for i in range(len(test['phrase'])):
         next_example = utils.InputExample(
             test['pairIDs'][i],
-            test['phrase'][i][0],
-            test['phrase'][i][1],
-            test['labels'][i]
+            test['phrase'][i],
+            label=test['labels'][i]
         )
         test_examples.append(next_example) 
     features_test = generate_features(test_examples, tokenizer)
@@ -163,8 +129,18 @@ def run():
     optimizer = AdamW(optimizer_grouped_parameters, lr=5e-5, eps=1e-8)
     scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=num_epoch)
 
-    # load model and train
-    #print('initialize model...')
+
+    if args.random:
+        random.shuffle(train['difficulty'])
+
+    # if k is set, sort once
+    #if args.k > 0:
+    #    diffs = train['difficulty'] 
+    #    diffs_sorted_idx = k_sort(diffs, args.k) 
+    #else:
+    diffs_sorted_idx = None 
+
+    
     max_epoch = 0
     max_train = 0
     max_dev = 0
@@ -176,12 +152,15 @@ def run():
     top_dev_epoch = 0
     top_dev_test = 0.0
 
-    #print('Training model {}'.format(model))
-    #print('training')
+    print('Training model {}'.format(model))
+    print('training')
     for i in range(num_epoch):
-        # estimate theta for current model parameters
-        if args.strategy in ['theta', 'theta-hard']:
+        loss = 0.0
+        #print('train epoch {}'.format(i))
+        # load training data for this epoch
 
+        # estimate theta_hat 
+        if args.strategy in ['theta', 'theta-hat']:
             theta_sampler = SequentialSampler(features_train)
             theta_dataloader = DataLoader(features_train, sampler=theta_sampler, batch_size=batch_size)
             preds = None 
@@ -219,12 +198,10 @@ def run():
         else:
             theta_hat=0
 
-        loss = 0.0
-        #print('train epoch {}'.format(i))
-        epoch_training_data = get_epoch_training_data(train, args, i, 'snli', theta_hat, diffs_sorted_idx=None)  
+        epoch_training_data = get_epoch_training_data(train, args, i, 'sstb', theta_hat, diffs_sorted_idx) 
         num_train_epoch = len(epoch_training_data['phrase'])
         #print('training set size: {}'.format(num_train_epoch))
-
+        # shuffle training data
         # per epoch training set
         train_examples = []
         for i in range(len(train['phrase'])):
@@ -318,17 +295,58 @@ def run():
         
         rps = [int(p == c) for p, c in zip(preds, out_label_ids)] 
         test_acc = np.mean(rps) 
-         
 
-        if dev_acc > top_dev:
-            top_dev = dev_acc
-            top_dev_epoch = i
-            top_dev_test = test_acc
         print('{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, dev_acc, test_acc, theta_hat))
-        #print('Best so far (by dev dev): D: {}, T; {}, epoch {}'.format(top_dev, top_dev_test, top_dev_epoch))
+                
+        # write test predictions to file
+        #for j in range(len(predictions)):
+        #    row = [i, itemIDs[j], correct[j], preds[j]]
+        #    outwriter.writerow(row) 
+
+        #if acc_dev > top_dev:
+        #    top_dev = acc_dev
+        #    top_dev_epoch = i
+        #    top_dev_test = acc_test 
+
+        #print('Best so far (dev): {}, epoch {}'.format(top_dev, top_dev_epoch))
+        #print('Best so far (test): {}, epoch {}'.format(top_dev_test, top_dev_epoch))
         
+    return top_dev_test, num_train 
+
+
+def run():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--gpu', type=int, default=-1, help='use GPU?')
+    parser.add_argument('--data-dir', help='path to SNLI dataset')
+    parser.add_argument('--num-units', type=int, default=300, help='number of units per layer')
+    parser.add_argument('--balanced', action='store_true') 
+    parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple', 'theta', 'naacl-linear', 'naacl-root', 'theta-hard'],
+                        help='CL data policy', default='simple')
+    parser.add_argument('--ordering', choices=['easiest', 'hardest', 'middleout'], default='easiest') 
+    parser.add_argument('--num-epochs', type=int, default=100) 
+    parser.add_argument('--random', action='store_true') 
+    parser.add_argument('--use-length', action='store_true')
+    parser.add_argument('--min-train-length', default=100, type=int)
+    parser.add_argument('--k', default=0, type=int) 
+    parser.add_argument('--competency', default=50, type=int) 
+    parser.add_argument('--p-correct', default=0.5, type=float, help="P(correct) to filter training data for IRT")
+    parser.add_argument('--cache-dir', help='cache dir for bert models')
+    args = parser.parse_args()
+
+    #preds_file = '{}processed/test_predictions/sstb_{}_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random, args.k) 
+    #outfile = open(preds_file, 'w') 
+    #outwriter = csv.writer(outfile, delimiter=',')
+    #outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])
+
+    #print(args)
+    test_acc, training_set_size = train(args) #, outwriter)   
+    #print(test_acc) 
+
 
 if __name__ == '__main__':
     run()
+
+
+
 
 

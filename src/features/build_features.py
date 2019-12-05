@@ -278,6 +278,57 @@ def load_sstb(data_dir):
     return out_train, out_dev, out_test, w2i, i2w, vectors
 
 
+
+def load_sstb_bert(data_dir):
+    # load SSTB data
+    trainfile = 'sstb_train_diff.tsv'
+    devfile = 'sstb_dev.tsv'
+    testfile = 'sstb_test.labeled.tsv'
+    label_set_MASTER = [0, 1]
+
+    with open(data_dir + '/processed/' + trainfile, 'r') as infile:
+        training_data = infile.readlines()[1:]
+        training_data = [t.split('\t') for t in training_data]
+        TRAIN_SIZE = len(training_data)
+        idx = list(range(TRAIN_SIZE))  # generate labels for each item 
+         
+        # load training data 
+        train = {}
+        train['lbls'] = [] 
+        train['phrase'] = [] 
+        train['difficulty'] = []
+        train['itemID'] = []
+        for i in range(TRAIN_SIZE):
+            train['lbls'].append(eval(training_data[i][1]))
+            train['phrase'].append(training_data[i][0]) 
+            train['difficulty'].append(eval(training_data[i][3])) 
+            train['itemID'].append(eval(training_data[i][2]))
+
+    with open(data_dir + '/raw/' + devfile, 'r') as infile:
+        dev_data = infile.readlines()[1:]
+        dev = {}
+        dev['lbls'] = [eval(l.split('\t')[1]) for l in dev_data]
+        dev['phrase'] = [l.split('\t')[0] for l in dev_data]
+        dev['itemID'] = list(range(len(dev['phrase'])))
+
+    with open(data_dir + '/raw/' + testfile, 'r') as infile:
+        test_data = infile.readlines()[1:]
+        test = {}
+        test['lbls'] = [eval(l[0]) for l in test_data]
+        #test['lbls'] = [0] * len(test_data)  # for now
+        test['phrase'] = [l[1:] for l in test_data]
+        test['itemID'] = list(range(len(test['phrase']))) 
+
+    out_train = train
+    out_dev = dev
+
+    out_test = test
+
+    gc.collect()
+    #print('dict size: {}'.format(len(w2i)))
+    return out_train, out_dev, out_test
+
+
 ####### Get CL Data per epoch ########
 def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_idx=None):
     if args.strategy == 'baseline':
