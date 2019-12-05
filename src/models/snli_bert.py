@@ -95,7 +95,7 @@ def run():
     out_dim = 3
     max_grad_norm = 1.0
 
-    device = torch.device('cuda' if args.gpu else 'cpu') 
+    device = torch.device('cuda' if args.gpu >= 0 else 'cpu') 
 
     config_class = BertConfig
     model_class = BertForSequenceClassification
