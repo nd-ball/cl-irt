@@ -5,11 +5,11 @@ NUMOBS=1000  # for estimating theta
 DIFFDIR=/mnt/nfs/work1/hongyu/lalor/data/jiant/artificial-crowd-generation-2/rps
 DATADIR=/mnt/nfs/work1/hongyu/lalor/data/glue
 MINTRAINLEN=100
-TASK=RTE
+TASK=QNLI
 CACHEDIR=/mnt/nfs/work1/hongyu/lalor/data/bert/
 
 # DDaCLAE
-sbatch -p titanx-long --gres=gpu:1 --mem=64gb --output=logs/bert/v2/bert-cola-ddaclae-test-%j.log --wrap="python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy theta --min-train-length $MINTRAINLEN --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR"
+sbatch -p titanx-long --gres=gpu:1 --mem=64gb --output=logs/bert/v2/bert-$TASK-ddaclae-test-%j.log --wrap="python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy theta --min-train-length $MINTRAINLEN --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR"
 
 
 # NAACL Baselines
@@ -25,5 +25,5 @@ do
 done
 
 # Fully supervised baselines
-#sbatch -p titanx-long --gres=gpu:1 --mem=64gb --output=logs/bert/test/bert-$TASK-baseline.log --wrap="python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy baseline --use-length --ordering easiest --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --competency $COMP --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR"
+sbatch -p titanx-long --gres=gpu:1 --mem=64gb --output=logs/bert/v2/bert-$TASK-baseline.log --wrap="python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy baseline --use-length --ordering easiest --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --competency $COMP --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR"
 
