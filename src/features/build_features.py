@@ -677,8 +677,10 @@ def load_glue_task(datadir, diffdir, taskname):
     
     with open(trainfile, 'r') as tr_file, open(devfile, 'r') as dv_file, open(testfile, 'r') as tst_file:
         idx = 0
+        next(tst_file)
         if taskname != 'CoLA': 
             next(tr_file) 
+            next(dv_file) 
         for line in tr_file:
             split_line = line.strip().split('\t') 
             lid, s1, s2, label = parse_line(split_line, taskname, 1)
