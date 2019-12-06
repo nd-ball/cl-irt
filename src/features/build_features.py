@@ -585,3 +585,70 @@ def k_sort(D, k):
 
     return result 
 
+
+def load_glue_task(datadir, diffdir, taskname):
+    '''
+    load and return the glue data with difficulties
+    '''
+
+    GLUETASKS = ['CoLA', 'SST-2', 'MRPC', 'MNLI', 'QNLI', 'RTE', 'WNLI', 'QQP']
+
+    assert taskname in GLUETASKS, 'task not found' 
+
+    # load data
+    trainfile = '{}/{}/train.tsv'.format(datadir, taskname)
+    devfile = '{}/{}/dev.tsv'.format(datadir, taskname)
+    testfile = '{}/{}/test.tsv'.format(datadir, taskname)
+    if taskname == 'cola':
+        train = pd.read_csv(trainfile, sep='\t', header=None, names=['id', 'label', 'judgement', 's1'])
+        dev = pd.read_csv(devfile, sep='\t', header=None, names=['id', 'label', 'judgement', 's1'])
+        test = pd.read_csv(testfile, sep='\t', header=None, names=['id', 's1'])
+    elif taskname == 'SST-2':
+        train = pd.read_csv(trainfile, sep='\t', header=0, names=['s1', 'label'])
+        dev = pd.read_csv(devfile, sep='\t', header=0, names=['s1', 'label']) 
+        test = pd.read_csv(testfile, sep='\t', header=0, names=['id', 's1']) 
+    elif taskname == 'MRPC': 
+        train = pd.read_csv(trainfile, sep='\t', header=0, names=['label', 'id1', 'id2', 's1', 's2'])
+        dev = pd.read_csv(devfile, sep='\t', header=0, names=['label', 'id1', 'id2', 's1', 's2']) 
+        test = pd.read_csv(testfile, sep='\t', header=0, names=['id', 'id1', 'id2', 's1', 's2']) 
+    elif taskname == 'MNLI':
+        train = pd.read_csv(trainfile, sep='\t', header=0, usecols=['index', 'sentence1', 'sentence2', 'label'])[['index', 'sentence1', 'sentence2', 'label']]
+
+        # MNLI has matched/mismatched dev and testfiles
+        devfile_m = '{}/{}/dev_matched.tsv'.format(datadir, taskname)
+        testfile_m = '{}/{}/test_matched.tsv'.format(datadir, taskname)
+        devfile_mm = '{}/{}/dev_mismatched.tsv'.format(datadir, taskname)
+        testfile_mm = '{}/{}/test_mismatched.tsv'.format(datadir, taskname)
+
+
+        dev_m = pd.read_csv(devfile_m, sep='\t', header=0, usecols=['index', 'sentence1', 'sentence2', 'label'])[['index', 'sentence1', 'sentence2', 'label']]
+        test_m = pd.read_csv(testfile_m, sep='\t', header=0, usecols=['index', 'sentence1', 'sentence2'])[['index', 'sentence1', 'sentence2']]
+        dev_mm = pd.read_csv(devfile_mm, sep='\t', header=0, usecols=['index', 'sentence1', 'sentence2', 'label'])[['index', 'sentence1', 'sentence2', 'label']]
+        test_mm = pd.read_csv(testfile_mm, sep='\t', header=0, usecols=['index', 'sentence1', 'sentence2'])[['index', 'sentence1', 'sentence2']]
+
+        train.columns = ['id', 's1', 's2', 'label']
+        dev_m.columns = ['id', 's1', 's2', 'label']
+        dev_mm.columns = ['id', 's1', 's2', 'label']
+        test_m.columns = ['id', 's1', 's2']
+        test_mm.columns = ['id', 's1', 's2']
+        dev = (dev_m, dev_mm)
+        test = (test_m, test_mm) 
+
+    elif taskname in ['QNLI', 'RTE', 'WNLI']:
+        train = pd.read_csv(trainfile, sep='\t', header=0, names=['id', 's1', 's2', 'label'])
+        dev = pd.read_csv(devfile, sep='\t', header=0, names=['id', 's1', 's2', 'label',]) 
+        test = pd.read_csv(testfile, sep='\t', header=0, names=['id', 's1', 's2'])
+    elif taskname == 'QQP':
+        train = pd.read_csv(trainfile, sep='\t', header=0, names=['id', 'qid1', 'qid2', 's1', 's2', 'label'])
+        dev = pd.read_csv(devfile, sep='\t', header=0, names=['id', 'qid1', 'qid2', 's1', 's2', 'label',]) 
+        test = pd.read_csv(testfile, sep='\t', header=0, names=['id', 's1', 's2'])
+    
+
+    # load difficulties 
+    train_diff_file = '{}/{}/rp.diffs'.format(diffdir, taskname.lower())
+    diffs = pd.read_csv(train_diff_file, header=None, names=['id', 'difficulty'])
+    train['difficulty'] = diffs['difficulty']
+
+    return train, dev, test 
+
+
