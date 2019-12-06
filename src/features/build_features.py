@@ -669,7 +669,7 @@ def load_glue_task(datadir, diffdir, taskname):
         'pairID': list(dev['id'])
         }
     test_result = {
-        'phrase': test_phrase, 'lbls': list(test['label']), 
+        'phrase': test_phrase, 
         'pairID': list(test['id'])
         }
 
