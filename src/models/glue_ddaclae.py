@@ -94,6 +94,7 @@ def train(args): #, outwriter):
     full_train_diffs = train['difficulty'] 
     full_train_examples = []
     single_sentence = train['phrase'][0][1] == np.NaN 
+    print(single_sentence)
     for i in range(len(train['phrase'])):
         if single_sentence:
             next_example = utils.InputExample(
@@ -106,7 +107,7 @@ def train(args): #, outwriter):
                 train['pairID'][i],
                 train['phrase'][i][0],
                 train['phrase'][i][1],
-                label=train['lbls'][i]
+                train['lbls'][i]
             )
         full_train_examples.append(next_example) 
 
@@ -132,7 +133,7 @@ def train(args): #, outwriter):
                 dev['pairID'][i],
                 dev['phrase'][i][0],
                 dev['phrase'][i][1],
-                label=dev['lbls'][i]
+                dev['lbls'][i]
             )
 
         dev_examples.append(next_example) 
@@ -151,7 +152,7 @@ def train(args): #, outwriter):
                 test['pairID'][i],
                 test['phrase'][i][0],
                 test['phrase'][i][1],
-                label=test['lbls'][i]
+                test['lbls'][i]
             )
         test_examples.append(next_example) 
     features_test = generate_features(test_examples, tokenizer, label_list)
@@ -239,7 +240,7 @@ def train(args): #, outwriter):
                     epoch_training_data['pairID'][j],
                     epoch_training_data['phrase'][j][0],
                     epoch_training_data['phrase'][j][1],
-                    label=epoch_training_data['lbls'][j]
+                    epoch_training_data['lbls'][j]
                 )
             train_examples.append(next_example) 
         features_train_epoch = generate_features(train_examples, tokenizer, label_list)
