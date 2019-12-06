@@ -254,11 +254,11 @@ def train(args): #, outwriter):
                 out_label_ids = np.append(out_label_ids, inputs['labels'].detach().cpu().numpy(), axis=0) 
 
         preds = np.argmax(preds, axis=1) 
-        print('dev loss:{}'.format(dev_loss))
+        #print('dev loss:{}'.format(dev_loss))
         
         rps = [int(p == c) for p, c in zip(preds, out_label_ids)] 
-        print(rps) 
-        print('dev acc:{}'.format(np.mean(rps)))
+        #print(rps) 
+        #print('dev acc:{}'.format(np.mean(rps)))
         dev_acc = np.mean(rps) 
         
         # Test (SNLI)
@@ -288,8 +288,8 @@ def train(args): #, outwriter):
         preds = np.argmax(preds, axis=1) 
         
         rps = [int(p == c) for p, c in zip(preds, out_label_ids)] 
-        print(rps) 
-        print('test acc:{}'.format(np.mean(rps)))
+        #print(rps) 
+        #print('test acc:{}'.format(np.mean(rps)))
 
         test_acc = np.mean(rps) 
 
