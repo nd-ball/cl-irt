@@ -1,7 +1,7 @@
 
 NUMEPOCHS=10  # max num epochs, using early stopping though 
 COMP=5  # for baselines, competency at midpoint
-NUMOBS = 1000  # for estimating theta 
+NUMOBS=1000  # for estimating theta 
 
 # DDaCLAE
 sbatch -p titanx-long --gres=gpu:1 --mem=64gb --output=logs/bert/bert-cola-ddaclae-test-%j.log --wrap="python -u -m models.glue_ddaclae --gpu 0 --data-dir /mnt/nfs/work1/hongyu/lalor/data/cl-data/ --strategy theta --min-train-length 100 --num-epochs $NUMEPOCHS --cache-dir /mnt/nfs/work1/hongyu/lalor/data/bert/ --task COLA --num-obs $NUMOBS"
