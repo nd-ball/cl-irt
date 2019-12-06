@@ -599,7 +599,7 @@ def load_glue_task(datadir, diffdir, taskname):
     trainfile = '{}/{}/train.tsv'.format(datadir, taskname)
     devfile = '{}/{}/dev.tsv'.format(datadir, taskname)
     testfile = '{}/{}/test.tsv'.format(datadir, taskname)
-    if taskname == 'cola':
+    if taskname == 'CoLA':
         train = pd.read_csv(trainfile, sep='\t', header=None, names=['id', 'label', 'judgement', 's1'])
         dev = pd.read_csv(devfile, sep='\t', header=None, names=['id', 'label', 'judgement', 's1'])
         test = pd.read_csv(testfile, sep='\t', header=None, names=['id', 's1'])
@@ -648,6 +648,8 @@ def load_glue_task(datadir, diffdir, taskname):
         train = pd.read_csv(trainfile, sep='\t', header=0, names=['id', 'qid1', 'qid2', 's1', 's2', 'label'])
         dev = pd.read_csv(devfile, sep='\t', header=0, names=['id', 'qid1', 'qid2', 's1', 's2', 'label',]) 
         test = pd.read_csv(testfile, sep='\t', header=0, names=['id', 's1', 's2'])
+    else:
+        raise NotImplementedError 
     
 
     # load difficulties 
