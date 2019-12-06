@@ -65,7 +65,7 @@ def train(args): #, outwriter):
     model_class = BertForSequenceClassification
     tokenizer_class = BertTokenizer 
 
-    train, dev, test = load_glue_task(args.data_dir, args.diff_dir, args.taskname)
+    train, dev, test = load_glue_task(args.data_dir, args.diff_dir, args.task)
     out_dim = len(set(train['labels']))
     
 
