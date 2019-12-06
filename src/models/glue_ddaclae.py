@@ -66,7 +66,7 @@ def train(args): #, outwriter):
     tokenizer_class = BertTokenizer 
 
     train, dev, test = load_glue_task(args.data_dir, args.diff_dir, args.task)
-    out_dim = len(set(train['labels']))
+    out_dim = len(set(train['lbls']))
     
 
     config = config_class.from_pretrained('bert-base-uncased',
