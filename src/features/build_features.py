@@ -666,11 +666,11 @@ def load_glue_task(datadir, diffdir, taskname):
         }
     dev_result = {
         'phrase': dev_phrase, 'lbls': list(dev['label']), 
-        'pairID': list(dev['id']), 'difficulty': list(dev['difficulty'])
+        'pairID': list(dev['id'])
         }
     test_result = {
         'phrase': test_phrase, 'lbls': list(test['label']), 
-        'pairID': list(test['id']), 'difficulty': list(test['difficulty'])
+        'pairID': list(test['id'])
         }
 
     return train_result, dev_result, test_result 
