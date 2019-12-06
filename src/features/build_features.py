@@ -213,7 +213,7 @@ def load_sstb(data_dir):
         train['difficulty'] = []
         train['pairID'] = []
         for i in range(TRAIN_SIZE):
-            train['lbls'].append(eval(training_data[i][1]))
+            train['lbls'].append(training_data[i][1])
             train['phrase'].append(tokenize(training_data[i][0].strip()).split(' ')) 
             train['difficulty'].append(eval(training_data[i][3])) 
             train['pairID'].append(eval(training_data[i][2]))
@@ -221,15 +221,14 @@ def load_sstb(data_dir):
     with open(data_dir + '/raw/' + devfile, 'r') as infile:
         dev_data = infile.readlines()[1:]
         dev = {}
-        dev['lbls'] = [eval(l.split('\t')[1]) for l in dev_data]
+        dev['lbls'] = [l.split('\t')[1] for l in dev_data]
         dev['phrase'] = [tokenize(l.split('\t')[0].strip()).split(' ') for l in dev_data]
         dev['pairID'] = list(range(len(dev['phrase'])))
 
     with open(data_dir + '/raw/' + testfile, 'r') as infile:
         test_data = infile.readlines()[1:]
         test = {}
-        test['lbls'] = [eval(l[0]) for l in test_data]
-        #test['lbls'] = [0] * len(test_data)  # for now
+        test['lbls'] = [l[0] for l in test_data]
         test['phrase'] = [tokenize(l[1:].strip()).split(' ') for l in test_data]
         test['pairID'] = list(range(len(test['phrase']))) 
 
@@ -299,7 +298,7 @@ def load_sstb_bert(data_dir):
         train['difficulty'] = []
         train['pairID'] = []
         for i in range(TRAIN_SIZE):
-            train['lbls'].append(eval(training_data[i][1]))
+            train['lbls'].append(training_data[i][1])
             train['phrase'].append(training_data[i][0]) 
             train['difficulty'].append(eval(training_data[i][3])) 
             train['pairID'].append(eval(training_data[i][2]))
@@ -307,15 +306,14 @@ def load_sstb_bert(data_dir):
     with open(data_dir + '/raw/' + devfile, 'r') as infile:
         dev_data = infile.readlines()[1:]
         dev = {}
-        dev['lbls'] = [eval(l.split('\t')[1]) for l in dev_data]
+        dev['lbls'] = [l.split('\t')[1] for l in dev_data]
         dev['phrase'] = [l.split('\t')[0] for l in dev_data]
         dev['pairID'] = list(range(len(dev['phrase'])))
 
     with open(data_dir + '/raw/' + testfile, 'r') as infile:
         test_data = infile.readlines()[1:]
         test = {}
-        test['lbls'] = [eval(l[0]) for l in test_data]
-        #test['lbls'] = [0] * len(test_data)  # for now
+        test['lbls'] = [l[0] for l in test_data]
         test['phrase'] = [l[1:] for l in test_data]
         test['pairID'] = list(range(len(test['phrase']))) 
 
