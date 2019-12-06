@@ -585,38 +585,41 @@ def k_sort(D, k):
 
     return result 
 
-
-def load_glue_task(datadir, diffdir, taskname):
+def parse_line(line, task, split):
     '''
-    load and return the glue data with difficulties
+    1: train: return id, s1, s2, label
+    2: dev: return id, s1, s2, label
+    3: test: return id, s1, s2
     '''
-
-    GLUETASKS = ['CoLA', 'SST-2', 'MRPC', 'MNLI', 'QNLI', 'RTE', 'WNLI', 'QQP']
-
-    assert taskname in GLUETASKS, 'task not found' 
-
-    # load data
-    trainfile = '{}/{}/train.tsv'.format(datadir, taskname)
-    devfile = '{}/{}/dev.tsv'.format(datadir, taskname)
-    testfile = '{}/{}/test.tsv'.format(datadir, taskname)
-    if taskname == 'CoLA':
-        train = pd.read_csv(trainfile, sep='\t', header=None, names=['id', 'label', 'judgement', 's1'])
-        dev = pd.read_csv(devfile, sep='\t', header=None, names=['id', 'label', 'judgement', 's1'])
-        test = pd.read_csv(testfile, sep='\t', header=None, names=['id', 's1'])
-        train['s2'] = np.NaN
-        dev['s2'] = np.NaN
-        test['s2'] = np.NaN 
-    elif taskname == 'SST-2':
-        train = pd.read_csv(trainfile, sep='\t', header=0, names=['s1', 'label'])
-        dev = pd.read_csv(devfile, sep='\t', header=0, names=['s1', 'label']) 
-        test = pd.read_csv(testfile, sep='\t', header=0, names=['id', 's1']) 
-        train['s2'] = np.NaN
-        dev['s2'] = np.NaN
-        test['s2'] = np.NaN 
-    elif taskname == 'MRPC': 
-        train = pd.read_csv(trainfile, sep='\t', header=0, names=['label', 'id1', 'id2', 's1', 's2'])
-        dev = pd.read_csv(devfile, sep='\t', header=0, names=['label', 'id1', 'id2', 's1', 's2']) 
-        test = pd.read_csv(testfile, sep='\t', header=0, names=['id', 'id1', 'id2', 's1', 's2']) 
+    if task == 'CoLA':
+        if split <= 2:
+            return line[0], line[3], np.NaN, line[1] 
+        else:
+            return line[0], line[3], np.NaN
+    elif task == 'SST-2':
+        if split <= 2:
+            return -1, line[0], np.NaN, line[1] 
+        else:
+            return line[0], line[1], np.NaN
+    elif task == 'MRPC':
+        if split <= 2:
+            return -1, line[3], line[4], line[0] 
+        else:
+            return line[0], line[3], line[4]
+    elif task in ['QNLI', 'RTE', 'WNLI']:
+        if split <= 2:
+            return line[0], line[1], line[2], line[3] 
+        else:
+            return line[0], line[1], line[2]
+    elif task == 'QQP':
+        if split <= 2:
+            return line[0], line[3], line[4], line[5] 
+        else:
+            return line[0], line[1], line[2]
+    else:
+        raise NotImplementedError 
+    # we're skipping mnli for now
+    '''
     elif taskname == 'MNLI':
         train = pd.read_csv(trainfile, sep='\t', header=0, usecols=['index', 'sentence1', 'sentence2', 'label'])[['index', 'sentence1', 'sentence2', 'label']]
 
@@ -639,18 +642,69 @@ def load_glue_task(datadir, diffdir, taskname):
         test_mm.columns = ['id', 's1', 's2']
         dev = (dev_m, dev_mm)
         test = (test_m, test_mm) 
+    '''
 
-    elif taskname in ['QNLI', 'RTE', 'WNLI']:
-        train = pd.read_csv(trainfile, sep='\t', header=0, names=['id', 's1', 's2', 'label'])
-        dev = pd.read_csv(devfile, sep='\t', header=0, names=['id', 's1', 's2', 'label',]) 
-        test = pd.read_csv(testfile, sep='\t', header=0, names=['id', 's1', 's2'])
-    elif taskname == 'QQP':
-        train = pd.read_csv(trainfile, sep='\t', header=0, names=['id', 'qid1', 'qid2', 's1', 's2', 'label'])
-        dev = pd.read_csv(devfile, sep='\t', header=0, names=['id', 'qid1', 'qid2', 's1', 's2', 'label',]) 
-        test = pd.read_csv(testfile, sep='\t', header=0, names=['id', 's1', 's2'])
-    else:
-        raise NotImplementedError 
+
+
+def load_glue_task(datadir, diffdir, taskname):
+    '''
+    load and return the glue data with difficulties
+    '''
+
+    GLUETASKS = ['CoLA', 'SST-2', 'MRPC', 'MNLI', 'QNLI', 'RTE', 'WNLI', 'QQP']
+
+    assert taskname in GLUETASKS, 'task not found' 
+
+    # load data
+    trainfile = '{}/{}/train.tsv'.format(datadir, taskname)
+    devfile = '{}/{}/dev.tsv'.format(datadir, taskname)
+    testfile = '{}/{}/test.tsv'.format(datadir, taskname)
+    train = {
+        'phrase': [],
+        'label': [],
+        'id': [],
+        'difficulty':[]
+    }
+    dev = {
+        'phrase': [],
+        'label': [],
+        'id': []
+    }
+    test = {
+        'phrase': [],
+        'id': []
+    }
     
+    with open(trainfile, 'r') as tr_file, open(devfile, 'r') as dv_file, open(testfile, 'r') as tst_file:
+        idx = 0
+        for line in tr_file:
+            split_line = line.strip().split('\t') 
+            lid, s1, s2, label = parse_line(split_line, taskname, 1)
+            if lid == -1:
+                lid = idx 
+            idx += 1 
+            train['phrase'].append([s1, s2])
+            train['label'].append(label) 
+            train['id'].append(lid) 
+
+        for line in dv_file:
+            split_line = line.strip().split('\t') 
+            lid, s1, s2, label = parse_line(split_line, taskname, 2)
+            if lid == -1:
+                lid = idx 
+            idx += 1 
+            dev['phrase'].append([s1, s2])
+            dev['label'].append(label) 
+            dev['id'].append(lid) 
+    
+        for line in tst_file:
+            split_line = line.strip().split('\t') 
+            lid, s1, s2 = parse_line(split_line, taskname, 3)
+            if lid == -1:
+                lid = idx 
+            idx += 1 
+            test['phrase'].append([s1, s2])
+            test['id'].append(lid) 
 
     # load difficulties 
     train_diff_file = '{}/{}.rp.diffs'.format(diffdir, taskname.lower())
