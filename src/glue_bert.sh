@@ -4,10 +4,10 @@ COMP=5  # for baselines, competency at midpoint
 NUMOBS=1000  # for estimating theta 
 DIFFDIR=/mnt/nfs/work1/hongyu/lalor/data/jiant/artificial-crowd-generation-2/rps
 DATADIR=/mnt/nfs/work1/hongyu/lalor/data/glue
-MINTRAINLEN=100
+MINTRAINLEN=500
 TASK=QNLI
 CACHEDIR=/mnt/nfs/work1/hongyu/lalor/data/bert/
-LOGDIR=20191206-2
+LOGDIR=20191206-3
 
 
 for TASK in CoLA MRPC QNLI RTE WNLI QQP
@@ -29,5 +29,5 @@ do
     #done
 
     # Fully supervised baselines
-    #sbatch -p titanx-long --gres=gpu:1 --mem=64gb --output=logs/bert/$LOGDIR/bert-$TASK-baseline.log --wrap="python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy baseline --use-length --ordering easiest --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --competency $COMP --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR"
+    sbatch -p titanx-long --gres=gpu:1 --mem=64gb --output=logs/bert/$LOGDIR/bert-$TASK-baseline.log --wrap="python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy baseline --use-length --ordering easiest --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --competency $COMP --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR"
 done 
