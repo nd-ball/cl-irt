@@ -93,7 +93,7 @@ def train(args): #, outwriter):
 
     full_train_diffs = train['difficulty'] 
     full_train_examples = []
-    single_sentence = train['phrase'][0][1] == np.NaN 
+    single_sentence = np.isnan(train['phrase'][0][1]) 
     print(single_sentence)
     for i in range(len(train['phrase'])):
         if single_sentence:
