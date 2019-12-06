@@ -298,7 +298,7 @@ def load_sstb_bert(data_dir):
         train['difficulty'] = []
         train['pairID'] = []
         for i in range(TRAIN_SIZE):
-            train['lbls'].append(training_data[i][1])
+            train['lbls'].append(training_data[i][1].strip())
             train['phrase'].append(training_data[i][0]) 
             train['difficulty'].append(eval(training_data[i][3])) 
             train['pairID'].append(eval(training_data[i][2]))
@@ -306,7 +306,7 @@ def load_sstb_bert(data_dir):
     with open(data_dir + '/raw/' + devfile, 'r') as infile:
         dev_data = infile.readlines()[1:]
         dev = {}
-        dev['lbls'] = [l.split('\t')[1] for l in dev_data]
+        dev['lbls'] = [l.split('\t')[1].strip() for l in dev_data]
         dev['phrase'] = [l.split('\t')[0] for l in dev_data]
         dev['pairID'] = list(range(len(dev['phrase'])))
 
