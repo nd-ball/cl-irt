@@ -5,7 +5,7 @@ NUMOBS=1000  # for estimating theta
 DIFFDIR=/mnt/nfs/work1/hongyu/lalor/data/jiant/artificial-crowd-generation-2/rps
 DATADIR=/mnt/nfs/work1/hongyu/lalor/data/glue
 MINTRAINLEN=100
-TASK=MRPC
+TASK=RTE
 CACHEDIR=/mnt/nfs/work1/hongyu/lalor/data/bert/
 
 # DDaCLAE
