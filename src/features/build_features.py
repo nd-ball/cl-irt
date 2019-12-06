@@ -711,19 +711,19 @@ def load_glue_task(datadir, diffdir, taskname):
     diffs = pd.read_csv(train_diff_file, header=None, names=['id', 'difficulty'])
     train['difficulty'] = diffs['difficulty']
 
-    train_phrase = [[a, b] for a, b in zip(train['s1'], train['s2'])]
-    dev_phrase = [[a, b] for a, b in zip(dev['s1'], dev['s2'])]
-    test_phrase = [[a, b] for a, b in zip(test['s1'], test['s2'])]
+    #train_phrase = [[a, b] for a, b in zip(train['s1'], train['s2'])]
+    #dev_phrase = [[a, b] for a, b in zip(dev['s1'], dev['s2'])]
+    #test_phrase = [[a, b] for a, b in zip(test['s1'], test['s2'])]
     train_result = {
-        'phrase': train_phrase, 'lbls': list(train['label']), 
+        'phrase': train['phrase'], 'lbls': list(train['label']), 
         'pairID': list(train['id']), 'difficulty': list(train['difficulty'])
         }
     dev_result = {
-        'phrase': dev_phrase, 'lbls': list(dev['label']), 
+        'phrase': dev['phrase'], 'lbls': list(dev['label']), 
         'pairID': list(dev['id'])
         }
     test_result = {
-        'phrase': test_phrase, 
+        'phrase': test['phrase'], 
         'pairID': list(test['id'])
         }
 
