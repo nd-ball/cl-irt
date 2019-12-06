@@ -595,7 +595,7 @@ def parse_line(line, task, split):
         if split <= 2:
             return line[0], line[3], np.NaN, line[1] 
         else:
-            return line[0], line[3], np.NaN
+            return line[0], line[1], np.NaN
     elif task == 'SST-2':
         if split <= 2:
             return -1, line[0], np.NaN, line[1] 
@@ -677,6 +677,8 @@ def load_glue_task(datadir, diffdir, taskname):
     
     with open(trainfile, 'r') as tr_file, open(devfile, 'r') as dv_file, open(testfile, 'r') as tst_file:
         idx = 0
+        if taskname != 'CoLA': 
+            next(tr_file) 
         for line in tr_file:
             split_line = line.strip().split('\t') 
             lid, s1, s2, label = parse_line(split_line, taskname, 1)
