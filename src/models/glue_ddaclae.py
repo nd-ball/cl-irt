@@ -26,8 +26,7 @@ from transformers import glue_convert_examples_to_features as convert_examples_t
 
 
 
-def generate_features(examples, tokenizer):
-    #label_list = ['0', '1'] 
+def generate_features(examples, tokenizer, label_list):
     max_seq_len = 128
     output_mode = 'classification'
     pad_on_left=False 
@@ -36,7 +35,7 @@ def generate_features(examples, tokenizer):
 
     features = convert_examples_to_features(
         examples, tokenizer,
-        #label_list=label_list, 
+        label_list=label_list, 
         max_length=max_seq_len,
         output_mode=output_mode,
         pad_on_left=pad_on_left,
@@ -66,7 +65,8 @@ def train(args): #, outwriter):
     tokenizer_class = BertTokenizer 
 
     train, dev, test = load_glue_task(args.data_dir, args.diff_dir, args.task)
-    out_dim = len(set(train['lbls']))
+    label_list = list(set(train['lbls']))
+    out_dim = len(label_list)
     
 
     config = config_class.from_pretrained('bert-base-uncased',
@@ -114,9 +114,9 @@ def train(args): #, outwriter):
         theta_sample = np.random.randint(0, len(full_train_examples), args.num_obs) 
         theta_diffs = [full_train_diffs[z] for z in theta_sample]
         theta_train = [full_train_examples[z] for z in theta_sample]
-        features_train = generate_features(theta_train, tokenizer)
+        features_train = generate_features(theta_train, tokenizer, label_list)
     else:
-        features_train = generate_features(full_train_examples, tokenizer) 
+        features_train = generate_features(full_train_examples, tokenizer, label_list) 
         theta_diffs = full_train_diffs 
 
     dev_examples = []
@@ -136,7 +136,7 @@ def train(args): #, outwriter):
             )
 
         dev_examples.append(next_example) 
-    features_dev = generate_features(dev_examples, tokenizer) 
+    features_dev = generate_features(dev_examples, tokenizer, label_list) 
 
     test_examples = []
     for i in range(len(test['phrase'])):
@@ -154,7 +154,7 @@ def train(args): #, outwriter):
                 label=test['lbls'][i]
             )
         test_examples.append(next_example) 
-    features_test = generate_features(test_examples, tokenizer)
+    features_test = generate_features(test_examples, tokenizer, label_list)
 
     optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8, correct_bias=False)
     #scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=num_epoch)
@@ -242,7 +242,7 @@ def train(args): #, outwriter):
                     label=epoch_training_data['lbls'][j]
                 )
             train_examples.append(next_example) 
-        features_train_epoch = generate_features(train_examples, tokenizer)
+        features_train_epoch = generate_features(train_examples, tokenizer, label_list)
 
         train_sampler = RandomSampler(features_train_epoch)
         train_dataloader = DataLoader(features_train_epoch, sampler=train_sampler, batch_size=batch_size) 
