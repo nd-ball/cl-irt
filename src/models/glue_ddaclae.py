@@ -93,7 +93,10 @@ def train(args): #, outwriter):
 
     full_train_diffs = train['difficulty'] 
     full_train_examples = []
-    single_sentence = np.isnan(train['phrase'][0][1]) 
+    try:
+        single_sentence = np.isnan(train['phrase'][0][1]) 
+    except:
+        single_sentence = False  # isnan will throw an error if type is str
     print(single_sentence)
     for i in range(len(train['phrase'])):
         if single_sentence:
