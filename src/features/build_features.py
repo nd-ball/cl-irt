@@ -651,7 +651,7 @@ def load_glue_task(datadir, diffdir, taskname):
     
 
     # load difficulties 
-    train_diff_file = '{}/{}/rp.diffs'.format(diffdir, taskname.lower())
+    train_diff_file = '{}/{}.rp.diffs'.format(diffdir, taskname.lower())
     diffs = pd.read_csv(train_diff_file, header=None, names=['id', 'difficulty'])
     train['difficulty'] = diffs['difficulty']
 
