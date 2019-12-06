@@ -18,7 +18,7 @@ from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler, Tens
 
 from transformers import (WEIGHTS_NAME, BertConfig,
                             BertForSequenceClassification, BertTokenizer) 
-from transformers import AdamW, get_linear_schedule_with_warmup 
+from transformers import AdamW, get_linear_schedule_with_warmup, get_constant_schedule 
 
 from transformers.data.processors import utils  
 
@@ -120,14 +120,9 @@ def train(args): #, outwriter):
         test_examples.append(next_example) 
     features_test = generate_features(test_examples, tokenizer)
 
-    no_decay = ['bias', 'LayerNorm.weight']
-    optimizer_grouped_parameters = [
-        {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': 0.0},
-        {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
-        ]
-
-    optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8)
-    scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=num_epoch)
+    optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8, correct_bias=False)
+    #scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=num_epoch)
+    scheduler = get_constant_schedule(optimizer) 
 
     if args.random:
         random.shuffle(train['difficulty'])
@@ -209,8 +204,8 @@ def train(args): #, outwriter):
         train_dataloader = DataLoader(features_train_epoch, sampler=train_sampler, batch_size=batch_size) 
 
         #model.zero_grad()
+        model.train() 
         for j, batch in enumerate(train_dataloader):
-            model.train() 
             batch = tuple(t.to(device) for t in batch) 
             inputs = {
                         'input_ids': batch[0],
@@ -221,11 +216,11 @@ def train(args): #, outwriter):
             #print(inputs) 
             outputs = model(**inputs) 
             loss = outputs[0]
-            print(loss.item()) 
+            #print(loss.item()) 
             loss.backward() 
             #print(model.parameters())
             #print(optimizer_grouped_parameters)
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm) 
+            #torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm) 
             optimizer.step() 
             scheduler.step()
             model.zero_grad() 
