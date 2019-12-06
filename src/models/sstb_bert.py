@@ -332,7 +332,7 @@ def run():
     parser.add_argument('--competency', default=50, type=int) 
     parser.add_argument('--p-correct', default=0.5, type=float, help="P(correct) to filter training data for IRT")
     parser.add_argument('--cache-dir', help='cache dir for bert models')
-    parser.add_argument('--num-obs', help='num obs for learning theta', default=1000)
+    parser.add_argument('--num-obs', help='num obs for learning theta', default=1000, type=int)
     args = parser.parse_args()
 
     #preds_file = '{}processed/test_predictions/sstb_{}_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random, args.k) 
