@@ -27,7 +27,7 @@ from transformers import glue_convert_examples_to_features as convert_examples_t
 
 
 def generate_features(examples, tokenizer):
-    label_list = [0, 1] 
+    label_list = ['0', '1'] 
     max_seq_len = 128
     output_mode = 'classification'
     pad_on_left=False 
