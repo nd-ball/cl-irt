@@ -144,15 +144,13 @@ def train(args): #, outwriter):
         if single_sentence:
             next_example = utils.InputExample(
                 test['pairID'][i],
-                test['phrase'][i][0],
-                label=test['lbls'][i]
+                test['phrase'][i][0]
             )
         else:
             next_example = utils.InputExample(
                 test['pairID'][i],
                 test['phrase'][i][0],
-                test['phrase'][i][1],
-                test['lbls'][i]
+                test['phrase'][i][1]
             )
         test_examples.append(next_example) 
     features_test = generate_features(test_examples, tokenizer, label_list)
