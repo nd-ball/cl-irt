@@ -226,12 +226,12 @@ def run():
 
         # per epoch training set
         train_examples = []
-        for i in range(num_train_epoch):
+        for j in range(num_train_epoch):
             next_example = utils.InputExample(
-                epoch_training_data['pairID'][i],
-                epoch_training_data['phrase'][i][0],
-                epoch_training_data['phrase'][i][1],
-                epoch_training_data['lbls'][i]
+                epoch_training_data['pairID'][j],
+                epoch_training_data['phrase'][j][0],
+                epoch_training_data['phrase'][j][1],
+                epoch_training_data['lbls'][j]
             )
             train_examples.append(next_example) 
         features_train_epoch = generate_features(train_examples, tokenizer)

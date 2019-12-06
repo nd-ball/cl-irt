@@ -197,7 +197,7 @@ def train(args): #, outwriter):
         train_examples = []
         for j in range(num_train_epoch):
             next_example = utils.InputExample(
-                epoch_training_data['pairID'][i],
+                epoch_training_data['pairID'][j],
                 epoch_training_data['phrase'][j],
                 label=epoch_training_data['lbls'][j]
             )

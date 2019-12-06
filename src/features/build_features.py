@@ -603,10 +603,16 @@ def load_glue_task(datadir, diffdir, taskname):
         train = pd.read_csv(trainfile, sep='\t', header=None, names=['id', 'label', 'judgement', 's1'])
         dev = pd.read_csv(devfile, sep='\t', header=None, names=['id', 'label', 'judgement', 's1'])
         test = pd.read_csv(testfile, sep='\t', header=None, names=['id', 's1'])
+        train['s2'] = np.NaN
+        dev['s2'] = np.NaN
+        test['s2'] = np.NaN 
     elif taskname == 'SST-2':
         train = pd.read_csv(trainfile, sep='\t', header=0, names=['s1', 'label'])
         dev = pd.read_csv(devfile, sep='\t', header=0, names=['s1', 'label']) 
         test = pd.read_csv(testfile, sep='\t', header=0, names=['id', 's1']) 
+        train['s2'] = np.NaN
+        dev['s2'] = np.NaN
+        test['s2'] = np.NaN 
     elif taskname == 'MRPC': 
         train = pd.read_csv(trainfile, sep='\t', header=0, names=['label', 'id1', 'id2', 's1', 's2'])
         dev = pd.read_csv(devfile, sep='\t', header=0, names=['label', 'id1', 'id2', 's1', 's2']) 
@@ -649,6 +655,22 @@ def load_glue_task(datadir, diffdir, taskname):
     diffs = pd.read_csv(train_diff_file, header=None, names=['id', 'difficulty'])
     train['difficulty'] = diffs['difficulty']
 
-    return train, dev, test 
+    train_phrase = [[a, b] for a, b in zip(train['s1'], train['s2'])]
+    dev_phrase = [[a, b] for a, b in zip(dev['s1'], dev['s2'])]
+    test_phrase = [[a, b] for a, b in zip(test['s1'], test['s2'])]
+    train_result = {
+        'phrase': train_phrase, 'lbls': list(train['label']), 
+        'pairID': list(train['id']), 'difficulty': list(train['difficulty'])
+        }
+    dev_result = {
+        'phrase': dev_phrase, 'lbls': list(dev['label']), 
+        'pairID': list(dev['id']), 'difficulty': list(dev['difficulty'])
+        }
+    test_result = {
+        'phrase': test_phrase, 'lbls': list(test['label']), 
+        'pairID': list(test['id']), 'difficulty': list(test['difficulty'])
+        }
+
+    return train_result, dev_result, test_result 
 
 

@@ -8,7 +8,7 @@ import pandas as pd
 
 from sklearn.metrics import accuracy_score
 
-from features.build_features import load_sstb_bert, get_epoch_training_data, k_sort
+from features.build_features import load_glue_task, get_epoch_training_data, k_sort
 from features.irt_scoring import calculate_theta, calculate_diff_threshold
 
 # import required bert libraries
@@ -27,7 +27,7 @@ from transformers import glue_convert_examples_to_features as convert_examples_t
 
 
 def generate_features(examples, tokenizer):
-    label_list = ['0', '1'] 
+    #label_list = ['0', '1'] 
     max_seq_len = 128
     output_mode = 'classification'
     pad_on_left=False 
@@ -36,7 +36,7 @@ def generate_features(examples, tokenizer):
 
     features = convert_examples_to_features(
         examples, tokenizer,
-        label_list=label_list, 
+        #label_list=label_list, 
         max_length=max_seq_len,
         output_mode=output_mode,
         pad_on_left=pad_on_left,
@@ -57,7 +57,6 @@ def train(args): #, outwriter):
     # variables
     num_epoch = args.num_epochs
     batch_size = 8
-    out_dim = 2
     max_grad_norm = 1.0
 
     device = torch.device('cuda' if args.gpu >= 0 else 'cpu') 
@@ -65,6 +64,10 @@ def train(args): #, outwriter):
     config_class = BertConfig
     model_class = BertForSequenceClassification
     tokenizer_class = BertTokenizer 
+
+    train, dev, test = load_glue_task(args.data_dir, args.diff_dir, args.taskname)
+    out_dim = len(set(train['labels']))
+    
 
     config = config_class.from_pretrained('bert-base-uncased',
                                             num_labels=out_dim,
@@ -87,40 +90,69 @@ def train(args): #, outwriter):
 
     exp_label = 'bert_{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random)
 
-    train, dev, test = load_sstb_bert(args.data_dir)
 
     full_train_diffs = train['difficulty'] 
     full_train_examples = []
+    single_sentence = train['phrase'][0][1] == np.NaN 
     for i in range(len(train['phrase'])):
-        next_example = utils.InputExample(
-            train['pairID'][i],
-            train['phrase'][i],
-            label=train['lbls'][i]
-        )
+        if single_sentence:
+            next_example = utils.InputExample(
+                train['pairID'][i],
+                train['phrase'][i][0],
+                label=train['lbls'][i]
+            )
+        else:
+            next_example = utils.InputExample(
+                train['pairID'][i],
+                train['phrase'][i][0],
+                train['phrase'][i][1],
+                label=train['lbls'][i]
+            )
         full_train_examples.append(next_example) 
 
-    theta_sample = np.random.randint(0, len(full_train_examples), args.num_obs) 
-    theta_diffs = [full_train_diffs[z] for z in theta_sample]
-    theta_train = [full_train_examples[z] for z in theta_sample]
-    features_train = generate_features(theta_train, tokenizer)
+    if args.num_obs < len(full_train_examples):
+        theta_sample = np.random.randint(0, len(full_train_examples), args.num_obs) 
+        theta_diffs = [full_train_diffs[z] for z in theta_sample]
+        theta_train = [full_train_examples[z] for z in theta_sample]
+        features_train = generate_features(theta_train, tokenizer)
+    else:
+        features_train = generate_features(full_train_examples, tokenizer) 
+        theta_diffs = full_train_diffs 
 
     dev_examples = []
     for i in range(len(dev['phrase'])):
-        next_example = utils.InputExample(
-            dev['pairID'][i],
-            dev['phrase'][i],
-            label=dev['lbls'][i]
-        )
+        if single_sentence:
+            next_example = utils.InputExample(
+                dev['pairID'][i],
+                dev['phrase'][i][0],
+                label=dev['lbls'][i]
+            )
+        else:
+            next_example = utils.InputExample(
+                dev['pairID'][i],
+                dev['phrase'][i][0],
+                dev['phrase'][i][1],
+                label=dev['lbls'][i]
+            )
+
         dev_examples.append(next_example) 
     features_dev = generate_features(dev_examples, tokenizer) 
 
     test_examples = []
     for i in range(len(test['phrase'])):
-        next_example = utils.InputExample(
-            test['pairID'][i],
-            test['phrase'][i],
-            label=test['lbls'][i]
-        )
+        if single_sentence:
+            next_example = utils.InputExample(
+                test['pairID'][i],
+                test['phrase'][i][0],
+                label=test['lbls'][i]
+            )
+        else:
+            next_example = utils.InputExample(
+                test['pairID'][i],
+                test['phrase'][i][0],
+                test['phrase'][i][1],
+                label=test['lbls'][i]
+            )
         test_examples.append(next_example) 
     features_test = generate_features(test_examples, tokenizer)
 
@@ -189,18 +221,26 @@ def train(args): #, outwriter):
         else:
             theta_hat=0
 
-        epoch_training_data = get_epoch_training_data(train, args, i, 'sstb', theta_hat, diffs_sorted_idx) 
+        epoch_training_data = get_epoch_training_data(train, args, i, 'glue', theta_hat, diffs_sorted_idx) 
         num_train_epoch = len(epoch_training_data['phrase'])
         #print('training set size: {}'.format(num_train_epoch))
         # shuffle training data
         # per epoch training set
         train_examples = []
         for j in range(num_train_epoch):
-            next_example = utils.InputExample(
-                epoch_training_data['pairID'][i],
-                epoch_training_data['phrase'][j],
-                label=epoch_training_data['lbls'][j]
-            )
+            if single_sentence:
+                next_example = utils.InputExample(
+                    epoch_training_data['pairID'][j],
+                    epoch_training_data['phrase'][j][0],
+                    label=epoch_training_data['lbls'][j]
+                )
+            else:
+                next_example = utils.InputExample(
+                    epoch_training_data['pairID'][j],
+                    epoch_training_data['phrase'][j][0],
+                    epoch_training_data['phrase'][j][1],
+                    label=epoch_training_data['lbls'][j]
+                )
             train_examples.append(next_example) 
         features_train_epoch = generate_features(train_examples, tokenizer)
 
@@ -320,6 +360,7 @@ def run():
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu', type=int, default=-1, help='use GPU?')
     parser.add_argument('--data-dir', help='path to SNLI dataset')
+    parser.add_argument('--diff-dir', help='path to SNLI dataset')
     parser.add_argument('--num-units', type=int, default=300, help='number of units per layer')
     parser.add_argument('--balanced', action='store_true') 
     parser.add_argument('--strategy', choices=['baseline', 'ordered', 'simple', 'theta', 'naacl-linear', 'naacl-root', 'theta-hard'],
