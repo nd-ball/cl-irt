@@ -98,7 +98,11 @@ def train(args): #, outwriter):
             label=train['lbls'][i]
         )
         full_train_examples.append(next_example) 
-    features_train = generate_features(full_train_examples, tokenizer)
+
+    theta_sample = np.random.randint(0, len(full_train_examples), args.num_obs) 
+    theta_diffs = [full_train_diffs[z] for z in theta_sample]
+    theta_train = [full_train_examples[z] for z in theta_sample]
+    features_train = generate_features(theta_train, tokenizer)
 
     dev_examples = []
     for i in range(len(dev['phrase'])):
@@ -177,7 +181,7 @@ def train(args): #, outwriter):
             rps = [j if j==1 else -1 for j in rps] 
             #print(rps) 
             #print(train['difficulty']) 
-            theta_hat = calculate_theta(train['difficulty'], rps, num_obs=args.num_obs)[0] 
+            theta_hat = calculate_theta(theta_diffs, rps)[0] 
             #print('estimated theta: {}'.format(theta_hat))     
             # calculate the difficulty value required for such that 
             # we only include items where p_correct >= args.p_correct
