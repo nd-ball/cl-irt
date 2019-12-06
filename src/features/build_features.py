@@ -362,8 +362,8 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
             training_set['difficulty'] = [len(p[0]) for p in training_set['phrase']] 
 
     if diffs_sorted_idx is None:
-        difficulties = [img[3] for img in training_set]
-        diffs_sorted_idx = np.argsort(difficulties) 
+        #difficulties = [img['difficulty'] for img in training_set]
+        diffs_sorted_idx = np.argsort(training_set['difficulty']) 
 
     if args.ordering == 'easiest':
         diffs_sorted_idx = np.argsort(training_set['difficulty']) 
