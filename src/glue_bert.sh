@@ -7,8 +7,8 @@ DATADIR=/mnt/nfs/work1/hongyu/lalor/data/glue
 MINTRAINLEN=1000
 TASK=MNLI
 CACHEDIR=/mnt/nfs/work1/hongyu/lalor/data/bert/
-LOGDIR=20191206-naacl-2
-QUEUE=titanx-short
+LOGDIR=20191206-naacl
+QUEUE=titanx-long 
 
 #for TASK in MRPC QNLI RTE WNLI QQP MNLI
 #for TASK in MNLI CoLA 
