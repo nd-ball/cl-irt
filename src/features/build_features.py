@@ -708,29 +708,26 @@ def load_glue_task(datadir, diffdir, taskname):
     #test_phrase = [[a, b] for a, b in zip(test['s1'], test['s2'])]
 
     # 90-10 split of training set for early stopping
-    sss = StratifiedShuffleSplit(train['label'], 1, test_size=0.1, random_state=0)
+    sss = StratifiedShuffleSplit(1, test_size=0.1, random_state=0)
 
-    train_idx, dev_idx = next(sss) 
-
-
-
-    train_result = {
-        'phrase': [train['phrase'][i] for i in train_idx], 
-        'lbls': list([train['label'][i] for i in train_idx]), 
-        'pairID': list([train['id'][i] for i in train_idx]), 
-        'difficulty': list([train['difficulty'][i] for i in train_idx])
-        }
-    dev_result = {
-        'phrase': [train['phrase'][i] for i in dev_idx], 
-        'lbls': list([train['label'][i] for i in dev_idx]), 
-        'pairID': list([train['id'][i] for i in dev_idx]), 
-        'difficulty': list([train['difficulty'][i] for i in dev_idx])
-        }
-    test_result = {
-        'phrase': dev['phrase'], 
-        'lbls': list(dev['label']), 
-        'pairID': list(dev['id'])
-        }
+    for train_idx, dev_idx in sss.split(train['phrase'], train['label']): 
+        train_result = {
+            'phrase': [train['phrase'][i] for i in train_idx], 
+            'lbls': list([train['label'][i] for i in train_idx]), 
+            'pairID': list([train['id'][i] for i in train_idx]), 
+            'difficulty': list([train['difficulty'][i] for i in train_idx])
+            }
+        dev_result = {
+            'phrase': [train['phrase'][i] for i in dev_idx], 
+            'lbls': list([train['label'][i] for i in dev_idx]), 
+            'pairID': list([train['id'][i] for i in dev_idx]), 
+            'difficulty': list([train['difficulty'][i] for i in dev_idx])
+            }
+        test_result = {
+            'phrase': dev['phrase'], 
+            'lbls': list(dev['label']), 
+            'pairID': list(dev['id'])
+            }
     
     #test_result = {
     #    'phrase': test['phrase'], 
