@@ -10,8 +10,8 @@ CACHEDIR=/mnt/nfs/work1/hongyu/lalor/data/bert/
 LOGDIR=20191206-naacl-2
 QUEUE=titanx-short
 
-for TASK in CoLA MRPC QNLI RTE WNLI QQP MNLI
-#for TASK in MNLI 
+for TASK in MRPC QNLI RTE WNLI QQP MNLI
+#for TASK in MNLI CoLA 
 do 
     # DDaCLAE
     sbatch -p $QUEUE --gres=gpu:1 --mem=64gb --output=logs/bert/$LOGDIR/bert-$TASK-ddaclae-test-%j.log --wrap="python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy theta --min-train-length $MINTRAINLEN --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR"
