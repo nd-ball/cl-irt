@@ -141,7 +141,7 @@ def train(args): #, outwriter):
 
         dev_examples.append(next_example) 
     features_dev = generate_features(dev_examples, tokenizer, label_list) 
-    '''
+    
     test_examples = []
     for i in range(len(test['phrase'])):
         if single_sentence:
@@ -157,7 +157,7 @@ def train(args): #, outwriter):
             )
         test_examples.append(next_example) 
     features_test = generate_features(test_examples, tokenizer, label_list)
-    '''
+    
     optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8, correct_bias=False)
     #scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=num_epoch)
     scheduler = get_constant_schedule(optimizer) 
@@ -308,7 +308,7 @@ def train(args): #, outwriter):
         dev_acc = np.mean(rps) 
         
         # Test (SNLI)
-        '''
+        
         test_sampler = SequentialSampler(features_test)
         test_dataloader = DataLoader(features_test, sampler=test_sampler, batch_size=batch_size)
         preds = None 
@@ -337,9 +337,9 @@ def train(args): #, outwriter):
         rps = [int(p == c) for p, c in zip(preds, out_label_ids)] 
         #print(rps) 
         #print('test acc:{}'.format(np.mean(rps)))
-        '''
-        #test_acc = np.mean(rps) 
-        test_acc = 0 
+        
+        test_acc = np.mean(rps) 
+        #test_acc = 0 
         print('{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, dev_acc, test_acc, theta_hat))
                 
         # write test predictions to file

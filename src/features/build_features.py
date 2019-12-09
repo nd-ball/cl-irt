@@ -10,6 +10,8 @@ import torch
 
 from sklearn.preprocessing import LabelEncoder
 
+from sklearn.cross_validation import StratifiedShuffleSplit 
+
 
 
 ###### SNLI ########
@@ -704,18 +706,36 @@ def load_glue_task(datadir, diffdir, taskname):
     #train_phrase = [[a, b] for a, b in zip(train['s1'], train['s2'])]
     #dev_phrase = [[a, b] for a, b in zip(dev['s1'], dev['s2'])]
     #test_phrase = [[a, b] for a, b in zip(test['s1'], test['s2'])]
+
+    # 90-10 split of training set for early stopping
+    sss = StratifiedShuffleSplit(train['label'], 1, test_size=0.1, random_state=0)
+
+    train_idx, dev_idx = next(sss) 
+
+
+
     train_result = {
-        'phrase': train['phrase'], 'lbls': list(train['label']), 
-        'pairID': list(train['id']), 'difficulty': list(train['difficulty'])
+        'phrase': [train['phrase'][i] for i in train_idx], 
+        'lbls': list([train['label'][i] for i in train_idx]), 
+        'pairID': list([train['id'][i] for i in train_idx]), 
+        'difficulty': list([train['difficulty'][i] for i in train_idx])
         }
     dev_result = {
-        'phrase': dev['phrase'], 'lbls': list(dev['label']), 
-        'pairID': list(dev['id'])
+        'phrase': [train['phrase'][i] for i in dev_idx], 
+        'lbls': list([train['label'][i] for i in dev_idx]), 
+        'pairID': list([train['id'][i] for i in dev_idx]), 
+        'difficulty': list([train['difficulty'][i] for i in dev_idx])
         }
     test_result = {
-        'phrase': test['phrase'], 
-        'pairID': list(test['id'])
+        'phrase': dev['phrase'], 
+        'lbls': list(dev['label']), 
+        'pairID': list(dev['id'])
         }
+    
+    #test_result = {
+    #    'phrase': test['phrase'], 
+    #    'pairID': list(test['id'])
+    #    }
 
     return train_result, dev_result, test_result 
 
