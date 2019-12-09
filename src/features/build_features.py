@@ -618,7 +618,7 @@ def parse_line(line, task, split):
             return line[0], line[3], line[4], line[5] 
         else:
             return line[0], line[1], line[2]
-    elif taskname == 'MNLI':
+    elif task == 'MNLI':
         if split == 1:
             return line[0], line[8], line[9], line[11]
         elif split == 2:
