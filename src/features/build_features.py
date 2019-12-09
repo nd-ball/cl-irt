@@ -10,7 +10,7 @@ import torch
 
 from sklearn.preprocessing import LabelEncoder
 
-from sklearn.cross_validation import StratifiedShuffleSplit 
+from sklearn.model_selection import StratifiedShuffleSplit 
 
 
 
