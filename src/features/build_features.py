@@ -616,34 +616,16 @@ def parse_line(line, task, split):
             return line[0], line[3], line[4], line[5] 
         else:
             return line[0], line[1], line[2]
+    elif taskname == 'MNLI':
+        if split == 1:
+            return line[0], line[8], line[9], line[11]
+        elif split == 2:
+            return line[0], line[8], line[9], line[15]
+        else:
+            return line[0], line[8], line[9]
     else:
         raise NotImplementedError 
-    # we're skipping mnli for now
-    '''
-    elif taskname == 'MNLI':
-        train = pd.read_csv(trainfile, sep='\t', header=0, usecols=['index', 'sentence1', 'sentence2', 'label'])[['index', 'sentence1', 'sentence2', 'label']]
-
-        # MNLI has matched/mismatched dev and testfiles
-        devfile_m = '{}/{}/dev_matched.tsv'.format(datadir, taskname)
-        testfile_m = '{}/{}/test_matched.tsv'.format(datadir, taskname)
-        devfile_mm = '{}/{}/dev_mismatched.tsv'.format(datadir, taskname)
-        testfile_mm = '{}/{}/test_mismatched.tsv'.format(datadir, taskname)
-
-
-        dev_m = pd.read_csv(devfile_m, sep='\t', header=0, usecols=['index', 'sentence1', 'sentence2', 'label'])[['index', 'sentence1', 'sentence2', 'label']]
-        test_m = pd.read_csv(testfile_m, sep='\t', header=0, usecols=['index', 'sentence1', 'sentence2'])[['index', 'sentence1', 'sentence2']]
-        dev_mm = pd.read_csv(devfile_mm, sep='\t', header=0, usecols=['index', 'sentence1', 'sentence2', 'label'])[['index', 'sentence1', 'sentence2', 'label']]
-        test_mm = pd.read_csv(testfile_mm, sep='\t', header=0, usecols=['index', 'sentence1', 'sentence2'])[['index', 'sentence1', 'sentence2']]
-
-        train.columns = ['id', 's1', 's2', 'label']
-        dev_m.columns = ['id', 's1', 's2', 'label']
-        dev_mm.columns = ['id', 's1', 's2', 'label']
-        test_m.columns = ['id', 's1', 's2']
-        test_mm.columns = ['id', 's1', 's2']
-        dev = (dev_m, dev_mm)
-        test = (test_m, test_mm) 
-    '''
-
+    
 
 
 def load_glue_task(datadir, diffdir, taskname):
@@ -657,8 +639,12 @@ def load_glue_task(datadir, diffdir, taskname):
 
     # load data
     trainfile = '{}/{}/train.tsv'.format(datadir, taskname)
-    devfile = '{}/{}/dev.tsv'.format(datadir, taskname)
-    testfile = '{}/{}/test.tsv'.format(datadir, taskname)
+    if taskname == 'MNLI':
+        devfile = '{}/{}/dev_matched.tsv'.format(datadir, taskname)
+        testfile = '{}/{}/test_matched.tsv'.format(datadir, taskname)
+    else:
+        devfile = '{}/{}/dev.tsv'.format(datadir, taskname)
+        testfile = '{}/{}/test.tsv'.format(datadir, taskname)
     train = {
         'phrase': [],
         'label': [],

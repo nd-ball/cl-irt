@@ -1,21 +1,22 @@
 
-NUMEPOCHS=10  # max num epochs, using early stopping though 
+NUMEPOCHS=20  # max num epochs, using early stopping though 
 COMP=5  # for baselines, competency at midpoint
 NUMOBS=1000  # for estimating theta 
 DIFFDIR=/mnt/nfs/work1/hongyu/lalor/data/jiant/artificial-crowd-generation-2/rps
 DATADIR=/mnt/nfs/work1/hongyu/lalor/data/glue
 MINTRAINLEN=1000
-TASK=QNLI
+TASK=MNLI
 CACHEDIR=/mnt/nfs/work1/hongyu/lalor/data/bert/
-LOGDIR=20191206-4
+LOGDIR=20191206-naacl
 
 
-for TASK in CoLA MRPC QNLI RTE WNLI QQP
+#for TASK in CoLA MRPC QNLI RTE WNLI QQP
+for TASK in MNLI 
 do 
 
 
     # DDaCLAE
-    #sbatch -p titanx-long --gres=gpu:1 --mem=64gb --output=logs/bert/$LOGDIR/bert-$TASK-ddaclae-test-%j.log --wrap="python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy theta --min-train-length $MINTRAINLEN --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR"
+    sbatch -p titanx-long --gres=gpu:1 --mem=64gb --output=logs/bert/$LOGDIR/bert-$TASK-ddaclae-test-%j.log --wrap="python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy theta --min-train-length $MINTRAINLEN --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR"
 
 
     # NAACL Baselines    
@@ -29,5 +30,5 @@ do
     done
 
     # Fully supervised baselines
-    #sbatch -p titanx-long --gres=gpu:1 --mem=64gb --output=logs/bert/$LOGDIR/bert-$TASK-baseline.log --wrap="python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy baseline --use-length --ordering easiest --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --competency $COMP --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR"
+    sbatch -p titanx-long --gres=gpu:1 --mem=64gb --output=logs/bert/$LOGDIR/bert-$TASK-baseline.log --wrap="python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy baseline --use-length --ordering easiest --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --competency $COMP --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR"
 done 
