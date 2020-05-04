@@ -1,10 +1,12 @@
 import numpy as np
-#import dynet as dy
 import argparse
 import random
 import gc
 import csv
 import pandas as pd
+
+import os 
+import datetime 
 
 from sklearn.metrics import accuracy_score
 
@@ -15,15 +17,11 @@ from features.irt_scoring import calculate_theta, calculate_diff_threshold
 
 import torch 
 from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler, TensorDataset)
-
 from transformers import (WEIGHTS_NAME, BertConfig,
                             BertForSequenceClassification, BertTokenizer) 
 from transformers import AdamW, get_linear_schedule_with_warmup, get_constant_schedule 
-
 from transformers.data.processors import utils  
-
 from transformers import glue_convert_examples_to_features as convert_examples_to_features
-
 
 
 def generate_features(examples, tokenizer, label_list):
@@ -51,7 +49,7 @@ def generate_features(examples, tokenizer, label_list):
     dataset = TensorDataset(all_input_ids, all_attention_mask, all_token_type_ids, all_labels)
     return dataset
 
-def train(args): #, outwriter): 
+def train(args, outfile): 
 
     # variables
     num_epoch = args.num_epochs
@@ -174,8 +172,8 @@ def train(args): #, outwriter):
     #else:
     diffs_sorted_idx = None 
 
-    
     num_train = len(train['phrase'])
+    top_dev = 0.0
     top_dev_test = 0.0
 
     print('Training model {}'.format(model))
@@ -215,10 +213,7 @@ def train(args): #, outwriter):
             
             rps = [int(p == c) for p, c in zip(preds, out_label_ids)] 
             rps = [j if j==1 else -1 for j in rps] 
-            #print(rps) 
-            #print(train['difficulty']) 
             theta_hat = calculate_theta(theta_diffs, rps)[0] 
-            #print('estimated theta: {}'.format(theta_hat))     
             # calculate the difficulty value required for such that 
             # we only include items where p_correct >= args.p_correct
             theta_hat = calculate_diff_threshold(args.p_correct, theta_hat)
@@ -261,14 +256,9 @@ def train(args): #, outwriter):
                         'token_type_ids': batch[2],
                         'labels': batch[3]
                     }
-            #print(inputs) 
             outputs = model(**inputs) 
             loss = outputs[0]
-            #print(loss.item()) 
             loss.backward() 
-            #print(model.parameters())
-            #print(optimizer_grouped_parameters)
-            #torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm) 
             optimizer.step() 
             scheduler.step()
             model.zero_grad() 
@@ -302,15 +292,13 @@ def train(args): #, outwriter):
                 out_label_ids = np.append(out_label_ids, inputs['labels'].detach().cpu().numpy(), axis=0) 
 
         preds = np.argmax(preds, axis=1) 
-        #print('dev loss:{}'.format(dev_loss))
+        print('dev loss:{}'.format(dev_loss))
         
         rps = [int(p == c) for p, c in zip(preds, out_label_ids)] 
-        #print(rps) 
-        #print('dev acc:{}'.format(np.mean(rps)))
+        print('dev acc:{}'.format(np.mean(rps)))
         dev_acc = np.mean(rps) 
         
-        # Test (SNLI)
-        
+        # Test 
         test_sampler = SequentialSampler(features_test)
         test_dataloader = DataLoader(features_test, sampler=test_sampler, batch_size=batch_size)
         preds = None 
@@ -337,25 +325,26 @@ def train(args): #, outwriter):
         preds = np.argmax(preds, axis=1) 
         
         rps = [int(p == c) for p, c in zip(preds, out_label_ids)] 
-        #print(rps) 
-        #print('test acc:{}'.format(np.mean(rps)))
+        print('test acc:{}'.format(np.mean(rps)))
         
         test_acc = np.mean(rps) 
-        #test_acc = 0 
         print('{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, dev_acc, test_acc, theta_hat))
                 
         # write test predictions to file
-        #for j in range(len(predictions)):
-        #    row = [i, itemIDs[j], correct[j], preds[j]]
-        #    outwriter.writerow(row) 
+        if dev_acc > top_dev:
+            top_dev = dev_acc
+            top_dev_epoch = i
+            top_dev_test = test_acc 
+            os.makedirs(os.path.dirname(outfile), exist_ok=True)
+            with open(outfile, "w") as f:
+                outwriter = csv.writer(outfile)
+                outwriter.writerow(['epoch','idx','correct','prediction'])
+                for j in range(len(preds)):
+                    row = [i, j, out_label_ids[j], preds[j]]
+                    outwriter.writerow(row) 
 
-        #if acc_dev > top_dev:
-        #    top_dev = acc_dev
-        #    top_dev_epoch = i
-        #    top_dev_test = acc_test 
-
-        #print('Best so far (dev): {}, epoch {}'.format(top_dev, top_dev_epoch))
-        #print('Best so far (test): {}, epoch {}'.format(top_dev_test, top_dev_epoch))
+        print('Best so far (dev): {}, epoch {}'.format(top_dev, top_dev_epoch))
+        print('Best so far (test): {}, epoch {}'.format(top_dev_test, top_dev_epoch))
         
     return top_dev_test, num_train 
 
@@ -388,8 +377,15 @@ def run():
     #outwriter = csv.writer(outfile, delimiter=',')
     #outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])
 
+    # create output directory-file
+    outfile = 'results/bert/{}-len-{}/{}/.preds.csv'.format(
+        args.strategy,
+        args.use_length,
+        datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    )
+
     #print(args)
-    test_acc, training_set_size = train(args) #, outwriter)   
+    test_acc, training_set_size = train(args, outfile)   
     #print(test_acc) 
 
 
