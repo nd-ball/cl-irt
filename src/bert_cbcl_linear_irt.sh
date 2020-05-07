@@ -2,7 +2,7 @@
 
 #$ -q gpu
 #$ -l gpu_card=1
-#$ -N ddaclae-test
+#$ -N cbcl-linear-irt
 
 module load conda
 module load cuda
