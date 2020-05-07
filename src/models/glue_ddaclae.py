@@ -336,12 +336,16 @@ def train(args, outfile):
             top_dev_epoch = i
             top_dev_test = test_acc 
             os.makedirs(os.path.dirname(outfile), exist_ok=True)
-            with open(outfile, "w") as f:
-                outwriter = csv.writer(outfile)
+            with open(outfile+'preds.csv', "w") as f:
+                outwriter = csv.writer(f)
                 outwriter.writerow(['epoch','idx','correct','prediction'])
                 for j in range(len(preds)):
                     row = [i, j, out_label_ids[j], preds[j]]
                     outwriter.writerow(row) 
+
+            # save model to disk
+            torch.save(model.state_dict(), outfile + 'model.pt') 
+
 
         print('Best so far (dev): {}, epoch {}'.format(top_dev, top_dev_epoch))
         print('Best so far (test): {}, epoch {}'.format(top_dev_test, top_dev_epoch))
@@ -378,14 +382,14 @@ def run():
     #outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])
 
     # create output directory-file
-    outfile = 'results/bert/{}-len-{}/{}/.preds.csv'.format(
+    outdir = 'results/bert/{}-len-{}/{}/'.format(
         args.strategy,
         args.use_length,
         datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     )
 
     #print(args)
-    test_acc, training_set_size = train(args, outfile)   
+    test_acc, training_set_size = train(args, outdir)   
     #print(test_acc) 
 
 
