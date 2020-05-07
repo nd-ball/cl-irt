@@ -7,6 +7,7 @@ import pandas as pd
 
 import os 
 import datetime 
+import time 
 
 from sklearn.metrics import accuracy_score
 
@@ -389,7 +390,10 @@ def run():
     )
 
     #print(args)
+    start_time = time.time()
     test_acc, training_set_size = train(args, outdir)   
+    end_time = time.time()
+    print(end_time - start_time)
     #print(test_acc) 
 
 
