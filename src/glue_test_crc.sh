@@ -15,7 +15,7 @@ NUMOBS=1000  # for estimating theta
 DIFFDIR=~/data/artificial-crowd-rps
 DATADIR=~/data/glue
 MINTRAINLEN=1000
-TASK=MNLI
+TASK=$1
 CACHEDIR=~/data/bert/
 
 python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy theta --min-train-length $MINTRAINLEN --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR
