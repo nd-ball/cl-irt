@@ -378,7 +378,7 @@ def run():
     args = parser.parse_args()
 
     # create output directory-file
-    outdir = '~/code/cl-irt/src/results/bert/{}-len-{}/{}/'.format(
+    outdir = 'results/bert/{}-len-{}/{}/'.format(
         args.strategy,
         args.use_length,
         datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
