@@ -5,7 +5,7 @@ do
     qsub glue_test_crc.sh $TASK 
 
     # baseline
-    qsub bert_baseline.sh $TASK 
+    qsub bert_baseline_crc.sh $TASK 
 
     # CBCL Linear Heuristic
     qsub bert_cbcl_linear_heuristic.sh $TASK 
