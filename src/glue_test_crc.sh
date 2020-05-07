@@ -4,11 +4,6 @@
 #$ -l gpu_card=1
 #$ -N ddaclae-test
 
-# 1 - num supervised
-# 2 - run number (for separating logs and rps)
-# 3 - number of batches with IRT training
-# 4 - number of VI epochs per training epoch (they're different for now)
-
 module load conda
 module load cuda
 module load cudnn

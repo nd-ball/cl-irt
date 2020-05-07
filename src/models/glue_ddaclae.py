@@ -383,7 +383,7 @@ def run():
     #outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])
 
     # create output directory-file
-    outdir = 'results/bert/{}-len-{}/{}/'.format(
+    outdir = '~/code/cl-irt/src/results/bert/{}-len-{}/{}/'.format(
         args.strategy,
         args.use_length,
         datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
