@@ -1,5 +1,7 @@
 
-for TASK in MRPC QNLI RTE WNLI QQP MNLI CoLA 
+for n in 1 2 3 4 5
+do
+for TASK in MRPC QNLI RTE QQP MNLI SST-2 
 do 
     # ddaclae
     qsub glue_test_crc.sh $TASK 
@@ -19,3 +21,5 @@ do
     # CBCL Root IRT Diff
     qsub bert_cbcl_root_irt.sh $TASK 
 done 
+sleep 20
+done
