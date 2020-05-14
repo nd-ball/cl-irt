@@ -1,8 +1,7 @@
 
 for n in 1 2 3 4 5
 do
-#for TASK in MRPC QNLI RTE QQP MNLI SST-2 
-for TASK in SST-2
+for TASK in MRPC QNLI RTE QQP MNLI SST-2 
 do 
     # ddaclae
     qsub glue_test_crc.sh $TASK 
