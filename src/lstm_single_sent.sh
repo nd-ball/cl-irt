@@ -9,7 +9,7 @@ module load cuda
 module load cudnn
 source activate ddaclae-lstm
 
-NUMEPOCHS=10  # max num epochs, using early stopping though 
+NUMEPOCHS=100  # max num epochs, using early stopping though 
 COMP=5  # for baselines, competency at midpoint
 NUMOBS=1000  # for estimating theta 
 DIFFDIR=~/data/artificial-crowd-rps
