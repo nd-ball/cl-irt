@@ -9,6 +9,8 @@ module load cuda
 module load cudnn
 source activate ddaclae-lstm
 
+export LD_LIBRARY_PATH=/afs/crc.nd.edu/user/j/jlalor1/.conda/envs/ddaclae-lstm/lib/:$LD_LIBRARY_PATH
+
 NUMEPOCHS=100  # max num epochs, using early stopping though 
 COMP=5  # for baselines, competency at midpoint
 NUMOBS=1000  # for estimating theta 
