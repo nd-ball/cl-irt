@@ -2,7 +2,7 @@
 
 #$ -q gpu
 #$ -l gpu_card=1
-#$ -N ddaclae
+#$ -N lstm-single-sent
 
 module load conda
 module load cuda
