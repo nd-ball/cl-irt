@@ -6,9 +6,13 @@ import gc
 import csv
 import pandas as pd
 
+import datetime 
+import time 
+import os 
+
 from sklearn.metrics import accuracy_score
 
-from features.build_features import load_sstb, get_epoch_training_data, k_sort
+from features.build_features import load_sstb, get_epoch_training_data, k_sort, load_glue_task
 from features.irt_scoring import calculate_theta, calculate_diff_threshold
 
 
@@ -69,7 +73,7 @@ class SentimentRNNBuilder:
         return out
 
 
-def train(args, outwriter): 
+def train(args, outdir): 
 
     # variables
     num_epoch = args.num_epochs 
@@ -82,11 +86,38 @@ def train(args, outwriter):
 
     exp_label = '{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random)
 
-    train, dev, test, w2i, i2w, vectors = load_sstb(args.data_dir)
+    #train, dev, test, w2i, i2w, vectors = load_sstb(args.data_dir)
+    train, dev, test = load_glue_task(args.datadir, args.diffdir, args.task)
     if len(train['phrase']) == 0:
         return -1, 0
     if args.random:
         random.shuffle(train['difficulty'])
+
+    # build embeddings
+    vectors = []
+    w2i = {}
+    i2w = {}
+
+    i = 0
+    with open(data_dir + '/raw/' + 'glove.840B.300d.txt', 'r', encoding='utf-8') as glovefile:
+        for j, line in enumerate(glovefile):
+            vals = line.rstrip().split(' ')
+            if vals[0] in vocab:
+                w2i[vals[0]] = i
+                i2w[i] = vals[0]
+                vectors.append(list(map(float, vals[1:])))
+                i += 1
+
+    # now I need to look at vocab words that aren't in glove
+    next_i = len(vectors)
+    dict_keys = w2i.keys()
+    for w in vocab:
+        if w not in dict_keys:
+            w2i[w] = next_i
+            i2w[next_i] = w
+            next_i += 1
+    w2i['<PAD>'] = next_i
+    i2w[next_i] = '<PAD>'
 
     # if k is set, sort once
     if args.k > 0:
@@ -277,17 +308,28 @@ def train(args, outwriter):
         acc_test = accuracy_score(correct, preds)
         #print('Test accuracy: {}'.format(acc_test))
 
-        print('{},{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, acc_train, acc_dev, acc_test, theta_hat))
+        #print('{},{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, acc_train, acc_dev, acc_test, theta_hat))
                 
         # write test predictions to file
-        for j in range(len(predictions)):
-            row = [i, itemIDs[j], correct[j], preds[j]]
-            outwriter.writerow(row) 
+        #for j in range(len(predictions)):
+        #    row = [i, itemIDs[j], correct[j], preds[j]]
+        #    outwriter.writerow(row) 
 
         if acc_dev > top_dev:
             top_dev = acc_dev
             top_dev_epoch = i
             top_dev_test = acc_test 
+
+            os.makedirs(os.path.dirname(outdir), exist_ok=True)
+            with open(outdir+'preds.csv', "w") as f:
+                outwriter = csv.writer(f)
+                outwriter.writerow(['epoch','idx','correct','prediction'])
+                for j in range(len(preds)):
+                    row = [i, j, out_label_ids[j], preds[j]]
+                    outwriter.writerow(row) 
+
+            # save model to disk
+            dnnmodel.save(model.state_dict(), outdir + 'model.pt') 
 
         #print('Best so far (dev): {}, epoch {}'.format(top_dev, top_dev_epoch))
         #print('Best so far (test): {}, epoch {}'.format(top_dev_test, top_dev_epoch))
@@ -296,6 +338,7 @@ def train(args, outwriter):
 
 
 def run():
+    GLUETASKS = ['CoLA', 'SST-2']
     parser = argparse.ArgumentParser()
     parser.add_argument('--dynet-autobatch', help='DyNet requirement for autobatching')
     parser.add_argument('--dynet-gpus', help='DyNet requirement to trigger gpu')
@@ -317,16 +360,32 @@ def run():
     parser.add_argument('--k', default=0, type=int) 
     parser.add_argument('--competency', default=50, type=int) 
     parser.add_argument('--p-correct', default=0.5, type=float, help="P(correct) to filter training data for IRT")
+    parser.add_argument('--diff-dir', help='path to SNLI dataset')
+    parser.add_argument('--task', choices=GLUETASKS, help='GLUE task for fine-tuning')
     args = parser.parse_args()
 
-    preds_file = '{}processed/test_predictions/sstb_{}_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random, args.k) 
-    outfile = open(preds_file, 'w') 
-    outwriter = csv.writer(outfile, delimiter=',')
-    outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])
+    # create output directory-file
+    outdir = 'results/lstm/{}-{}-len-{}/{}/'.format(
+        args.task,
+        args.strategy,
+        args.use_length,
+        datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    )
+
+    #preds_file = '{}processed/test_predictions/sstb_{}_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random, args.k) 
+    #outfile = open(preds_file, 'w') 
+    #outwriter = csv.writer(outfile, delimiter=',')
+    #outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])
 
     #print(args)
-    test_acc, training_set_size = train(args, outwriter)   
+    #test_acc, training_set_size = train(args, outwriter)   
     #print(test_acc) 
+
+    start_time = time.time()
+    test_acc, training_set_size = train(args, outdir)   
+    end_time = time.time()
+    print(end_time - start_time)
+
 
 
 if __name__ == '__main__':
