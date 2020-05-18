@@ -21,9 +21,10 @@ LENGTH=$3
 CACHEDIR=~/data/bert/
 
 if ["$LENGTH" = "TRUE"]; then
-python -u -m models.sstb --dynet-autobatch 1 --dynet-gpus 1 --dynet-mem 10000 --gpu 0 --data-dir $DATADIR --strategy $STRATEGY --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK --use-length 
+python -u -m models.snli --dynet-autobatch 1 --dynet-gpus 1 --dynet-mem 10000 --gpu 0 --data-dir $DATADIR --strategy $STRATEGY --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK --use-length 
 else
-python -u -m models.sstb --dynet-autobatch 1 --dynet-gpus 1 --dynet-mem 10000 --gpu 0 --data-dir $DATADIR --strategy $STRATEGY --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK 
+python -u -m models.snli --dynet-autobatch 1 --dynet-gpus 1 --dynet-mem 10000 --gpu 0 --data-dir $DATADIR --strategy $STRATEGY --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK 
 fi
+
 
 echo $TASK-$STRATEGY-$LENGTH 

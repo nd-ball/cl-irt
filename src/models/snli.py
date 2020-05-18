@@ -8,11 +8,16 @@ import gc
 import csv
 import pandas as pd
 
+import datetime 
+import time 
+import os 
+
 from sklearn.metrics import accuracy_score
 
-from features.build_features import load_snli, get_epoch_training_data, k_sort 
+from features.build_features import load_snli, get_epoch_training_data, k_sort, load_glue_task
 from features.irt_scoring import calculate_theta, calculate_diff_threshold 
 
+GLUETASKS = ['MRPC', 'MNLI', 'QNLI', 'RTE', 'QQP']
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dynet-autobatch', help='DyNet requirement for autobatching')
@@ -35,6 +40,8 @@ parser.add_argument('--min-train-length', default=100, type=int)
 parser.add_argument('--k', default=0, type=int) 
 parser.add_argument('--competency', default=50, type=int) 
 parser.add_argument('--p-correct', default=0.5, type=float, help="P(correct) to filter training data for IRT")
+parser.add_argument('--diff-dir', help='path to SNLI dataset')
+parser.add_argument('--task', choices=GLUETASKS, help='GLUE task for fine-tuning')
 args = parser.parse_args()
 
 print(args)
@@ -42,10 +49,17 @@ print(args)
 VOCAB_SIZE = 0
 INPUT_DIM = 100
 
-preds_file = '{}processed/test_predictions/snli_{}_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random, args.k) 
-outfile = open(preds_file, 'w') 
-outwriter = csv.writer(outfile, delimiter=',')
-outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])
+outdir = 'results/lstm/{}-{}-len-{}/{}/'.format(
+        args.task,
+        args.strategy,
+        args.use_length,
+        datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    )
+
+#preds_file = '{}processed/test_predictions/snli_{}_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random, args.k) 
+#outfile = open(preds_file, 'w') 
+#outwriter = csv.writer(outfile, delimiter=',')
+#outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])
 
 # first define the LSTM model that we'll be using 
 # TODO: rip this out and replace with a more advanced model (in PyTorch) 
@@ -135,9 +149,41 @@ def run():
     #print('num_epoch: {}\nbatch_size: {}'.format(num_epoch, batch_size))
     exp_label = '{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random)
 
-    train, dev, test, w2i, i2w, vectors = load_snli(args.data_dir)  
+    #train, dev, test, w2i, i2w, vectors = load_snli(args.data_dir)  
+    train, dev, test = load_glue_task(args.data_dir, args.diff_dir, args.task)  
     if args.random:
         random.shuffle(train['difficulty'])
+    # build embeddings
+    vectors = []
+    w2i = {}
+    i2w = {}
+
+    # build vocab
+    vocab = set()
+    for dataset in [train, dev, test]:
+        for r in dataset['phrase']:
+            vocab.update(r)
+
+    i = 0
+    with open(args.data_dir + '/glove/' + 'glove.840B.300d.txt', 'r', encoding='utf-8') as glovefile:
+        for j, line in enumerate(glovefile):
+            vals = line.rstrip().split(' ')
+            if vals[0] in vocab:
+                w2i[vals[0]] = i
+                i2w[i] = vals[0]
+                vectors.append(list(map(float, vals[1:])))
+                i += 1
+
+    # now I need to look at vocab words that aren't in glove
+    next_i = len(vectors)
+    dict_keys = w2i.keys()
+    for w in vocab:
+        if w not in dict_keys:
+            w2i[w] = next_i
+            i2w[next_i] = w
+            next_i += 1
+    w2i['<PAD>'] = next_i
+    i2w[next_i] = '<PAD>'
 
     # if k is set, sort once
     if args.k > 0:
@@ -179,7 +225,7 @@ def run():
                     outs = []
 
                 sent1, sent2 = train['phrase'][j]
-                lbl = train['lbls'][j]
+                lbl = eval(train['lbls'][j])
                 correct.append(lbl)
                 out = dy.softmax(dnnmodel.forward(sent1, sent2, lbl, False))
                 outs.append(out)
@@ -233,7 +279,7 @@ def run():
             sent1, sent2 = epoch_training_data['phrase'][j]
 
             #label = train['labels'][j]
-            lbl = epoch_training_data['lbls'][j]
+            lbl = eval(epoch_training_data['lbls'][j])
             
             #labels.append(label)
             correct.append(epoch_training_data['lbls'][j])
@@ -279,7 +325,7 @@ def run():
                 outs = []
 
             sent1, sent2 = dev['phrase'][j]
-            lbl = dev['lbls'][j]
+            lbl = eval(dev['lbls'][j])
             #label = dev['labels'][j]
             #labels.append(label)
             correct.append(lbl)
@@ -315,9 +361,9 @@ def run():
                 outs = []
 
             sent1, sent2 = test['phrase'][j]
-            lbl = test['lbls'][j]
+            lbl = eval(test['lbls'][j])
             #label = test['labels'][j]
-            pairIDs.append(test['pairIDs'][j])
+            #pairIDs.append(test['pairIDs'][j])
             #labels.append(label)
             correct.append(lbl)
 
@@ -347,11 +393,27 @@ def run():
             top_dev = acc_dev
             top_dev_epoch = i
             top_dev_test = acc_test_snli
-        print('{},{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, acc_train, acc_dev, acc_test_snli, theta_hat))
+
+            os.makedirs(os.path.dirname(outdir), exist_ok=True)
+            with open(outdir+'preds.csv', "w") as f:
+                outwriter = csv.writer(f)
+                outwriter.writerow(['epoch','idx','correct','prediction'])
+                for j in range(len(preds)):
+                    row = [i, j, correct[j], preds[j]]
+                    outwriter.writerow(row) 
+
+            # save model to disk
+            dnnmodel.m.save(outdir + 'model.pt') 
+        
+        #print('{},{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, acc_train, acc_dev, acc_test_snli, theta_hat))
         #print('Best so far (by dev dev): D: {}, T; {}, epoch {}'.format(top_dev, top_dev_test, top_dev_epoch))
         
 
 if __name__ == '__main__':
+    start_time = time.time()
     run()
+    end_time = time.time()
+    print(end_time - start_time)
+
 
 
