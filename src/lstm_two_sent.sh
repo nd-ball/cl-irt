@@ -2,7 +2,7 @@
 
 #$ -q gpu
 #$ -l gpu_card=1
-#$ -N lstm-single-sent
+#$ -N lstm-two-sent
 
 module load conda
 module load cuda
