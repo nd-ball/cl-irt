@@ -222,7 +222,6 @@ def train(args, outdir):
             correct.append(epoch_training_data['lbls'][j])
             out = dnnmodel.forward(sent1, lbl)
             outs.append(out)
-            print(lbl)
             loss = dy.pickneglogsoftmax(out, eval(lbl))
             
             losses.append(loss)
@@ -285,7 +284,7 @@ def train(args, outdir):
         predictions = []
         correct = []
         outs = []
-        itemIDs = [] 
+        #itemIDs = [] 
         k = 0
         for j in range(num_test):
             if k % batch_size == 0:
@@ -295,7 +294,7 @@ def train(args, outdir):
             sent1 = test['phrase'][j]
             lbl = test['lbls'][j]
             correct.append(lbl)
-            itemIDs.append(test['itemID'][j])
+            #itemIDs.append(test['itemID'][j])
 
             out = dy.softmax(dnnmodel.forward(sent1, lbl, False))
             outs.append(out)
