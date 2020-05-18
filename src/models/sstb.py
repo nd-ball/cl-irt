@@ -223,7 +223,7 @@ def train(args, outdir):
             out = dnnmodel.forward(sent1, lbl)
             outs.append(out)
             print(lbl)
-            loss = dy.pickneglogsoftmax(out, lbl)
+            loss = dy.pickneglogsoftmax(out, eval(lbl))
             
             losses.append(loss)
 
