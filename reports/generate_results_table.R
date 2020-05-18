@@ -47,7 +47,8 @@ outputsDF %>%
 
 outputTable <- outputsDF %>%
   mutate(experiment =  str_replace(experiment, "naacl-", "naacl_")) %>%
-  group_by(experiment) %>%
+mutate(experiment=str_replace(experiment,"SST-2","SST2")) %>%
+    group_by(experiment) %>%
   mutate(
     meanAcc = mean(accuracies),
     sd = sd(accuracies)
