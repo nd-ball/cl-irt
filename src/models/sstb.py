@@ -87,7 +87,7 @@ def train(args, outdir):
     exp_label = '{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random)
 
     #train, dev, test, w2i, i2w, vectors = load_sstb(args.data_dir)
-    train, dev, test = load_glue_task(args.datadir, args.diffdir, args.task)
+    train, dev, test = load_glue_task(args.data_dir, args.diffdir, args.task)
     if len(train['phrase']) == 0:
         return -1, 0
     if args.random:
