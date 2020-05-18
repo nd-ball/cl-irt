@@ -99,7 +99,7 @@ def train(args, outdir):
     i2w = {}
 
     i = 0
-    with open(data_dir + '/raw/' + 'glove.840B.300d.txt', 'r', encoding='utf-8') as glovefile:
+    with open(args.data_dir + '/glove/' + 'glove.840B.300d.txt', 'r', encoding='utf-8') as glovefile:
         for j, line in enumerate(glovefile):
             vals = line.rstrip().split(' ')
             if vals[0] in vocab:
