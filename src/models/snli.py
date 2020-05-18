@@ -162,7 +162,7 @@ def run():
     vocab = set()
     for dataset in [train, dev, test]:
         for r in dataset['phrase']:
-            vocab.update(r)
+            vocab.update(tokenize(r).split(' '))
 
     i = 0
     with open(args.data_dir + '/glove/' + 'glove.840B.300d.txt', 'r', encoding='utf-8') as glovefile:
@@ -225,6 +225,8 @@ def run():
                     outs = []
 
                 sent1, sent2 = train['phrase'][j]
+                sent1 = tokenize(sent1).split(' ')
+                sent2 = tokenize(sent2).split(' ')
                 lbl = eval(train['lbls'][j])
                 correct.append(lbl)
                 out = dy.softmax(dnnmodel.forward(sent1, sent2, lbl, False))
@@ -277,6 +279,8 @@ def run():
                 losses = []
                 outs = []
             sent1, sent2 = epoch_training_data['phrase'][j]
+            sent1 = tokenize(sent1).split(' ')
+            sent2 = tokenize(sent2).split(' ')    
 
             #label = train['labels'][j]
             lbl = eval(epoch_training_data['lbls'][j])
@@ -325,6 +329,9 @@ def run():
                 outs = []
 
             sent1, sent2 = dev['phrase'][j]
+            sent1 = tokenize(sent1).split(' ')
+            sent2 = tokenize(sent2).split(' ')
+                
             lbl = eval(dev['lbls'][j])
             #label = dev['labels'][j]
             #labels.append(label)
@@ -361,6 +368,9 @@ def run():
                 outs = []
 
             sent1, sent2 = test['phrase'][j]
+            sent1 = tokenize(sent1).split(' ')
+            sent2 = tokenize(sent2).split(' ')
+                
             lbl = eval(test['lbls'][j])
             #label = test['labels'][j]
             #pairIDs.append(test['pairIDs'][j])

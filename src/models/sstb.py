@@ -12,7 +12,7 @@ import os
 
 from sklearn.metrics import accuracy_score
 
-from features.build_features import load_sstb, get_epoch_training_data, k_sort, load_glue_task
+from features.build_features import load_sstb, get_epoch_training_data, k_sort, load_glue_task, tokenize 
 from features.irt_scoring import calculate_theta, calculate_diff_threshold
 
 
@@ -102,7 +102,7 @@ def train(args, outdir):
     vocab = set()
     for dataset in [train, dev, test]:
         for r in dataset['phrase']:
-            vocab.update(r)
+            vocab.update(tokenize(r).split(' '))
 
     i = 0
     with open(args.data_dir + '/glove/' + 'glove.840B.300d.txt', 'r', encoding='utf-8') as glovefile:
@@ -170,7 +170,7 @@ def train(args, outdir):
                     dy.renew_cg()
                     losses = []
                     outs = []
-                sent1 = train['phrase'][j]
+                sent1 = tokenize(train['phrase'][j]).split(' ')
                 lbl = train['lbls'][j]
                 correct.append(eval(lbl))
                 out = dnnmodel.forward(sent1, lbl)
@@ -217,7 +217,7 @@ def train(args, outdir):
                 dy.renew_cg()
                 losses = []
                 outs = []
-            sent1 = epoch_training_data['phrase'][j]
+            sent1 = tokenize(epoch_training_data['phrase'][j]).split(' ')
             lbl = eval(epoch_training_data['lbls'][j])
             correct.append(lbl)
             out = dnnmodel.forward(sent1, lbl)
@@ -259,7 +259,7 @@ def train(args, outdir):
                 dy.renew_cg()
                 outs = []
 
-            sent1 = dev['phrase'][j]
+            sent1 = tokenize(dev['phrase'][j]).split(' ')
             lbl = eval(dev['lbls'][j])
             correct.append(lbl)
             out = dy.softmax(dnnmodel.forward(sent1, lbl, False))
@@ -291,7 +291,7 @@ def train(args, outdir):
                 dy.renew_cg()
                 outs = []
 
-            sent1 = test['phrase'][j]
+            sent1 = tokenize(test['phrase'][j]).split(' ')
             lbl = eval(test['lbls'][j])
             correct.append(lbl)
             #itemIDs.append(test['itemID'][j])
