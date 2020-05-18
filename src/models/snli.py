@@ -161,8 +161,9 @@ def run():
     # build vocab
     vocab = set()
     for dataset in [train, dev, test]:
-        for r in dataset['phrase']:
-            vocab.update(tokenize(r).split(' '))
+        for s1, s2 in dataset['phrase']:
+            vocab.update(tokenize(s1).split(' '))
+            vocab.update(tokenize(s2).split(' '))
 
     i = 0
     with open(args.data_dir + '/glove/' + 'glove.840B.300d.txt', 'r', encoding='utf-8') as glovefile:
