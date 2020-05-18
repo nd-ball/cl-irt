@@ -98,6 +98,12 @@ def train(args, outdir):
     w2i = {}
     i2w = {}
 
+    # build vocab
+    vocab = set()
+    for dataset in [train, dev, test]:
+        for r in dataset['phrase']:
+            vocab.update(r)
+
     i = 0
     with open(args.data_dir + '/glove/' + 'glove.840B.300d.txt', 'r', encoding='utf-8') as glovefile:
         for j, line in enumerate(glovefile):
