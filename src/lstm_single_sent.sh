@@ -9,7 +9,7 @@ module load cuda
 module load cudnn
 source activate ddaclae-lstm
 
-export LD_LIBRARY_PATH=/afs/crc.nd.edu/user/j/jlalor1/.conda/envs/ddaclae-lstm/lib/:$LD_LIBRARY_PATH
+# export LD_LIBRARY_PATH=/afs/crc.nd.edu/user/j/jlalor1/.conda/envs/ddaclae-lstm/lib/:$LD_LIBRARY_PATH
 
 NUMEPOCHS=100  # max num epochs, using early stopping though 
 COMP=5  # for baselines, competency at midpoint
@@ -22,4 +22,4 @@ CACHEDIR=~/data/bert/
 
 #python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy theta --min-train-length $MINTRAINLEN --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR
 
-python -u -m models.snli --dynet-autobatch 1 --dynet-gpu 1 --dynet-mem 11000 --gpu 0 --data-dir $DATADIR --strategy theta --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK 
+python -u -m models.snli --dynet-autobatch 1 --dynet-gpu --dynet-gpus 1 --dynet-mem 11000 --gpu 0 --data-dir $DATADIR --strategy theta --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK 
