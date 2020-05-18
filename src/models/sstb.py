@@ -172,7 +172,7 @@ def train(args, outdir):
                     outs = []
                 sent1 = train['phrase'][j]
                 lbl = train['lbls'][j]
-                correct.append(train['lbls'][j])
+                correct.append(eval(lbl))
                 out = dnnmodel.forward(sent1, lbl)
                 outs.append(out)
 
@@ -218,11 +218,11 @@ def train(args, outdir):
                 losses = []
                 outs = []
             sent1 = epoch_training_data['phrase'][j]
-            lbl = epoch_training_data['lbls'][j]
-            correct.append(epoch_training_data['lbls'][j])
+            lbl = eval(epoch_training_data['lbls'][j])
+            correct.append(lbl)
             out = dnnmodel.forward(sent1, lbl)
             outs.append(out)
-            loss = dy.pickneglogsoftmax(out, eval(lbl))
+            loss = dy.pickneglogsoftmax(out, lbl)
             
             losses.append(loss)
 
@@ -260,7 +260,7 @@ def train(args, outdir):
                 outs = []
 
             sent1 = dev['phrase'][j]
-            lbl = dev['lbls'][j]
+            lbl = eval(dev['lbls'][j])
             correct.append(lbl)
             out = dy.softmax(dnnmodel.forward(sent1, lbl, False))
             outs.append(out)
@@ -292,7 +292,7 @@ def train(args, outdir):
                 outs = []
 
             sent1 = test['phrase'][j]
-            lbl = test['lbls'][j]
+            lbl = eval(test['lbls'][j])
             correct.append(lbl)
             #itemIDs.append(test['itemID'][j])
 
