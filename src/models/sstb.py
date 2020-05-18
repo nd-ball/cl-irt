@@ -331,7 +331,7 @@ def train(args, outdir):
                 outwriter = csv.writer(f)
                 outwriter.writerow(['epoch','idx','correct','prediction'])
                 for j in range(len(preds)):
-                    row = [i, j, out_label_ids[j], preds[j]]
+                    row = [i, j, correct[j], preds[j]]
                     outwriter.writerow(row) 
 
             # save model to disk
