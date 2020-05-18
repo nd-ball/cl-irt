@@ -222,6 +222,7 @@ def train(args, outdir):
             correct.append(epoch_training_data['lbls'][j])
             out = dnnmodel.forward(sent1, lbl)
             outs.append(out)
+            print(out)
             loss = dy.pickneglogsoftmax(out, lbl)
             
             losses.append(loss)
