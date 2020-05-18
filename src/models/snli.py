@@ -14,7 +14,7 @@ import os
 
 from sklearn.metrics import accuracy_score
 
-from features.build_features import load_snli, get_epoch_training_data, k_sort, load_glue_task
+from features.build_features import load_snli, get_epoch_training_data, k_sort, load_glue_task, tokenize
 from features.irt_scoring import calculate_theta, calculate_diff_threshold 
 
 GLUETASKS = ['MRPC', 'MNLI', 'QNLI', 'RTE', 'QQP']
