@@ -335,7 +335,7 @@ def train(args, outdir):
                     outwriter.writerow(row) 
 
             # save model to disk
-            dnnmodel.m.save(model.m.state_dict(), outdir + 'model.pt') 
+            dnnmodel.m.save(dnnmodel.m.state_dict(), outdir + 'model.pt') 
 
         #print('Best so far (dev): {}, epoch {}'.format(top_dev, top_dev_epoch))
         #print('Best so far (test): {}, epoch {}'.format(top_dev_test, top_dev_epoch))
