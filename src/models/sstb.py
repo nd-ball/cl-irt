@@ -384,10 +384,11 @@ def run():
     args = parser.parse_args()
 
     # create output directory-file
-    outdir = 'results/lstm/{}-{}-len-{}/{}/'.format(
+    outdir = 'results/lstm/{}-{}-len-{}-balanced-{}/{}/'.format(
         args.task,
         args.strategy,
         args.use_length,
+        args.balanced,
         datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     )
 
@@ -396,13 +397,13 @@ def run():
     #outwriter = csv.writer(outfile, delimiter=',')
     #outwriter.writerow(['epoch', 'itemID', 'correct', 'pred'])
 
-    #print(args)
     #test_acc, training_set_size = train(args, outwriter)   
     #print(test_acc) 
 
     start_time = time.time()
     test_acc, training_set_size = train(args, outdir)   
     end_time = time.time()
+    print(args)
     print(end_time - start_time)
 
 

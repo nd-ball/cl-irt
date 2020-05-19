@@ -54,10 +54,11 @@ writeResultsTable <- function(modelName){
       group_by(experiment) %>%
     mutate(
       meanAcc = mean(accuracies),
-      sd = sd(accuracies)
+      sd = sd(accuracies),
+      n=n()
     ) %>%
     mutate(
-      me = qnorm(0.975) * sd/sqrt(2)
+      me = qnorm(0.975) * sd/sqrt(n)
     ) %>%
     select(-c(accuracies,sd)) %>%
     unique() %>%

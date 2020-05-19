@@ -50,10 +50,11 @@ print(args)
 VOCAB_SIZE = 0
 INPUT_DIM = 100
 
-outdir = 'results/lstm/{}-{}-len-{}/{}/'.format(
+outdir = 'results/lstm/{}-{}-len-{}-balanced-{}/{}/'.format(
         args.task,
         args.strategy,
         args.use_length,
+        args.balanced,
         datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     )
 
