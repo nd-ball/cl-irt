@@ -215,7 +215,7 @@ def run():
     le.fit(train['lbls']) 
     train['lbls'] = le.transform(train['lbls'])
     dev['lbls'] = le.transform(dev['lbls']) 
-    test['lbls'] = le.transform(dev['lbls']) 
+    test['lbls'] = le.transform(test['lbls']) 
 
     #print('Training model {}'.format(model))
     #print('training')
