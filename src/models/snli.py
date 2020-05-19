@@ -13,6 +13,7 @@ import time
 import os 
 
 from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import LabelEncoder 
 
 from features.build_features import load_snli, get_epoch_training_data, k_sort, load_glue_task, tokenize
 from features.irt_scoring import calculate_theta, calculate_diff_threshold 
@@ -209,6 +210,13 @@ def run():
     top_dev_epoch = 0
     top_dev_test = 0.0
 
+    # build the label encoder
+    le = LabelEncoder()
+    le.fit(train['lbls']) 
+    train['lbls'] = le.transform(train['lbls'])
+    dev['lbls'] = le.transform(dev['lbls']) 
+    test['lbls'] = le.transform(dev['lbls']) 
+
     #print('Training model {}'.format(model))
     #print('training')
     for i in range(num_epoch):
@@ -228,7 +236,7 @@ def run():
                 sent1, sent2 = train['phrase'][j]
                 sent1 = tokenize(sent1).split(' ')
                 sent2 = tokenize(sent2).split(' ')
-                lbl = eval(train['lbls'][j])
+                lbl = train['lbls'][j]
                 correct.append(lbl)
                 out = dy.softmax(dnnmodel.forward(sent1, sent2, lbl, False))
                 outs.append(out)
@@ -284,7 +292,7 @@ def run():
             sent2 = tokenize(sent2).split(' ')    
 
             #label = train['labels'][j]
-            lbl = eval(epoch_training_data['lbls'][j])
+            lbl = epoch_training_data['lbls'][j]
             
             #labels.append(label)
             correct.append(epoch_training_data['lbls'][j])
@@ -333,7 +341,7 @@ def run():
             sent1 = tokenize(sent1).split(' ')
             sent2 = tokenize(sent2).split(' ')
                 
-            lbl = eval(dev['lbls'][j])
+            lbl = dev['lbls'][j]
             #label = dev['labels'][j]
             #labels.append(label)
             correct.append(lbl)
@@ -372,7 +380,7 @@ def run():
             sent1 = tokenize(sent1).split(' ')
             sent2 = tokenize(sent2).split(' ')
                 
-            lbl = eval(test['lbls'][j])
+            lbl = test['lbls'][j]
             #label = test['labels'][j]
             #pairIDs.append(test['pairIDs'][j])
             #labels.append(label)

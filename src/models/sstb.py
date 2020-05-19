@@ -11,6 +11,7 @@ import time
 import os 
 
 from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import LabelEncoder 
 
 from features.build_features import load_sstb, get_epoch_training_data, k_sort, load_glue_task, tokenize 
 from features.irt_scoring import calculate_theta, calculate_diff_threshold
@@ -148,6 +149,13 @@ def train(args, outdir):
     top_dev_epoch = 0
     top_dev_test = 0.0
 
+    # build the label encoder
+    le = LabelEncoder()
+    le.fit(train['lbls']) 
+    train['lbls'] = le.transform(train['lbls'])
+    dev['lbls'] = le.transform(dev['lbls']) 
+    test['lbls'] = le.transform(dev['lbls']) 
+
     print('Training model {}'.format(model))
     print('training')
     for i in range(num_epoch):
@@ -172,7 +180,7 @@ def train(args, outdir):
                     outs = []
                 sent1 = tokenize(train['phrase'][j]).split(' ')
                 lbl = train['lbls'][j]
-                correct.append(eval(lbl))
+                correct.append(lbl)
                 out = dnnmodel.forward(sent1, lbl)
                 outs.append(out)
 
@@ -218,7 +226,7 @@ def train(args, outdir):
                 losses = []
                 outs = []
             sent1 = tokenize(epoch_training_data['phrase'][j]).split(' ')
-            lbl = eval(epoch_training_data['lbls'][j])
+            lbl = epoch_training_data['lbls'][j]
             correct.append(lbl)
             out = dnnmodel.forward(sent1, lbl)
             outs.append(out)
@@ -260,7 +268,7 @@ def train(args, outdir):
                 outs = []
 
             sent1 = tokenize(dev['phrase'][j]).split(' ')
-            lbl = eval(dev['lbls'][j])
+            lbl = dev['lbls'][j]
             correct.append(lbl)
             out = dy.softmax(dnnmodel.forward(sent1, lbl, False))
             outs.append(out)
@@ -292,7 +300,7 @@ def train(args, outdir):
                 outs = []
 
             sent1 = tokenize(test['phrase'][j]).split(' ')
-            lbl = eval(test['lbls'][j])
+            lbl = test['lbls'][j]
             correct.append(lbl)
             #itemIDs.append(test['itemID'][j])
 
