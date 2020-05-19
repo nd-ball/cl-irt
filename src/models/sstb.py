@@ -94,6 +94,11 @@ def train(args, outdir):
     if args.random:
         random.shuffle(train['difficulty'])
 
+    # fix this based on how glue data is loaded
+    train['phrase'] = [t[0] for t in train['phrase']]
+    dev['phrase'] = [t[0] for t in dev['phrase']]
+    test['phrase'] = [t[0] for t in test['phrase']]
+
     # build embeddings
     vectors = []
     w2i = {}
