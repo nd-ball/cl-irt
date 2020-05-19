@@ -7,9 +7,6 @@ library(xtable)
 
 setwd("~/code/cl-irt/reports/")
 
-resultsDir <- "../src/results/bert/"
-
-experiments <- list.dirs(resultsDir)[-c(1)]
 
 pullAccuracies <- function(directoryName){
   files <- list.files(
@@ -36,43 +33,54 @@ pullAccuracies <- function(directoryName){
   return(result)
 }
 
-outputs <- lapply(experiments, pullAccuracies)
 
-outputsDF <- do.call(rbind, outputs)
-
-outputsDF %>%
-  group_by(experiment) %>%
-  summarise(meanAcc = mean(accuracies)) %>%
-  print(n=Inf)
-
-outputTable <- outputsDF %>%
-  mutate(experiment =  str_replace(experiment, "naacl-", "naacl_")) %>%
-mutate(experiment=str_replace(experiment,"SST-2","SST2")) %>%
+writeResultsTable <- function(modelName){
+  resultsDir <- str_glue("../src/results/{modelName}/")
+  
+  experiments <- list.dirs(resultsDir)[-c(1)]
+  
+  outputs <- lapply(experiments, pullAccuracies)
+  
+  outputsDF <- do.call(rbind, outputs)
+  
+  outputsDF %>%
     group_by(experiment) %>%
-  mutate(
-    meanAcc = mean(accuracies),
-    sd = sd(accuracies)
-  ) %>%
-  mutate(
-    me = qnorm(0.975) * sd/sqrt(2)
-  ) %>%
-  select(-c(accuracies,sd)) %>%
-  unique() %>%
-  separate(
-    experiment, 
-    c(
-      "dataset",
-      "exp",
-      "dropping",
-      "length_heuristic"
-    ),
-    sep='-'
-  ) %>%
-  select(-dropping) %>%
-  filter(dataset != 'WNLI') %>%
-  pivot_wider(
-    names_from = dataset,
-    values_from = c(meanAcc, me)
-  )
+    summarise(meanAcc = mean(accuracies)) %>%
+    print(n=Inf)
+  
+  outputTable <- outputsDF %>%
+    mutate(experiment =  str_replace(experiment, "naacl-", "naacl_")) %>%
+  mutate(experiment=str_replace(experiment,"SST-2","SST2")) %>%
+      group_by(experiment) %>%
+    mutate(
+      meanAcc = mean(accuracies),
+      sd = sd(accuracies)
+    ) %>%
+    mutate(
+      me = qnorm(0.975) * sd/sqrt(2)
+    ) %>%
+    select(-c(accuracies,sd)) %>%
+    unique() %>%
+    separate(
+      experiment, 
+      c(
+        "dataset",
+        "exp",
+        "dropping",
+        "length_heuristic"
+      ),
+      sep='-'
+    ) %>%
+    select(-dropping) %>%
+    filter(dataset != 'WNLI') %>%
+    pivot_wider(
+      names_from = dataset,
+      values_from = c(meanAcc, me)
+    )
+  
+  print(xtable(outputTable, type="latex"), file="ddaclae_accuracies_{modelName}.tex")
+}
 
-print(xtable(outputTable, type="latex"), file="ddaclae_accuracies.tex")
+writeResultsTable("bert")
+writeResultsTable("lstm")
+
