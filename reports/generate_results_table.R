@@ -78,7 +78,7 @@ writeResultsTable <- function(modelName){
       values_from = c(meanAcc, me)
     )
   
-  print(xtable(outputTable, type="latex"), file="ddaclae_accuracies_{modelName}.tex")
+  print(xtable(outputTable, type="latex"), file=str_glue("ddaclae_accuracies_{modelName}.tex"))
 }
 
 writeResultsTable("bert")
