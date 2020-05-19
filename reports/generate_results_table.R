@@ -60,7 +60,7 @@ writeResultsTable <- function(modelName){
     mutate(
       me = qnorm(0.975) * sd/sqrt(n)
     ) %>%
-    select(-c(accuracies,sd)) %>%
+    select(-c(accuracies,sd,n)) %>%
     unique() %>%
     separate(
       experiment, 
