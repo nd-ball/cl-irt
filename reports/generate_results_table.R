@@ -82,6 +82,8 @@ writeResultsTable <- function(modelName){
   print(xtable(outputTable, type="latex"), file=str_glue("ddaclae_accuracies_{modelName}.tex"))
 }
 
-writeResultsTable("bert")
-writeResultsTable("lstm")
+writeResultsTable("bert-True")
+writeResultsTable("lstm-True")
 
+writeResultsTable("bert-False")
+writeResultsTable("lstm-False")
