@@ -157,6 +157,9 @@ def train(args, outdir):
     # build the label encoder
     le = LabelEncoder()
     le.fit(train['lbls']) 
+    print(train['lbls'])
+    print(dev['lbls'])
+    print(test['lbls'])
     train['lbls'] = le.transform(train['lbls'])
     dev['lbls'] = le.transform(dev['lbls']) 
     test['lbls'] = le.transform(dev['lbls']) 
