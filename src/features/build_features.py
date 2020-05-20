@@ -472,13 +472,16 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
         train_2['difficulty'] = [training_set['difficulty'][d] for d in diffs_sorted_idx]
         train_2['pairID'] = [training_set['pairID'][d] for d in diffs_sorted_idx]
     else:
-        per_label_lists = {
-            0:[], 1:[]
-        }
-        if task == 'snli':
-            per_label_lists[2] = [] 
+        #per_label_lists = {
+        #    0:[], 1:[]
+        #}
+        #if task == 'snli':
+        #    per_label_lists[2] = [] 
+        per_label_lists = {}
         for d in diffs_sorted_idx:
-            eg = training_set['lbls'][d] 
+            eg = training_set['lbls'][d]
+            if eg not in per_label_lists:
+                per_label_lists[eg] = [] 
             per_label_lists[eg].append(d) 
 
         #max_length = max(len(per_label_lists[0]), len(per_label_lists[1]))
