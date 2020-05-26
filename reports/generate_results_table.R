@@ -92,7 +92,9 @@ writeResultsTable <- function(modelName){
       values_from = outFormat
     )
   
-  print(xtable(outputTable, type="latex"), file=str_glue("ddaclae_accuracies_{modelName}.tex"))
+  print(xtable(outputTable, type="latex"), 
+        file=str_glue("ddaclae_accuracies_{modelName}.tex"), 
+        sanitize.text.function = function(x) {x})
   
   # do a table of average epoch to convergence
   outputTable2 <- outputsDF %>%
@@ -133,7 +135,9 @@ writeResultsTable <- function(modelName){
       values_from = outFormat
     )
   
-  print(xtable(outputTable2, type="latex"), file=str_glue("ddaclae_avgEpoch_{modelName}.tex"))
+  print(xtable(outputTable2, type="latex"), 
+        file=str_glue("ddaclae_avgEpoch_{modelName}.tex"), 
+        sanitize.text.function = function(x) {x})
 }
 
 writeResultsTable("bert-True")
