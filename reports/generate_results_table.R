@@ -80,9 +80,12 @@ writeResultsTable <- function(modelName){
     ) %>%
     select(-dropping) %>%
     filter(dataset != 'WNLI') %>%
+    mutate(outFormat = str_glue("{meanAcc} [+-{me}]")) %>%
+    select(-c(meanAcc, me)) %>%
     pivot_wider(
       names_from = dataset,
-      values_from = c(meanAcc, me)
+      #values_from = c(meanAcc, me)
+      values_from = outFormat
     )
   
   print(xtable(outputTable, type="latex"), file=str_glue("ddaclae_accuracies_{modelName}.tex"))
