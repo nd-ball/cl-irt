@@ -84,7 +84,7 @@ writeResultsTable <- function(modelName){
     ) %>%
     select(-dropping) %>%
     filter(dataset != 'WNLI') %>%
-    mutate(outFormat = str_glue("{meanAcc} [+-{me}]")) %>%
+    mutate(outFormat = str_glue("{meanAcc} [$\\pm${me}]")) %>%
     select(-c(meanAcc, me)) %>%
     pivot_wider(
       names_from = dataset,
@@ -125,7 +125,7 @@ writeResultsTable <- function(modelName){
     ) %>%
     select(-dropping) %>%
     filter(dataset != 'WNLI') %>%
-    mutate(outFormat = str_glue("{meanEpoch} [+-{me}]")) %>%
+    mutate(outFormat = str_glue("{meanEpoch} [$\\pm${me}]")) %>%
     select(-c(meanEpoch, me)) %>%
     pivot_wider(
       names_from = dataset,
