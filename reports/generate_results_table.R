@@ -66,6 +66,10 @@ writeResultsTable <- function(modelName){
     mutate(
       me = qnorm(0.975) * sd/sqrt(n)
     ) %>%
+    mutate(
+      meanAcc = round(meanAcc, digits=2),
+      me = round(me, digits=2)
+    ) %>%
     select(-c(accuracies,sd,n,epoch)) %>%
     unique() %>%
     separate(
@@ -103,6 +107,10 @@ writeResultsTable <- function(modelName){
     mutate(
       me = qnorm(0.975) * sd/sqrt(n)
     ) %>%
+    mutate(
+      meanEpoch = round(meanEpoch, digits=2),
+      me = round(me, digits=2)
+    ) %>%
     select(-c(accuracies,sd,n,epoch)) %>%
     unique() %>%
     separate(
@@ -117,9 +125,12 @@ writeResultsTable <- function(modelName){
     ) %>%
     select(-dropping) %>%
     filter(dataset != 'WNLI') %>%
+    mutate(outFormat = str_glue("{meanEpoch} [+-{me}]")) %>%
+    select(-c(meanEpoch, me)) %>%
     pivot_wider(
       names_from = dataset,
-      values_from = c(meanEpoch, me)
+      #values_from = c(meanEpoch, me)
+      values_from = meanEpoch
     )
   
   print(xtable(outputTable2, type="latex"), file=str_glue("ddaclae_avgEpoch_{modelName}.tex"))
