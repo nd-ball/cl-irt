@@ -14,13 +14,18 @@ pullAccuracies <- function(directoryName){
     recursive = T,
     full.names=T) 
   files <- files[str_detect(files, 'preds')]
-  # for each file, return accs
+  # for each file, return accs and epoch
   outputs <- lapply(files, function(x){
-    
     accData <- read_csv(x) %>%
       select(c(correct, prediction)) %>%
       mutate(response = correct == prediction) %>%
       summarise(accuracy = mean(response) * 100)
+  })
+  
+  epochs <- lapply(files, function(x){
+    eData <- read_csv(x) %>%
+      select(epoch) %>%
+      slice(1) 
   })
   
   expName <- str_split_n(directoryName, "/",6)
@@ -29,6 +34,7 @@ pullAccuracies <- function(directoryName){
   colnames(result) <- c("accuracies")
   result$accuracies <- unlist(outputs)
   result$experiment <- expName
+  result$epoch <- unlist(epochs) 
   
   return(result)
 }
@@ -43,10 +49,10 @@ writeResultsTable <- function(modelName){
   
   outputsDF <- do.call(rbind, outputs)
   
-  outputsDF %>%
-    group_by(experiment) %>%
-    summarise(meanAcc = mean(accuracies)) %>%
-    print(n=Inf)
+  #outputsDF %>%
+  #  group_by(experiment) %>%
+  #  summarise(meanAcc = mean(accuracies)) %>%
+  #  print(n=Inf)
   
   outputTable <- outputsDF %>%
     mutate(experiment =  str_replace(experiment, "naacl-", "naacl_")) %>%
@@ -60,7 +66,7 @@ writeResultsTable <- function(modelName){
     mutate(
       me = qnorm(0.975) * sd/sqrt(n)
     ) %>%
-    select(-c(accuracies,sd,n)) %>%
+    select(-c(accuracies,sd,n,epoch)) %>%
     unique() %>%
     separate(
       experiment, 
@@ -80,6 +86,40 @@ writeResultsTable <- function(modelName){
     )
   
   print(xtable(outputTable, type="latex"), file=str_glue("ddaclae_accuracies_{modelName}.tex"))
+  
+  # do a table of average epoch to convergence
+  outputTable2 <- outputsDF %>%
+    mutate(experiment =  str_replace(experiment, "naacl-", "naacl_")) %>%
+    mutate(experiment=str_replace(experiment,"SST-2","SST2")) %>%
+    group_by(experiment) %>%
+    mutate(
+      meanEpoch = mean(epoch),
+      sd = sd(epoch),
+      n=n()
+    ) %>%
+    mutate(
+      me = qnorm(0.975) * sd/sqrt(n)
+    ) %>%
+    select(-c(accuracies,sd,n,epoch)) %>%
+    unique() %>%
+    separate(
+      experiment, 
+      c(
+        "dataset",
+        "exp",
+        "dropping",
+        "length_heuristic"
+      ),
+      sep='-'
+    ) %>%
+    select(-dropping) %>%
+    filter(dataset != 'WNLI') %>%
+    pivot_wider(
+      names_from = dataset,
+      values_from = c(meanEpoch, me)
+    )
+  
+  print(xtable(outputTable, type="latex"), file=str_glue("ddaclae_avgEpoch_{modelName}.tex"))
 }
 
 writeResultsTable("bert-True")
