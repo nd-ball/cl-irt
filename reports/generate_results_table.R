@@ -130,7 +130,7 @@ writeResultsTable <- function(modelName){
     pivot_wider(
       names_from = dataset,
       #values_from = c(meanEpoch, me)
-      values_from = meanEpoch
+      values_from = outFormat
     )
   
   print(xtable(outputTable2, type="latex"), file=str_glue("ddaclae_avgEpoch_{modelName}.tex"))
