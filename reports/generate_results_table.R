@@ -119,7 +119,7 @@ writeResultsTable <- function(modelName){
       values_from = c(meanEpoch, me)
     )
   
-  print(xtable(outputTable, type="latex"), file=str_glue("ddaclae_avgEpoch_{modelName}.tex"))
+  print(xtable(outputTable2, type="latex"), file=str_glue("ddaclae_avgEpoch_{modelName}.tex"))
 }
 
 writeResultsTable("bert-True")
