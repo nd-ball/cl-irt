@@ -1,18 +1,21 @@
 % latex table generated in R 3.6.2 by xtable 1.8-4 package
-% Fri May 29 08:56:29 2020
-\begin{table}[ht]
+% Fri May 29 09:33:11 2020
+\begin{table*}[ht]
 \centering
+\begingroup\small
 \begin{tabular}{rlllllll}
   \toprule
  & ExpName & MNLI & MRPC & QNLI & QQP & RTE & SST2 \\ 
   \midrule
 1 & baseline-False & 64.96 [$\pm$0.18] & 69.04 [$\pm$0.71] & 62.72 [$\pm$0.48] & 81 [$\pm$0.12] & 50.12 [$\pm$0.68] & 84.73 [$\pm$0.34] \\ 
   2 & CB Linear ($d_{irt}$) & 65.18 [$\pm$0.14] & 70.18 [$\pm$0.5] & 61.21 [$\pm$0.5] & 81.68 [$\pm$0.11] & 50.45 [$\pm$1.06] & 84.71 [$\pm$0.35] \\ 
-  3 & CB Linear ($d_{length}$) & 63.79 [$\pm$0.23] & 68.38 [$\pm$0.55] & 59.29 [$\pm$0.97] & 79.91 [$\pm$0.2] & 49.96 [$\pm$1.2] & 83.97 [$\pm$0.39] \\ 
+  3 & CB Linear ($d_{length}$) & 63.79 [$\pm$0.23] & 68.38 [$\pm$0.55] & 59.29 [$\pm$0.97] & 79.99 [$\pm$0.21] & 49.96 [$\pm$1.2] & 83.97 [$\pm$0.39] \\ 
   4 & CB Root ($d_{irt}$) & 65.37 [$\pm$0.16] & 69.98 [$\pm$0.52] & 61.87 [$\pm$0.27] & 81.91 [$\pm$0.08] & 50.93 [$\pm$0.69] & 84.74 [$\pm$0.12] \\ 
-  5 & CB Root ($d_{length}$) & 64.05 [$\pm$0.39] & 69.36 [$\pm$0.35] & 60.04 [$\pm$0.73] & 78.78 [$\pm$1.11] & 50.32 [$\pm$1.62] & 83.74 [$\pm$0.43] \\ 
+  5 & CB Root ($d_{length}$) & 64.05 [$\pm$0.39] & 69.36 [$\pm$0.35] & 60.04 [$\pm$0.73] & 79.23 [$\pm$0.55] & 50.32 [$\pm$1.62] & 83.74 [$\pm$0.43] \\ 
   6 & DDaCLAE & 65.93 [$\pm$0.24] & 70.38 [$\pm$0.62] & 63.01 [$\pm$0.4] & 81.75 [$\pm$0.11] & 52.35 [$\pm$1.2] & 85.7 [$\pm$0.19] \\ 
    \bottomrule
 \end{tabular}
-\caption{dev set accuracy results for each task under consideration. During training, 10\% of the training set was held out and used for early stopping. Highest overall accuracy is bolded. Highest accuracy among competence-based methods is underlined} 
-\end{table}
+\endgroup
+\caption{dev set accuracy results, including 95\% confidence intervals, for each task under consideration. During training, 10\% of the training set was held out and used for early stopping. Highest overall accuracy is bolded. Highest accuracy among competence-based methods is underlined} 
+\label{tab:acc_lstm-True}
+\end{table*}

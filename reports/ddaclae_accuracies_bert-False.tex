@@ -1,7 +1,8 @@
 % latex table generated in R 3.6.2 by xtable 1.8-4 package
-% Fri May 29 08:56:38 2020
-\begin{table}[ht]
+% Fri May 29 09:33:20 2020
+\begin{table*}[ht]
 \centering
+\begingroup\small
 \begin{tabular}{rlllllll}
   \toprule
  & ExpName & MNLI & MRPC & QNLI & QQP & RTE & SST2 \\ 
@@ -14,5 +15,7 @@
   6 & DDaCLAE & 79.67 [$\pm$1.42] & 76.18 [$\pm$2.53] & 85.74 [$\pm$5.28] & 88.59 [$\pm$1.27] & 53.47 [$\pm$1.94] & 90.24 [$\pm$0.4] \\ 
    \bottomrule
 \end{tabular}
-\caption{dev set accuracy results for each task under consideration. During training, 10\% of the training set was held out and used for early stopping. Highest overall accuracy is bolded. Highest accuracy among competence-based methods is underlined} 
-\end{table}
+\endgroup
+\caption{dev set accuracy results, including 95\% confidence intervals, for each task under consideration. During training, 10\% of the training set was held out and used for early stopping. Highest overall accuracy is bolded. Highest accuracy among competence-based methods is underlined} 
+\label{tab:acc_bert-False}
+\end{table*}
