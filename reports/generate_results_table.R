@@ -101,6 +101,7 @@ writeResultsTable <- function(modelName){
       ExpName = recode(
         ExpName,
         "baseline-True" = "Fully Supervised",
+        "baseline-False" = "Fully Supervised",
         "naacl_linear-False" = "CB Linear ($d_{irt}$)",
         "naacl_linear-True" = "CB Linear ($d_{length}$)",
         "naacl_root-False" = "CB Root ($d_{irt}$)",
@@ -133,6 +134,7 @@ writeResultsTable <- function(modelName){
     mutate(experiment =  str_replace(experiment, "naacl-", "naacl_")) %>%
     mutate(experiment=str_replace(experiment,"SST-2","SST2")) %>%
     group_by(experiment) %>%
+    mutate(epoch = epoch+1) %>%
     mutate(
       meanEpoch = mean(epoch),
       sd = sd(epoch),
@@ -176,6 +178,7 @@ writeResultsTable <- function(modelName){
       ExpName = recode(
         ExpName,
         "baseline-True" = "Fully Supervised",
+        "baseline-False" = "Fully Supervised",
         "naacl_linear-False" = "CB Linear ($d_{irt}$)",
         "naacl_linear-True" = "CB Linear ($d_{length}$)",
         "naacl_root-False" = "CB Root ($d_{irt}$)",
@@ -188,7 +191,7 @@ writeResultsTable <- function(modelName){
   result <- xtable(
     outputTable2, 
     type = "latex",
-    caption = c("Average epoch of convergence for each model, with 95\\% confidence intervals."),
+    caption = c("Average number of training epochs until convergence for each model, with 95\\% confidence intervals."),
     label = c(str_glue("tab:epoch_{modelName}")),
     align = c("llcccccc")
   )
