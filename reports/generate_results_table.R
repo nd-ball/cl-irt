@@ -114,7 +114,8 @@ writeResultsTable <- function(modelName){
     outputTable, 
     type = "latex",
     caption = c("dev set accuracy results, including 95\\% confidence intervals, for each task under consideration. During training, 10\\% of the training set was held out and used for early stopping. Highest overall accuracy is bolded. Highest accuracy among competence-based methods is underlined"),
-    label = c(str_glue("tab:acc_{modelName}"))
+    label = c(str_glue("tab:acc_{modelName}")),
+    align = c("rcccccc")
 )
   
   print(result, 
@@ -123,7 +124,8 @@ writeResultsTable <- function(modelName){
         booktabs = TRUE,
         floating.environment = "table*",
         latex.environments = "center",
-        size = "small"
+        size = "small",
+        include.rownames=FALSE
   )
   
   # do a table of average epoch to convergence
@@ -187,7 +189,8 @@ writeResultsTable <- function(modelName){
     outputTable2, 
     type = "latex",
     caption = c("Average epoch of convergence for each model, with 95\\% confidence intervals."),
-    label = c(str_glue("tab:epoch_{modelName}"))
+    label = c(str_glue("tab:epoch_{modelName}")),
+    align = c("rcccccc")
   )
   
   print(result,
@@ -196,7 +199,8 @@ writeResultsTable <- function(modelName){
         sanitize.text.function = function(x) {x},
         floating.environment = "table*",
         latex.environments = "center",
-        size = "small"
+        size = "small",
+        include.rownames=FALSE
   )
 }
 
