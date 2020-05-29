@@ -92,9 +92,34 @@ writeResultsTable <- function(modelName){
       values_from = outFormat
     )
   
-  print(xtable(outputTable, type="latex"), 
+  outputTable <- outputTable %>%
+    mutate(
+      ExpName = str_glue("{exp}-{length-heuristic}")
+    ) %>%
+    select(-c(exp, length-heuristic)) %>%
+    mutate(
+      ExpName = recode(
+        ExpName,
+        "baseline-True" = "Fully Supervised",
+        "naacl-linear-False" = "CB Linear ($d_{irt}$)",
+        "naacl-linear-True" = "CB Linear ($d_{length}$)",
+        "naacl-root-False" = "CB Root ($d_{irt}$)",
+        "naacl-root-True" = "CB Root ($d_{length}$)",
+        "theta-False" = "DDaCLAE"
+      )
+    ) %>%
+    select(ExpName, everything())
+    
+  result <- xtable(
+    outputTable, 
+    type = "latex",
+    caption = "dev set accuracy results for each task under consideration. During training, 10\\% of the training set was held out and used for early stopping. Highest overall accuracy is bolded. Highest accuracy among competence-based methods is underlined"
+)
+  
+  print(result, 
         file=str_glue("ddaclae_accuracies_{modelName}.tex"), 
-        sanitize.text.function = function(x) {x})
+        sanitize.text.function = function(x) {x},
+        booktabs = TRUE)
   
   # do a table of average epoch to convergence
   outputTable2 <- outputsDF %>%
@@ -135,7 +160,32 @@ writeResultsTable <- function(modelName){
       values_from = outFormat
     )
   
-  print(xtable(outputTable2, type="latex"), 
+  outputTable2 <- outputTable2 %>%
+    mutate(
+      ExpName = str_glue("{exp}-{length-heuristic}")
+    ) %>%
+    select(-c(exp, length-heuristic)) %>%
+    mutate(
+      ExpName = recode(
+        ExpName,
+        "baseline-True" = "Fully Supervised",
+        "naacl-linear-False" = "CB Linear ($d_{irt}$)",
+        "naacl-linear-True" = "CB Linear ($d_{length}$)",
+        "naacl-root-False" = "CB Root ($d_{irt}$)",
+        "naacl-root-True" = "CB Root ($d_{length}$)",
+        "theta-False" = "DDaCLAE"
+      )
+    ) %>%
+    select(ExpName, everything())
+  
+  result <- xtable(
+    outputTable2, 
+    type = "latex",
+    caption = "Average epoch of convergence for each model, with 95\\% confidence intervals."
+  )
+  
+  print(result,
+        #xtable(outputTable2, type="latex"), 
         file=str_glue("ddaclae_avgEpoch_{modelName}.tex"), 
         sanitize.text.function = function(x) {x})
 }
