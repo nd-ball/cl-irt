@@ -16,14 +16,14 @@ pullAccuracies <- function(directoryName){
   files <- files[str_detect(files, 'preds')]
   # for each file, return accs and epoch
   outputs <- lapply(files, function(x){
-    accData <- read_csv(x) %>%
+    accData <- read_csv(x, col_types=cols()) %>%
       select(c(correct, prediction)) %>%
       mutate(response = correct == prediction) %>%
       summarise(accuracy = mean(response) * 100)
   })
   
   epochs <- lapply(files, function(x){
-    eData <- read_csv(x) %>%
+    eData <- read_csv(x, col_types=cols()) %>%
       select(epoch) %>%
       slice(1) 
   })
@@ -94,9 +94,9 @@ writeResultsTable <- function(modelName){
   
   outputTable <- outputTable %>%
     mutate(
-      ExpName = str_glue("{exp}-{length-heuristic}")
+      ExpName = str_glue("{exp}-{length_heuristic}")
     ) %>%
-    select(-c(exp, length-heuristic)) %>%
+    select(-c(exp, length_heuristic)) %>%
     mutate(
       ExpName = recode(
         ExpName,
@@ -162,9 +162,9 @@ writeResultsTable <- function(modelName){
   
   outputTable2 <- outputTable2 %>%
     mutate(
-      ExpName = str_glue("{exp}-{length-heuristic}")
+      ExpName = str_glue("{exp}-{length_heuristic}")
     ) %>%
-    select(-c(exp, length-heuristic)) %>%
+    select(-c(exp, length_heuristic)) %>%
     mutate(
       ExpName = recode(
         ExpName,
