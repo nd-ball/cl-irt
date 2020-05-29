@@ -113,8 +113,8 @@ writeResultsTable <- function(modelName){
   result <- xtable(
     outputTable, 
     type = "latex",
-    caption = "dev set accuracy results for each task under consideration. During training, 10\\% of the training set was held out and used for early stopping. Highest overall accuracy is bolded. Highest accuracy among competence-based methods is underlined",
-    label = str_glue("tab:acc_{modelName}")
+    caption = c("dev set accuracy results, including 95\\% confidence intervals, for each task under consideration. During training, 10\\% of the training set was held out and used for early stopping. Highest overall accuracy is bolded. Highest accuracy among competence-based methods is underlined"),
+    label = c(str_glue("tab:acc_{modelName}"))
 )
   
   print(result, 
@@ -186,8 +186,8 @@ writeResultsTable <- function(modelName){
   result <- xtable(
     outputTable2, 
     type = "latex",
-    caption = "Average epoch of convergence for each model, with 95\\% confidence intervals.",
-    label = str_glue("tab:epoch_{modelName}")
+    caption = c("Average epoch of convergence for each model, with 95\\% confidence intervals."),
+    label = c(str_glue("tab:epoch_{modelName}"))
   )
   
   print(result,
