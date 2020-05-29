@@ -114,16 +114,17 @@ writeResultsTable <- function(modelName){
     outputTable, 
     type = "latex",
     caption = "dev set accuracy results for each task under consideration. During training, 10\\% of the training set was held out and used for early stopping. Highest overall accuracy is bolded. Highest accuracy among competence-based methods is underlined",
-    label = str_glue("tab:acc_{modelName}"),
-    floating.environment = "table*",
-    latex.environments = "center",
-    size = "small"
+    label = str_glue("tab:acc_{modelName}")
 )
   
   print(result, 
         file=str_glue("ddaclae_accuracies_{modelName}.tex"), 
         sanitize.text.function = function(x) {x},
-        booktabs = TRUE)
+        booktabs = TRUE,
+        floating.environment = "table*",
+        latex.environments = "center",
+        size = "small"
+  )
   
   # do a table of average epoch to convergence
   outputTable2 <- outputsDF %>%
@@ -186,16 +187,17 @@ writeResultsTable <- function(modelName){
     outputTable2, 
     type = "latex",
     caption = "Average epoch of convergence for each model, with 95\\% confidence intervals.",
-    label = str_glue("tab:epoch_{modelName}"),
-    floating.environment = "table*",
-    latex.environments = "center",
-    size = "small"
+    label = str_glue("tab:epoch_{modelName}")
   )
   
   print(result,
         #xtable(outputTable2, type="latex"), 
         file=str_glue("ddaclae_avgEpoch_{modelName}.tex"), 
-        sanitize.text.function = function(x) {x})
+        sanitize.text.function = function(x) {x},
+        floating.environment = "table*",
+        latex.environments = "center",
+        size = "small"
+  )
 }
 
 writeResultsTable("bert-True")
