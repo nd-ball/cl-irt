@@ -101,10 +101,10 @@ writeResultsTable <- function(modelName){
       ExpName = recode(
         ExpName,
         "baseline-True" = "Fully Supervised",
-        "naacl-linear-False" = "CB Linear ($d_{irt}$)",
-        "naacl-linear-True" = "CB Linear ($d_{length}$)",
-        "naacl-root-False" = "CB Root ($d_{irt}$)",
-        "naacl-root-True" = "CB Root ($d_{length}$)",
+        "naacl_linear-False" = "CB Linear ($d_{irt}$)",
+        "naacl_linear-True" = "CB Linear ($d_{length}$)",
+        "naacl_root-False" = "CB Root ($d_{irt}$)",
+        "naacl_root-True" = "CB Root ($d_{length}$)",
         "theta-False" = "DDaCLAE"
       )
     ) %>%
@@ -169,10 +169,10 @@ writeResultsTable <- function(modelName){
       ExpName = recode(
         ExpName,
         "baseline-True" = "Fully Supervised",
-        "naacl-linear-False" = "CB Linear ($d_{irt}$)",
-        "naacl-linear-True" = "CB Linear ($d_{length}$)",
-        "naacl-root-False" = "CB Root ($d_{irt}$)",
-        "naacl-root-True" = "CB Root ($d_{length}$)",
+        "naacl_linear-False" = "CB Linear ($d_{irt}$)",
+        "naacl_linear-True" = "CB Linear ($d_{length}$)",
+        "naacl_root-False" = "CB Root ($d_{irt}$)",
+        "naacl_root-True" = "CB Root ($d_{length}$)",
         "theta-False" = "DDaCLAE"
       )
     ) %>%
