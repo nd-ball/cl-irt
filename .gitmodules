@@ -1,3 +1,6 @@
 [submodule "reports/aaai20"]
 	path = reports/aaai20
 	url = https://git.overleaf.com/5d55b393eeb2845448c124c4
+[submodule "reports/tkdd2020"]
+	path = reports/tkdd2020
+	url = https://git.overleaf.com/5f514de0fbc9ba00016e18d2
