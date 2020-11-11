@@ -88,6 +88,7 @@ def train(args, outdir):
     exp_label = '{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random)
 
     # save training data set size to disk for bookkeeping
+    os.makedirs(os.path.dirname(outdir), exist_ok=True)
     progress_file = open(outdir + 'tracker.csv')
     progress_writer = csv.writer(progress_file)
     progress_writer.writerow(["epoch","num_training_examples", "dev_acc", "test_acc"])
@@ -341,7 +342,7 @@ def train(args, outdir):
         #    outwriter.writerow(row) 
 
         # write num_examples to tracker file
-        progress_writer.writerow([i, num_train_epoch, dev_acc, test_acc])
+        progress_writer.writerow([i, num_train_epoch, acc_dev, acc_test])
 
         if acc_dev > top_dev:
             top_dev = acc_dev

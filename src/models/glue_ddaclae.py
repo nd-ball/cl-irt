@@ -90,6 +90,7 @@ def train(args, outfile):
     exp_label = 'bert_{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random)
 
     # save training data set size to disk for bookkeeping
+    os.makedirs(os.path.dirname(outfile), exist_ok=True)
     progress_file = open(outfile + 'tracker.csv')
     progress_writer = csv.writer(progress_file)
     progress_writer.writerow(["epoch","num_training_examples", "dev_acc", "test_acc"])
