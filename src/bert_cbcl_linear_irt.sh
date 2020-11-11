@@ -2,6 +2,7 @@
 
 #$ -q gpu
 #$ -l gpu_card=1
+#$ -pe smp 1
 #$ -N cbcl-linear-irt
 
 module load conda

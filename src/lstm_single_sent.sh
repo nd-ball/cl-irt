@@ -2,6 +2,7 @@
 
 #$ -q gpu
 #$ -l gpu_card=1
+#$ -pe smp 1
 #$ -N lstm-single-sent
 
 module load conda
