@@ -91,7 +91,7 @@ def train(args, outfile):
 
     # save training data set size to disk for bookkeeping
     os.makedirs(os.path.dirname(outfile), exist_ok=True)
-    progress_file = open(outfile + 'tracker.csv')
+    progress_file = open(outfile + 'tracker.csv', 'w')
     progress_writer = csv.writer(progress_file)
     progress_writer.writerow(["epoch","num_training_examples", "dev_acc", "test_acc"])
 
@@ -345,7 +345,7 @@ def train(args, outfile):
             top_dev = dev_acc
             top_dev_epoch = i
             top_dev_test = test_acc 
-            os.makedirs(os.path.dirname(outfile), exist_ok=True)
+            #os.makedirs(os.path.dirname(outfile), exist_ok=True)
             with open(outfile+'preds.csv', "w") as f:
                 outwriter = csv.writer(f)
                 outwriter.writerow(['epoch','idx','correct','prediction'])
@@ -359,6 +359,8 @@ def train(args, outfile):
 
         print('Best so far (dev): {}, epoch {}'.format(top_dev, top_dev_epoch))
         print('Best so far (test): {}, epoch {}'.format(top_dev_test, top_dev_epoch))
+
+    progress_file.close()
         
     return top_dev_test, num_train 
 

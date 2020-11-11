@@ -154,7 +154,7 @@ def run():
 
     # save training data set size to disk for bookkeeping
     os.makedirs(os.path.dirname(outdir), exist_ok=True)
-    progress_file = open(outdir + 'tracker.csv')
+    progress_file = open(outdir + 'tracker.csv', 'w')
     progress_writer = csv.writer(progress_file)
     progress_writer.writerow(["epoch","num_training_examples", "dev_acc", "test_acc"])
 
@@ -418,14 +418,14 @@ def run():
 
 
         # write num_examples to tracker file
-        progress_writer.writerow([i, num_train_epoch, acc_dev, acc_test])
+        progress_writer.writerow([i, num_train_epoch, acc_dev, acc_test_snli])
 
         if acc_dev > top_dev:
             top_dev = acc_dev
             top_dev_epoch = i
             top_dev_test = acc_test_snli
 
-            os.makedirs(os.path.dirname(outdir), exist_ok=True)
+            #os.makedirs(os.path.dirname(outdir), exist_ok=True)
             with open(outdir+'preds.csv', "w") as f:
                 outwriter = csv.writer(f)
                 outwriter.writerow(['epoch','idx','correct','prediction'])
@@ -438,7 +438,8 @@ def run():
         
         #print('{},{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, acc_train, acc_dev, acc_test_snli, theta_hat))
         #print('Best so far (by dev dev): D: {}, T; {}, epoch {}'.format(top_dev, top_dev_test, top_dev_epoch))
-        
+    progress_file.close()
+    
 
 if __name__ == '__main__':
     start_time = time.time()
