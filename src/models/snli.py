@@ -58,6 +58,12 @@ outdir = 'results/lstm-{}/{}-{}-len-{}/{}/'.format(
         datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     )
 
+# save training data set size to disk for bookkeeping
+progress_file = open(outdir + 'tracker.csv')
+progress_writer = csv.writer(progress_file)
+progress_writer.writerow(["epoch","num_training_examples", "dev_acc", "test_acc"])
+
+
 #preds_file = '{}processed/test_predictions/snli_{}_{}_{}_{}_{}.csv'.format(args.data_dir, args.strategy, args.balanced, args.ordering, args.random, args.k) 
 #outfile = open(preds_file, 'w') 
 #outwriter = csv.writer(outfile, delimiter=',')
@@ -408,6 +414,10 @@ def run():
         #for j in range(len(predictions)):
         #    row = [i, pairIDs[j], correct[j], preds[j]]
         #    outwriter.writerow(row) 
+
+
+        # write num_examples to tracker file
+        progress_writer.writerow([i, num_train_epoch, dev_acc, test_acc])
 
         if acc_dev > top_dev:
             top_dev = acc_dev

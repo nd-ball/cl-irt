@@ -87,6 +87,12 @@ def train(args, outdir):
 
     exp_label = '{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random)
 
+    # save training data set size to disk for bookkeeping
+    progress_file = open(outdir + 'tracker.csv')
+    progress_writer = csv.writer(progress_file)
+    progress_writer.writerow(["epoch","num_training_examples", "dev_acc", "test_acc"])
+
+
     #train, dev, test, w2i, i2w, vectors = load_sstb(args.data_dir)
     train, dev, test = load_glue_task(args.data_dir, args.diff_dir, args.task)
     if len(train['phrase']) == 0:
@@ -333,6 +339,9 @@ def train(args, outdir):
         #for j in range(len(predictions)):
         #    row = [i, itemIDs[j], correct[j], preds[j]]
         #    outwriter.writerow(row) 
+
+        # write num_examples to tracker file
+        progress_writer.writerow([i, num_train_epoch, dev_acc, test_acc])
 
         if acc_dev > top_dev:
             top_dev = acc_dev

@@ -89,6 +89,11 @@ def train(args, outfile):
 
     exp_label = 'bert_{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random)
 
+    # save training data set size to disk for bookkeeping
+    progress_file = open(outfile + 'tracker.csv')
+    progress_writer = csv.writer(progress_file)
+    progress_writer.writerow(["epoch","num_training_examples", "dev_acc", "test_acc"])
+
 
     full_train_diffs = train['difficulty'] 
     full_train_examples = []
@@ -330,7 +335,10 @@ def train(args, outfile):
         
         test_acc = np.mean(rps) 
         print('{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, dev_acc, test_acc, theta_hat))
-                
+
+        # write num_examples to tracker file
+        progress_writer.writerow([i, num_train_epoch, dev_acc, test_acc])
+
         # write test predictions to file
         if dev_acc > top_dev:
             top_dev = dev_acc
