@@ -424,6 +424,8 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
         assert theta_hat is not None and args.ordering == 'easiest' 
     if args.strategy == 'theta-hard':
         assert theta_hat is not None and args.ordering == 'hardest' 
+    if args.use_word_rarity:
+        assert ts['example_rarity'] is not None 
 
     training_set = copy.deepcopy(ts) 
     c_init = 0.01  # as per naacl19 paper 
@@ -449,6 +451,9 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
             training_set['difficulty'] = [len(p) for p in training_set['phrase']]
         else:  # snli
             training_set['difficulty'] = [len(p[0]) for p in training_set['phrase']] 
+
+    if args.use_word_rarity:
+        training_set['difficulty'] = training_set['example_rarity']
 
     if diffs_sorted_idx is None:
         #difficulties = [img['difficulty'] for img in training_set]
@@ -792,6 +797,7 @@ def load_glue_task(datadir, diffdir, taskname):
     train_diff_file = '{}/{}.rp.diffs'.format(diffdir, taskname.lower())
     diffs = pd.read_csv(train_diff_file, header=None, names=['id', 'difficulty'])
     train['difficulty'] = diffs['difficulty']
+    train['example_rarirty'] = get_example_rarities(train['phrase'])
 
     #train_phrase = [[a, b] for a, b in zip(train['s1'], train['s2'])]
     #dev_phrase = [[a, b] for a, b in zip(dev['s1'], dev['s2'])]
@@ -827,3 +833,34 @@ def load_glue_task(datadir, diffdir, taskname):
     return train_result, dev_result, test_result 
 
 
+def get_example_rarities(examples):
+    '''for an input dataset, return the sentence rarirty difficulty heuristic'''
+    result = []
+
+    # if example[0][1] is NaN then it's a single sentence example
+    try:
+        single_sentence = np.isnan(example[0][1]) 
+    except:
+        single_sentence = False  # isnan will throw an error if type is str
+
+    if single_sentence:
+        tokenized = [tokenize(e[0]) for e in examples]
+    else:
+        tokenized = [tokenize(' '.join(e)) for e in examples]
+
+    vocab = set()
+    counts = dict()
+    N = 0
+    for t in tokenized:
+        vocab.update(t)
+        N += len(t)
+        for tok in t:
+            counts.setdefault(tok, 0)
+            counts[tok] += 1
+
+    for t in tokenized:
+        p_hats = [counts[tok]/N for tok in t]
+        p_hat = np.sum(np.log(p_hats)) * -1
+        result.append(p_hat) 
+
+    return result 
