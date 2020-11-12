@@ -797,7 +797,7 @@ def load_glue_task(datadir, diffdir, taskname):
     train_diff_file = '{}/{}.rp.diffs'.format(diffdir, taskname.lower())
     diffs = pd.read_csv(train_diff_file, header=None, names=['id', 'difficulty'])
     train['difficulty'] = diffs['difficulty']
-    train['example_rarirty'] = get_example_rarities(train['phrase'])
+    train['example_rarity'] = get_example_rarities(train['phrase'])
 
     #train_phrase = [[a, b] for a, b in zip(train['s1'], train['s2'])]
     #dev_phrase = [[a, b] for a, b in zip(dev['s1'], dev['s2'])]
