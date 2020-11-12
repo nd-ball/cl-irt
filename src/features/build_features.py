@@ -844,9 +844,9 @@ def get_example_rarities(examples):
         single_sentence = False  # isnan will throw an error if type is str
 
     if single_sentence:
-        tokenized = [tokenize(e[0]) for e in examples]
+        tokenized = [tokenize(e[0]).split(' ') for e in examples]
     else:
-        tokenized = [tokenize(' '.join(e)) for e in examples]
+        tokenized = [tokenize(e[0] + e[1]).split(' ') for e in examples]
 
     vocab = set()
     counts = dict()
