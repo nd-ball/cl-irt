@@ -839,7 +839,7 @@ def get_example_rarities(examples):
 
     # if example[0][1] is NaN then it's a single sentence example
     try:
-        single_sentence = np.isnan(example[0][1]) 
+        single_sentence = np.isnan(examples[0][1]) 
     except:
         single_sentence = False  # isnan will throw an error if type is str
 
