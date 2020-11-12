@@ -390,11 +390,12 @@ def run():
     args = parser.parse_args()
 
     # create output directory-file
-    outdir = 'results/bert-{}/{}-{}-len-{}/{}/'.format(
+    outdir = 'results/bert-{}/{}-{}-len-{}-{}/{}/'.format(
         args.balanced,
         args.task,
         args.strategy,
         args.use_length,
+        args.use_word_rarity,
         datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     )
 
