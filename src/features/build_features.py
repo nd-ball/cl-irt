@@ -34,7 +34,7 @@ def all_vocab(txt):
 
 
 def tokenize(sent):
-    print(sent)
+    #print(sent)
     return ' '.join([x.strip() for x in re.split('\W+?', sent) if x.strip()])
 
 
@@ -811,7 +811,8 @@ def load_glue_task(datadir, diffdir, taskname):
             'phrase': [train['phrase'][i] for i in train_idx], 
             'lbls': list([train['label'][i] for i in train_idx]), 
             'pairID': list([train['id'][i] for i in train_idx]), 
-            'difficulty': list([train['difficulty'][i] for i in train_idx])
+            'difficulty': list([train['difficulty'][i] for i in train_idx]),
+            'example_rarity': list([train['example_rarity'][i] for i in train_idx])
             }
         dev_result = {
             'phrase': [train['phrase'][i] for i in dev_idx], 
@@ -862,5 +863,5 @@ def get_example_rarities(examples):
         p_hats = [counts[tok]/N for tok in t]
         p_hat = np.sum(np.log(p_hats)) * -1
         result.append(p_hat) 
-
+    print(result)
     return result 
