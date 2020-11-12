@@ -37,6 +37,7 @@ parser.add_argument('--ordering', choices=['easiest', 'hardest', 'middleout'], d
 parser.add_argument('--num-epochs', type=int, default=100) 
 parser.add_argument('--random', action='store_true') 
 parser.add_argument('--use-length', action='store_true')
+parser.add_argument('--use-word-rarity', action='store_true')
 parser.add_argument('--min-train-length', default=100, type=int)
 parser.add_argument('--k', default=0, type=int) 
 parser.add_argument('--competency', default=50, type=int) 
@@ -50,11 +51,12 @@ print(args)
 VOCAB_SIZE = 0
 INPUT_DIM = 100
 
-outdir = 'results/lstm-{}/{}-{}-len-{}/{}/'.format(
+outdir = 'results/lstm-{}/{}-{}-len-{}-wordrarity-{}/{}/'.format(
         args.balanced,
         args.task,
         args.strategy,
         args.use_length,
+        args.use_word_rarity,
         datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     )
 

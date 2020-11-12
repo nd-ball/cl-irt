@@ -390,7 +390,7 @@ def run():
     args = parser.parse_args()
 
     # create output directory-file
-    outdir = 'results/bert-{}/{}-{}-len-{}-{}/{}/'.format(
+    outdir = 'results/bert-{}/{}-{}-len-{}-wordrarity-{}/{}/'.format(
         args.balanced,
         args.task,
         args.strategy,

@@ -19,5 +19,11 @@ MINTRAINLEN=1000
 TASK=$1
 CACHEDIR=~/data/bert/
 
+
+# use length
 python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy naacl-linear --use-length --ordering easiest --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --competency $COMP --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR
 python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy naacl-linear --use-length --ordering easiest --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --competency $COMP --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR --balanced 
+
+# use word rarity
+python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy naacl-linear --use-word-rarity --ordering easiest --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --competency $COMP --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR
+python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy naacl-linear --use-word-rarity --ordering easiest --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --competency $COMP --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR --balanced 
