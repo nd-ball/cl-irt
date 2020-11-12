@@ -35,7 +35,7 @@ def all_vocab(txt):
 
 def tokenize(sent):
     print(sent)
-    return ' '.join([x.strip() for x in re.split('(\W+)?', sent) if x.strip()])
+    return ' '.join([x.strip() for x in re.split('\W+?', sent) if x.strip()])
 
 
 def preprocess(X, train=False, bert=False): 
