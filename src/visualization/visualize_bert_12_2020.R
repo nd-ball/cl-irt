@@ -114,15 +114,15 @@ p <- Dvals %>%
   )) %>%
   ggplot(aes(x=epoch)) + 
   geom_line(aes(y=value, linetype=Metric, color=Experiment)) + 
-    facet_wrap(vars(dataset)) +
+    facet_wrap(vars(dataset), ncol=2) +
   ggtitle("Training efficiency plot: BERT") + 
   theme_minimal() + 
   xlab("Training epoch")
 
 
 
-ggsave("journal_plots/bert_balanced_data_plots.png", p)
+ggsave("journal_plots/bert_balanced_data_plots.png", p, width=8, height=4)
 
 
 ###### BERT UNBALANCED #####
-ggsave("journal_plots/bert_unbalanced_data_plots.png", p)
+ggsave("journal_plots/bert_unbalanced_data_plots.png", p, width=8, height=4)

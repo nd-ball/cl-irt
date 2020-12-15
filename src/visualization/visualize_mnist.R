@@ -1,7 +1,7 @@
 library(tidyverse)
 
 # sstb
-data_dir <- 'G:/My Drive/2019/research/projects/cl_irt/aaai_logs/aaai_run2/'
+data_dir <- 'G:/My Drive/research/2019/projects/cl_irt/aaai_logs/aaai_run2/'
 exp_type <- 'mnist'
 num_skip <- 0
 D.baseline <- read_csv(paste(data_dir, exp_type,'-baseline.log',sep=''), 
@@ -44,8 +44,7 @@ which(D$exp=='naacl-root-easiest' & D$epoch==183)
 
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-png("../../reports/figures/cl_irt_mnist.png", width=800, height=400)
-ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
+p <-ggplot(D, aes(x=epoch, y=test_acc, color=exp))  + 
   geom_line(show.legend = T) + 
   geom_line(aes(x=epoch, y=train_size/500, color=exp),D, linetype=2, show.legend = T) + 
   geom_vline(aes(xintercept=epoch, color=exp ), D[c(149,562,340,783),], show.legend = T) + 
@@ -58,7 +57,8 @@ ggplot(D, aes(x=epoch, y=test_acc, color=exp))  +
                        breaks=c('baseline', 'naacl-linear-easiest', 'irt', 'naacl-root-easiest'),
                        labels=c('Baseline', 'CB-L', 'DDaCLAE', 'CB-R'),
                      values=cbbPalette)
-dev.off()
+
+ggsave("journal_plots/mnist_efficiency.png", p, width=7, height=3)
 
 ######### Table to show how much data was required to get to best acc #################
 sum(D[which(D$exp=='baseline'&D$epoch <= max_epochs[which(max_epochs$exp=='baseline'),]$epoch),]$train_size)
