@@ -25,11 +25,11 @@ CACHEDIR=~/data/bert/
 #if ["$LENGTH" = "TRUE"]; then
 #python3 -u -m models.snli --dynet-autobatch 1 --dynet-gpus 1 --dynet-mem 10000 --gpu 0 --data-dir $DATADIR --strategy $STRATEGY --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK --use-length 
 #python3 -u -m models.snli --dynet-autobatch 1 --dynet-gpus 1 --dynet-mem 10000 --gpu 0 --data-dir $DATADIR --strategy $STRATEGY --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK --use-length --balanced 
-python3 -u -m models.snli --dynet-autobatch 1 --dynet-gpus 1 --dynet-mem 10000 --gpu 0 --data-dir $DATADIR --strategy $STRATEGY --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK --use-word-rarity 
-python3 -u -m models.snli --dynet-autobatch 1 --dynet-gpus 1 --dynet-mem 10000 --gpu 0 --data-dir $DATADIR --strategy $STRATEGY --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK --use-word-rarity --balanced 
+#python3 -u -m models.snli --dynet-autobatch 1 --dynet-gpus 1 --dynet-mem 10000 --gpu 0 --data-dir $DATADIR --strategy $STRATEGY --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK --use-word-rarity 
+#python3 -u -m models.snli --dynet-autobatch 1 --dynet-gpus 1 --dynet-mem 10000 --gpu 0 --data-dir $DATADIR --strategy $STRATEGY --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK --use-word-rarity --balanced 
 #else
-#python3 -u -m models.snli --dynet-autobatch 1 --dynet-gpus 1 --dynet-mem 10000 --gpu 0 --data-dir $DATADIR --strategy $STRATEGY --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK 
-#python3 -u -m models.snli --dynet-autobatch 1 --dynet-gpus 1 --dynet-mem 10000 --gpu 0 --data-dir $DATADIR --strategy $STRATEGY --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK --balanced 
+python3 -u -m models.snli --dynet-autobatch 1 --dynet-gpus 1 --dynet-mem 10000 --gpu 0 --data-dir $DATADIR --strategy $STRATEGY --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK 
+python3 -u -m models.snli --dynet-autobatch 1 --dynet-gpus 1 --dynet-mem 10000 --gpu 0 --data-dir $DATADIR --strategy $STRATEGY --num-epochs $NUMEPOCHS --diff-dir $DIFFDIR --task $TASK --balanced 
 #fi
 
 
