@@ -11,7 +11,7 @@ getResultsSingleTask <- function(dataset, task, useLen, useWR){
   # 5 files for each task
   # print the test acc results, and generate a plot 
   # start with bert-False
-  baseDir <- "../data/bert-True/"
+  baseDir <- "../data/lstm-True/"
   
   baseFolder <- paste(baseDir,dataset,"-", task, "-len-", useLen, "-wordrarity-", useWR,sep='')
   list_of_files <- list.files(baseFolder, pattern = "tracker.csv", recursive = T, full.names=T)
@@ -54,7 +54,7 @@ getBestResultSingleTask <- function(dataset, task, useLen, useWR){
   # different types of experiments
   # 5 files for each task
   # return the tracking code for the best single run by dev epoch
-  baseDir <- "../data/bert-True/"
+  baseDir <- "../data/lstm-True/"
   
   baseFolder <- paste(baseDir,dataset,"-", task, "-len-", useLen, "-wordrarity-", useWR,sep='')
   list_of_files <- list.files(baseFolder, pattern = "tracker.csv", recursive = T, full.names=T)
@@ -89,7 +89,8 @@ data <- list(
 D <- cross_df(data) %>%
   filter(!(lens == "True" & wrs == "True")) %>%
   filter(!((lens != "False" | wrs != "False") & tasks == "theta")) %>%
-  filter(!(!(lens == "True" & wrs == "False") & tasks == "baseline"))
+  filter(!(!(lens == "False" & wrs == "False") & tasks == "baseline")) %>%
+  filter(lens == "False")
 
 Dvals <- bind_rows(mapply(getBestResultSingleTask, D$datasets, D$tasks, D$lens, D$wrs, SIMPLIFY=F))
 
@@ -107,15 +108,15 @@ p <- Dvals %>%
     names_to="Metric") %>%
   mutate(Experiment = paste(task, useLen, useWR,sep="-")) %>%
   filter(Experiment %in% c(
-    "baseline-True-False",
+    "baseline-False-False",
     #"naacl-linear-True-False",
-    "naacl-root-True-False",
+    "naacl-root-False-False",
     "theta-False-False"
   )) %>%
   ggplot(aes(x=epoch)) + 
   geom_line(aes(y=value, linetype=Metric, color=Experiment)) + 
     facet_wrap(vars(dataset), ncol=2) +
-  ggtitle("Training efficiency plot: BERT") + 
+  ggtitle("Training efficiency plot: LSTM") + 
   theme_minimal() + 
   xlab("Training epoch")
 
@@ -126,3 +127,7 @@ ggsave("journal_plots/bert_balanced_data_plots.png", p, width=8, height=4)
 
 ###### BERT UNBALANCED #####
 ggsave("journal_plots/bert_unbalanced_data_plots.png", p, width=8, height=4)
+
+
+### LSTM Balanced #####
+ggsave("journal_plots/lstm_balanced_data_plots.png", p, width=8, height=4)
