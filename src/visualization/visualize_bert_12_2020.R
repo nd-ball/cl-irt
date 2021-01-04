@@ -11,7 +11,7 @@ getResultsSingleTask <- function(dataset, task, useLen, useWR){
   # 5 files for each task
   # print the test acc results, and generate a plot 
   # start with bert-False
-  baseDir <- "../data/lstm-True/"
+  baseDir <- "../data/bert-True/"
   
   baseFolder <- paste(baseDir,dataset,"-", task, "-len-", useLen, "-wordrarity-", useWR,sep='')
   list_of_files <- list.files(baseFolder, pattern = "tracker.csv", recursive = T, full.names=T)
@@ -100,6 +100,8 @@ Dvals <- bind_rows(mapply(getBestResultSingleTask, D$datasets, D$tasks, D$lens, 
 # so that it isn't over-crowded
 # definitely: baseline, DDaCLAE, IRT + CBCL 
 
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
 p <- Dvals %>%
   pivot_wider(names_from = metric, values_from= value) %>%
   select(-test_acc) %>%
@@ -116,9 +118,33 @@ p <- Dvals %>%
   ggplot(aes(x=epoch)) + 
   geom_line(aes(y=value, linetype=Metric, color=Experiment)) + 
     facet_wrap(vars(dataset), ncol=2) +
-  ggtitle("Training efficiency plot: LSTM") + 
+  ggtitle("Training efficiency plot: BERT") + 
   theme_minimal() + 
-  xlab("Training epoch")
+  xlab("Training epoch") + 
+  scale_color_manual(
+    values = cbPalette,
+    breaks = c(
+      "baseline-False-False",
+      "naacl-root-False-False",
+      "theta-False-False"
+    ),
+    labels = c(
+      "Baseline",
+      "CB Lin (IRT)",
+      "DDaCLAE"
+    )
+  ) + 
+  scale_linetype_manual(
+    values = c(1,2),
+    breaks = c(
+      "dev_acc",
+      "num_training_examples"
+    ),
+    labels = c(
+      "Accuracy",
+      "Training Data Used"
+    )
+  )
 
 
 
