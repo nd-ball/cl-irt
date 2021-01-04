@@ -54,7 +54,7 @@ getBestResultSingleTask <- function(dataset, task, useLen, useWR){
   # different types of experiments
   # 5 files for each task
   # return the tracking code for the best single run by dev epoch
-  baseDir <- "../data/lstm-True/"
+  baseDir <- "../data/bert-True/"
   
   baseFolder <- paste(baseDir,dataset,"-", task, "-len-", useLen, "-wordrarity-", useWR,sep='')
   list_of_files <- list.files(baseFolder, pattern = "tracker.csv", recursive = T, full.names=T)
@@ -89,7 +89,7 @@ data <- list(
 D <- cross_df(data) %>%
   filter(!(lens == "True" & wrs == "True")) %>%
   filter(!((lens != "False" | wrs != "False") & tasks == "theta")) %>%
-  filter(!(!(lens == "False" & wrs == "False") & tasks == "baseline")) %>%
+  filter(!(!(lens == "True" & wrs == "False") & tasks == "baseline")) %>%
   filter(lens == "False")
 
 Dvals <- bind_rows(mapply(getBestResultSingleTask, D$datasets, D$tasks, D$lens, D$wrs, SIMPLIFY=F))
@@ -110,7 +110,7 @@ p <- Dvals %>%
     names_to="Metric") %>%
   mutate(Experiment = paste(task, useLen, useWR,sep="-")) %>%
   filter(Experiment %in% c(
-    "baseline-False-False",
+    "baseline-True-False",
     #"naacl-linear-True-False",
     "naacl-root-False-False",
     "theta-False-False"
@@ -124,7 +124,7 @@ p <- Dvals %>%
   scale_color_manual(
     values = cbPalette,
     breaks = c(
-      "baseline-False-False",
+      "baseline-True-False",
       "naacl-root-False-False",
       "theta-False-False"
     ),
