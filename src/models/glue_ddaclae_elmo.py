@@ -293,14 +293,14 @@ def train(args, outfile):
         #model.zero_grad()
         model.train() 
         for j, batch in enumerate(train_dataloader):
-            batch = tuple(t.to(device) for t in batch) 
-            inputs = {
-                        'input_ids': batch[0],
-                        'attention_mask': batch[1],
-                        'token_type_ids': batch[2],
-                        'labels': batch[3]
-                    }
-            outputs = model(**inputs) 
+            #batch = tuple(t.to(device) for t in batch) 
+            #inputs = {
+            #            'input_ids': batch[0],
+            #            'attention_mask': batch[1],
+            #            'token_type_ids': batch[2],
+            #            'labels': batch[3]
+            #        }
+            outputs = model(batch['t1'], batch['t2']) 
             loss = outputs[0]
             loss.backward() 
             optimizer.step() 
