@@ -73,7 +73,7 @@ class CLF(torch.nn.Module):
             s2_emb = self.elmo(character_ids_s2)['elmo_representations'][0] 
             lstm_s1, _ = self.lstm(s1_emb)
             lstm_s2, _ = self.lstm(s2_emb)
-            print(lstm_s2).shape
+            print(lstm_s2.shape)
             embs = torch.cat((lstm_s1, lstm_s2), 1)
         else:
             embs, _ = self.lstm(s1_emb)
