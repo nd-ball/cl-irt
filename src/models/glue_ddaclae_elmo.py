@@ -27,6 +27,7 @@ from allennlp.data.dataset_readers import AllennlpDataset
 from allennlp.data.dataloader import PyTorchDataLoader 
 from allennlp.data.vocabulary import Vocabulary 
 from allennlp.data.samplers import SequentialSampler, RandomSampler 
+from allennlp.data.token_indexers import ELMoTokenCharactersIndexer 
 
 from transformers import (WEIGHTS_NAME, BertConfig,
                             BertForSequenceClassification, BertTokenizer) 
@@ -38,6 +39,7 @@ from transformers import glue_convert_examples_to_features as convert_examples_t
 options_file = "https://allennlp.s3.amazonaws.com/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_options.json"
 weight_file = "https://allennlp.s3.amazonaws.com/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5"
 
+elmo_token_indexer = ELMoTokenCharactersIndexer()
 
 class CLF(torch.nn.Module):
     def __init__(self, num_classes, num_sentences=2):
@@ -74,17 +76,24 @@ class CLF(torch.nn.Module):
             
 
 
-def generate_features(examples):
+def text_to_instance(examples):
 
     dataset = []
     for i in range(len(examples)):
         fields = {}
-        fields['t1'] = [Token(w) for w in tokenize(examples[i][0]).split(' ')]
+        fields['t1'] = TextField(
+            [Token(w) for w in tokenize(examples['phrase'][i][0]).split(' ')],
+            elmo_token_indexer
+        )
+
         try:
-            fields['t2'] = [Token(w) for w in tokenize(examples[i][1]).split(' ')]
+            fields['t2'] = TextField(
+                [Token(w) for w in tokenize(examples['phrase'][i][1]).split(' ')],
+                elmo_token_indexer
+            )
         except:
             fields['t2'] = None  # single sent
-        fields['label'] = examples['lbls'][i]
+        fields['label'] = LabelField(examples['lbls'][i])
         dataset.append(Instance(fields)) 
     
     dataset = AllennlpDataset(dataset)
@@ -137,6 +146,8 @@ def train(args, outfile):
         single_sentence = False  # isnan will throw an error if type is str
     print(single_sentence)
     #print(train)
+    full_train_examples = text_to_instance(train)
+    '''
     full_train_examples = []
     for i in range(len(train['phrase'])):
         fields = {}
@@ -150,6 +161,7 @@ def train(args, outfile):
             fields['label'] = LabelField(train['lbls'][i])
         full_train_examples.append(Instance(fields))
     full_train_examples = AllennlpDataset(full_train_examples)
+    '''
 
     vocab = Vocabulary.from_instances(full_train_examples) 
 
