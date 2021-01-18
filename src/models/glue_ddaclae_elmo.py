@@ -49,7 +49,7 @@ class CLF(torch.nn.Module):
 
         self.lstm_layer = 100
         self.num_classes = num_classes
-        self.elmo = Elmo(options_file, weight_file, 1, dropout=0)
+        self.elmo = Elmo(options_file, weight_file, 2, dropout=0.5)
         self.lstm = torch.nn.LSTM(1024, self.lstm_layer, 1)
         self.tanh = torch.nn.Tanh() 
         self.num_sentences = num_sentences
@@ -79,7 +79,7 @@ class CLF(torch.nn.Module):
             embs = torch.cat((lstm_s1, lstm_s2), 2)
         else:
             embs, _ = self.lstm(s1_emb)
-        print(embs.shape)
+        print(embs)
         return self.feed_forward(embs) 
             
 
