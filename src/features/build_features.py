@@ -863,5 +863,5 @@ def get_example_rarities(examples):
         p_hats = [counts[tok]/N for tok in t]
         p_hat = np.sum(np.log(p_hats)) * -1
         result.append(p_hat) 
-    print(result)
+    #print(result)
     return result 

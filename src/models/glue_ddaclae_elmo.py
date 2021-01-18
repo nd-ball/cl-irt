@@ -132,7 +132,7 @@ def train(args, outfile):
     except:
         single_sentence = False  # isnan will throw an error if type is str
     print(single_sentence)
-    print(train)
+    #print(train)
     full_train_examples = []
     for i in range(len(train['phrase'])):
         fields = {}
@@ -141,8 +141,8 @@ def train(args, outfile):
             fields['t2'] = None  # single sent
             fields['label'] = train['lbls'][i]
         else:
-            fields['t1'] = [Token(w) for w in tokenize(train[i][0]).split(' ')]
-            fields['t2'] = [Token(w) for w in tokenize(train[i][1]).split(' ')]
+            fields['t1'] = [Token(w) for w in tokenize(train['phrase'][i][0]).split(' ')]
+            fields['t2'] = [Token(w) for w in tokenize(train['phrase'][i][1]).split(' ')]
             fields['label'] = train['lbls'][i]
         full_train_examples.append(Instance(fields))
     
@@ -164,8 +164,8 @@ def train(args, outfile):
             fields['t2'] = None  # single sent
             fields['label'] = dev['lbls'][i]
         else:
-            fields['t1'] = [Token(w) for w in tokenize(dev[i][0]).split(' ')]
-            fields['t2'] = [Token(w) for w in tokenize(dev[i][1]).split(' ')]
+            fields['t1'] = [Token(w) for w in tokenize(dev['phrase'][i][0]).split(' ')]
+            fields['t2'] = [Token(w) for w in tokenize(dev['phrase'][i][1]).split(' ')]
             fields['label'] = dev['lbls'][i]
         dev_examples.append(Instance(fields))
     features_dev = dev_examples 
@@ -178,8 +178,8 @@ def train(args, outfile):
             fields['t2'] = None  # single sent
             fields['label'] = test['lbls'][i]
         else:
-            fields['t1'] = [Token(w) for w in tokenize(test[i][0]).split(' ')]
-            fields['t2'] = [Token(w) for w in tokenize(test[i][1]).split(' ')]
+            fields['t1'] = [Token(w) for w in tokenize(test['phrase'][i][0]).split(' ')]
+            fields['t2'] = [Token(w) for w in tokenize(test['phrase'][i][1]).split(' ')]
             fields['label'] = test['lbls'][i]
         test_examples.append(Instance(fields)) 
     features_test = test_examples
@@ -254,8 +254,8 @@ def train(args, outfile):
                 fields['t2'] = None  # single sent
                 fields['label'] = epoch_training_data['lbls'][i]
             else:
-                fields['t1'] = [Token(w) for w in tokenize(epoch_training_data[i][0]).split(' ')]
-                fields['t2'] = [Token(w) for w in tokenize(epoch_training_data[i][1]).split(' ')]
+                fields['t1'] = [Token(w) for w in tokenize(epoch_training_data['phrase'][i][0]).split(' ')]
+                fields['t2'] = [Token(w) for w in tokenize(epoch_training_data['phrase'][i][1]).split(' ')]
                 fields['label'] = epoch_training_data['lbls'][i]
             train_examples.append(Instance(fields)) 
         features_train_epoch = train_examples
