@@ -264,6 +264,8 @@ def train(args, outfile):
         #print('training set size: {}'.format(num_train_epoch))
         # shuffle training data
         # per epoch training set
+        features_train_epoch = text_to_instance(epoch_training_data)
+        '''
         train_examples = []
         for j in range(num_train_epoch):
             fields = {}
@@ -277,6 +279,7 @@ def train(args, outfile):
                 fields['label'] = epoch_training_data['lbls'][i]
             train_examples.append(Instance(fields)) 
         features_train_epoch = AllennlpDataset(train_examples)
+        '''
 
         train_sampler = RandomSampler(features_train_epoch)
         train_dataloader = PyTorchDataLoader(features_train_epoch, sampler=train_sampler, batch_size=batch_size) 
