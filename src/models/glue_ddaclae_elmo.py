@@ -132,7 +132,7 @@ def train(args, outfile):
     except:
         single_sentence = False  # isnan will throw an error if type is str
     print(single_sentence)
-    
+    print(train)
     full_train_examples = []
     for i in range(len(train['phrase'])):
         fields = {}
