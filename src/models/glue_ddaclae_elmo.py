@@ -17,12 +17,15 @@ from features.irt_scoring import calculate_theta, calculate_diff_threshold
 # import required elmo libraries
 
 import torch 
-from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler, TensorDataset)
+#from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler, TensorDataset)
+from torch.utils.data import (RandomSampler, SequentialSampler, TensorDataset)
+
 from allennlp.modules.elmo import Elmo, batch_to_ids
 from allennlp.data.tokenizers import Token 
 from allennlp.data.fields import Field, TextField, LabelField
 from allennlp.data.instance import Instance 
 from allennlp.data.dataset_readers import AllennlpDataset 
+from allennlp.data.dataloader import DataLoader 
 
 from transformers import (WEIGHTS_NAME, BertConfig,
                             BertForSequenceClassification, BertTokenizer) 
