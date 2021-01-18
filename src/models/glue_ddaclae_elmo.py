@@ -54,6 +54,7 @@ class CLF(torch.nn.Module):
         self.tanh = torch.nn.Tanh() 
         self.num_sentences = num_sentences
         self.linear_layer = self.lstm_layer * self.num_sentences 
+        self.softmax = torch.nn.Softmax()
 
         self.feed_forward = torch.nn.Sequential(
             torch.nn.Linear(self.linear_layer, self.linear_layer),
@@ -62,7 +63,8 @@ class CLF(torch.nn.Module):
             self.tanh,
             torch.nn.Linear(self.linear_layer, self.linear_layer),
             self.tanh,
-            torch.nn.Linear(self.linear_layer, self.num_classes)
+            torch.nn.Linear(self.linear_layer, self.num_classes),
+            self.softmax
         )
 
     def forward(self, s1, s2=None):
@@ -77,7 +79,7 @@ class CLF(torch.nn.Module):
             embs = torch.cat((lstm_s1, lstm_s2), 2)
         else:
             embs, _ = self.lstm(s1_emb)
-        
+        print(embs.shape)
         return self.feed_forward(embs) 
             
 
@@ -115,10 +117,6 @@ def train(args, outfile):
 
     device = torch.device('cuda' if args.gpu >= 0 else 'cpu') 
 
-    #config_class = BertConfig
-    #model_class = BertForSequenceClassification
-    #tokenizer_class = BertTokenizer 
-
     train, dev, test = load_glue_task(args.data_dir, args.diff_dir, args.task)
     label_list = list(set(train['lbls']))
     out_dim = len(label_list)
@@ -132,7 +130,6 @@ def train(args, outfile):
     model = CLF(num_classes, num_sent)
     model.to(device) 
 
-    #print('num_epoch: {}\nbatch_size: {}'.format(num_epoch, batch_size))
     # construct the exp label
 
     exp_label = 'elmo_{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random)
@@ -151,24 +148,7 @@ def train(args, outfile):
     except:
         single_sentence = False  # isnan will throw an error if type is str
     print(single_sentence)
-    #print(train)
     full_train_examples = text_to_instance(train)
-    '''
-    full_train_examples = []
-    for i in range(len(train['phrase'])):
-        fields = {}
-        if single_sentence:
-            fields['t1'] = TextField([Token(w) for w in tokenize(train['phrase'][i][0]).split(' ')])
-            fields['t2'] = None  # single sent
-            fields['label'] = LabelField(train['lbls'][i])
-        else:
-            fields['t1'] = TextField([Token(w) for w in tokenize(train['phrase'][i][0]).split(' ')])
-            fields['t2'] = TextField([Token(w) for w in tokenize(train['phrase'][i][1]).split(' ')])
-            fields['label'] = LabelField(train['lbls'][i])
-        full_train_examples.append(Instance(fields))
-    full_train_examples = AllennlpDataset(full_train_examples)
-    '''
-
     vocab = Vocabulary.from_instances(full_train_examples) 
     full_train_examples = AllennlpDataset(full_train_examples, vocab=vocab)
 
@@ -182,40 +162,13 @@ def train(args, outfile):
         theta_diffs = full_train_diffs 
 
     dev_examples = text_to_instance(dev)
-    '''
-    for i in range(len(dev['phrase'])):
-        fields = {}
-        if single_sentence:
-            fields['t1'] = [Token(w) for w in tokenize(dev['phrase'][i][0]).split(' ')]
-            fields['t2'] = None  # single sent
-            fields['label'] = dev['lbls'][i]
-        else:
-            fields['t1'] = [Token(w) for w in tokenize(dev['phrase'][i][0]).split(' ')]
-            fields['t2'] = [Token(w) for w in tokenize(dev['phrase'][i][1]).split(' ')]
-            fields['label'] = dev['lbls'][i]
-        dev_examples.append(Instance(fields))
-    '''
     features_dev = AllennlpDataset(dev_examples, vocab=vocab) 
     
     test_examples = text_to_instance(test)
-    '''
-    for i in range(len(test['phrase'])):
-        fields = {}
-        if single_sentence:
-            fields['t1'] = [Token(w) for w in tokenize(test['phrase'][i][0]).split(' ')]
-            fields['t2'] = None  # single sent
-            fields['label'] = test['lbls'][i]
-        else:
-            fields['t1'] = [Token(w) for w in tokenize(test['phrase'][i][0]).split(' ')]
-            fields['t2'] = [Token(w) for w in tokenize(test['phrase'][i][1]).split(' ')]
-            fields['label'] = test['lbls'][i]
-        test_examples.append(Instance(fields)) 
-    '''
     features_test = AllennlpDataset(test_examples, vocab=vocab)
     
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8, correct_bias=False)
-    #scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=num_epoch)
     scheduler = get_constant_schedule(optimizer) 
 
     if args.random:
@@ -272,26 +225,11 @@ def train(args, outfile):
 
         epoch_training_data = get_epoch_training_data(train, args, i, 'glue', theta_hat, diffs_sorted_idx) 
         num_train_epoch = len(epoch_training_data['phrase'])
-        #print('training set size: {}'.format(num_train_epoch))
+
         # shuffle training data
         # per epoch training set
         features_train_epoch = text_to_instance(epoch_training_data)
         features_train_epoch = AllennlpDataset(features_train_epoch, vocab=vocab)
-        '''
-        train_examples = []
-        for j in range(num_train_epoch):
-            fields = {}
-            if single_sentence:
-                fields['t1'] = [Token(w) for w in tokenize(epoch_training_data['phrase'][i][0]).split(' ')]
-                fields['t2'] = None  # single sent
-                fields['label'] = epoch_training_data['lbls'][i]
-            else:
-                fields['t1'] = [Token(w) for w in tokenize(epoch_training_data['phrase'][i][0]).split(' ')]
-                fields['t2'] = [Token(w) for w in tokenize(epoch_training_data['phrase'][i][1]).split(' ')]
-                fields['label'] = epoch_training_data['lbls'][i]
-            train_examples.append(Instance(fields)) 
-        features_train_epoch = AllennlpDataset(train_examples)
-        '''
         features_train_epoch.index_with(vocab)
         train_sampler = RandomSampler(features_train_epoch)
         train_dataloader = PyTorchDataLoader(features_train_epoch, sampler=train_sampler, batch_size=batch_size) 
@@ -299,16 +237,10 @@ def train(args, outfile):
         #model.zero_grad()
         model.train() 
         for j, batch in enumerate(train_dataloader):
-            #print(batch)
-            #batch = tuple(t.to(device) for t in batch) 
-            #inputs = {
-            #            'input_ids': batch[0],
-            #            'attention_mask': batch[1],
-            #            'token_type_ids': batch[2],
-            #            'labels': batch[3]
-            #        }
             outputs = model(batch['t1'], batch['t2']) 
+            print(outputs.shape)
             loss = criterion(outputs, batch['label'])
+            
             loss.backward() 
             optimizer.step() 
             scheduler.step()
