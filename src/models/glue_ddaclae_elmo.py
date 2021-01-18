@@ -141,13 +141,13 @@ def train(args, outfile):
     for i in range(len(train['phrase'])):
         fields = {}
         if single_sentence:
-            fields['t1'] = [Token(w) for w in tokenize(train['phrase'][i][0]).split(' ')]
+            fields['t1'] = TextField([Token(w) for w in tokenize(train['phrase'][i][0]).split(' ')])
             fields['t2'] = None  # single sent
-            fields['label'] = train['lbls'][i]
+            fields['label'] = LabelField(train['lbls'][i])
         else:
-            fields['t1'] = [Token(w) for w in tokenize(train['phrase'][i][0]).split(' ')]
-            fields['t2'] = [Token(w) for w in tokenize(train['phrase'][i][1]).split(' ')]
-            fields['label'] = train['lbls'][i]
+            fields['t1'] = TextField([Token(w) for w in tokenize(train['phrase'][i][0]).split(' ')])
+            fields['t2'] = TextField([Token(w) for w in tokenize(train['phrase'][i][1]).split(' ')])
+            fields['label'] = LabelField(train['lbls'][i])
         full_train_examples.append(Instance(fields))
     full_train_examples = AllennlpDataset(full_train_examples)
 
