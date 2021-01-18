@@ -145,7 +145,7 @@ def train(args, outfile):
             fields['t2'] = [Token(w) for w in tokenize(train['phrase'][i][1]).split(' ')]
             fields['label'] = train['lbls'][i]
         full_train_examples.append(Instance(fields))
-    
+    full_train_examples = AllennlpDataset(full_train_examples)
 
     if args.num_obs < len(full_train_examples):
         theta_sample = np.random.randint(0, len(full_train_examples), args.num_obs) 
@@ -168,7 +168,7 @@ def train(args, outfile):
             fields['t2'] = [Token(w) for w in tokenize(dev['phrase'][i][1]).split(' ')]
             fields['label'] = dev['lbls'][i]
         dev_examples.append(Instance(fields))
-    features_dev = dev_examples 
+    features_dev = AllennlpDataset(dev_examples) 
     
     test_examples = []
     for i in range(len(test['phrase'])):
@@ -182,7 +182,7 @@ def train(args, outfile):
             fields['t2'] = [Token(w) for w in tokenize(test['phrase'][i][1]).split(' ')]
             fields['label'] = test['lbls'][i]
         test_examples.append(Instance(fields)) 
-    features_test = test_examples
+    features_test = AllennlpDataset(test_examples)
     
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8, correct_bias=False)
@@ -258,7 +258,7 @@ def train(args, outfile):
                 fields['t2'] = [Token(w) for w in tokenize(epoch_training_data['phrase'][i][1]).split(' ')]
                 fields['label'] = epoch_training_data['lbls'][i]
             train_examples.append(Instance(fields)) 
-        features_train_epoch = train_examples
+        features_train_epoch = AllennlpDataset(train_examples)
 
         train_sampler = RandomSampler(features_train_epoch)
         train_dataloader = DataLoader(features_train_epoch, sampler=train_sampler, batch_size=batch_size) 
