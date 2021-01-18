@@ -74,7 +74,7 @@ class CLF(torch.nn.Module):
             lstm_s1, _ = self.lstm(s1_emb)
             lstm_s2, _ = self.lstm(s2_emb)
             print(lstm_s2.shape)
-            embs = torch.cat((lstm_s1, lstm_s2), 1)
+            embs = torch.cat((lstm_s1, lstm_s2), 2)
         else:
             embs, _ = self.lstm(s1_emb)
         
