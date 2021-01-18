@@ -22,7 +22,7 @@ from allennlp.modules.elmo import Elmo, batch_to_ids
 from allennlp.data.tokenizers import Token 
 from allennlp.data.fields import Field, TextField, LabelField
 from allennlp.data.instance import Instance 
-from allennlp.data.dataset_reader import AllennlpDataset 
+from allennlp.data.dataset_readers import AllennlpDataset 
 
 from transformers import (WEIGHTS_NAME, BertConfig,
                             BertForSequenceClassification, BertTokenizer) 
