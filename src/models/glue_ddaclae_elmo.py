@@ -71,11 +71,11 @@ class CLF(torch.nn.Module):
         if s2 != None:
             character_ids_s2 = batch_to_ids(s2)
             s2_emb = self.elmo(character_ids_s2)['elmo_representations'][0] 
-            lstm_s1 = self.lstm(s1_emb)
-            lstm_s2 = self.lstm(s2_emb)
+            lstm_s1, _ = self.lstm(s1_emb)
+            lstm_s2, _ = self.lstm(s2_emb)
             embs = torch.cat((lstm_s1, lstm_s1), 1)
         else:
-            embs = self.lstm(s1_emb)
+            embs, _ = self.lstm(s1_emb)
         
         return self.feed_forward(embs) 
             
