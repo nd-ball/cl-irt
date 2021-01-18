@@ -18,7 +18,6 @@ from features.irt_scoring import calculate_theta, calculate_diff_threshold
 
 import torch 
 #from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler, TensorDataset)
-from torch.utils.data import (RandomSampler, SequentialSampler, TensorDataset)
 
 from allennlp.modules.elmo import Elmo, batch_to_ids
 from allennlp.data.tokenizers import Token 
@@ -26,6 +25,8 @@ from allennlp.data.fields import Field, TextField, LabelField
 from allennlp.data.instance import Instance 
 from allennlp.data.dataset_readers import AllennlpDataset 
 from allennlp.data.dataloader import PyTorchDataLoader 
+from allennlp.data.vocabulary import Vocabulary 
+from allennlp.data.samplers import SequentialSampler, RandomSampler 
 
 from transformers import (WEIGHTS_NAME, BertConfig,
                             BertForSequenceClassification, BertTokenizer) 
@@ -149,6 +150,8 @@ def train(args, outfile):
             fields['label'] = train['lbls'][i]
         full_train_examples.append(Instance(fields))
     full_train_examples = AllennlpDataset(full_train_examples)
+
+    vocab = Vocabulary.from_instances(full_train_examples) 
 
     if args.num_obs < len(full_train_examples):
         theta_sample = np.random.randint(0, len(full_train_examples), args.num_obs) 
