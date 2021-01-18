@@ -67,11 +67,10 @@ class CLF(torch.nn.Module):
 
     def forward(self, s1, s2=None):
         character_ids_s1 = batch_to_ids(s1)
-        s1_emb = self.elmo(character_ids_s1)
+        s1_emb = self.elmo(character_ids_s1)['elmo_representations'][0]
         if s2 != None:
             character_ids_s2 = batch_to_ids(s2)
-            s2_emb = self.elmo(character_ids_s2) 
-            print(s1_emb)
+            s2_emb = self.elmo(character_ids_s2)['elmo_representations'][0] 
             embs = torch.cat((s1_emb, s2_emb), 1)
         else:
             embs = s1_emb
@@ -296,7 +295,7 @@ def train(args, outfile):
         #model.zero_grad()
         model.train() 
         for j, batch in enumerate(train_dataloader):
-            print(batch)
+            #print(batch)
             #batch = tuple(t.to(device) for t in batch) 
             #inputs = {
             #            'input_ids': batch[0],
