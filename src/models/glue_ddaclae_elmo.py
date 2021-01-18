@@ -83,13 +83,13 @@ def text_to_instance(examples):
         fields = {}
         fields['t1'] = TextField(
             [Token(w) for w in tokenize(examples['phrase'][i][0]).split(' ')],
-            elmo_token_indexer
+            token_indexers={'tokens': elmo_token_indexer}
         )
 
         try:
             fields['t2'] = TextField(
                 [Token(w) for w in tokenize(examples['phrase'][i][1]).split(' ')],
-                elmo_token_indexer
+                token_indexers={'tokens': elmo_token_indexer}
             )
         except:
             fields['t2'] = None  # single sent
