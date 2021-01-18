@@ -69,10 +69,10 @@ class CLF(torch.nn.Module):
 
     def forward(self, s1, s2=None):
         character_ids_s1 = batch_to_ids(s1)
-        s1_emb = self.elmo(character_ids_s1)['elmo_representations'][0]
+        s1_emb = self.elmo(character_ids_s1)['elmo_representations']
         if s2 is not None:
             character_ids_s2 = batch_to_ids(s2)
-            s2_emb = self.elmo(character_ids_s2)['elmo_representations'][0] 
+            s2_emb = self.elmo(character_ids_s2)['elmo_representations'] 
             print(s1_emb.shape, s2_emb.shape)
             lstm_s1, _ = self.lstm(s1_emb)
             lstm_s2, _ = self.lstm(s2_emb)
