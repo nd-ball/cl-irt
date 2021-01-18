@@ -239,6 +239,7 @@ def train(args, outfile):
         for j, batch in enumerate(train_dataloader):
             outputs = model(batch['t1'], batch['t2']) 
             print(outputs.shape)
+            print(batch['t2'])
             loss = criterion(outputs, batch['label'])
             
             loss.backward() 
