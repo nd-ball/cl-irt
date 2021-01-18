@@ -25,7 +25,7 @@ from allennlp.data.tokenizers import Token
 from allennlp.data.fields import Field, TextField, LabelField
 from allennlp.data.instance import Instance 
 from allennlp.data.dataset_readers import AllennlpDataset 
-from allennlp.data.dataloader import DataLoader 
+from allennlp.data.dataloader import PyTorchDataLoader 
 
 from transformers import (WEIGHTS_NAME, BertConfig,
                             BertForSequenceClassification, BertTokenizer) 
@@ -217,7 +217,7 @@ def train(args, outfile):
         # estimate theta_hat 
         if args.strategy in ['theta', 'theta-hat']:
             theta_sampler = SequentialSampler(features_train)
-            theta_dataloader = DataLoader(features_train, sampler=theta_sampler, batch_size=batch_size)
+            theta_dataloader = PyTorchDataLoader(features_train, sampler=theta_sampler, batch_size=batch_size)
             preds = None 
             for batch in theta_dataloader:
                 model.eval() 
@@ -264,7 +264,7 @@ def train(args, outfile):
         features_train_epoch = AllennlpDataset(train_examples)
 
         train_sampler = RandomSampler(features_train_epoch)
-        train_dataloader = DataLoader(features_train_epoch, sampler=train_sampler, batch_size=batch_size) 
+        train_dataloader = PyTorchDataLoader(features_train_epoch, sampler=train_sampler, batch_size=batch_size) 
 
         #model.zero_grad()
         model.train() 
@@ -287,7 +287,7 @@ def train(args, outfile):
 
         # Dev
         dev_sampler = SequentialSampler(features_dev)
-        dev_dataloader = DataLoader(features_dev, sampler=dev_sampler, batch_size=batch_size)
+        dev_dataloader = PyTorchDataLoader(features_dev, sampler=dev_sampler, batch_size=batch_size)
         preds = None 
         dev_loss = 0
         for batch in dev_dataloader:
@@ -320,7 +320,7 @@ def train(args, outfile):
         
         # Test 
         test_sampler = SequentialSampler(features_test)
-        test_dataloader = DataLoader(features_test, sampler=test_sampler, batch_size=batch_size)
+        test_dataloader = PyTorchDataLoader(features_test, sampler=test_sampler, batch_size=batch_size)
         preds = None 
         for batch in test_dataloader:
             model.eval() 
