@@ -308,7 +308,7 @@ def train(args, outfile):
             #            'labels': batch[3]
             #        }
             outputs = model(batch['t1'], batch['t2']) 
-            loss = outputs[0]
+            loss = criterion(outputs, batch['label'])
             loss.backward() 
             optimizer.step() 
             scheduler.step()
