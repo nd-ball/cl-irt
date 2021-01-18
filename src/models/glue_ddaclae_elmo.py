@@ -164,6 +164,7 @@ def train(args, outfile):
     '''
 
     vocab = Vocabulary.from_instances(full_train_examples) 
+    full_train_examples = AllennlpDataset(full_train_examples, vocab=vocab)
 
     if args.num_obs < len(full_train_examples):
         theta_sample = np.random.randint(0, len(full_train_examples), args.num_obs) 
@@ -174,7 +175,8 @@ def train(args, outfile):
         features_train = full_train_examples
         theta_diffs = full_train_diffs 
 
-    dev_examples = []
+    dev_examples = text_to_instance(dev)
+    '''
     for i in range(len(dev['phrase'])):
         fields = {}
         if single_sentence:
@@ -186,9 +188,11 @@ def train(args, outfile):
             fields['t2'] = [Token(w) for w in tokenize(dev['phrase'][i][1]).split(' ')]
             fields['label'] = dev['lbls'][i]
         dev_examples.append(Instance(fields))
-    features_dev = AllennlpDataset(dev_examples) 
+    '''
+    features_dev = AllennlpDataset(dev_examples, vocab=vocab) 
     
-    test_examples = []
+    test_examples = text_to_instance(test)
+    '''
     for i in range(len(test['phrase'])):
         fields = {}
         if single_sentence:
@@ -200,7 +204,8 @@ def train(args, outfile):
             fields['t2'] = [Token(w) for w in tokenize(test['phrase'][i][1]).split(' ')]
             fields['label'] = test['lbls'][i]
         test_examples.append(Instance(fields)) 
-    features_test = AllennlpDataset(test_examples)
+    '''
+    features_test = AllennlpDataset(test_examples, vocab=vocab)
     
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8, correct_bias=False)
@@ -265,6 +270,7 @@ def train(args, outfile):
         # shuffle training data
         # per epoch training set
         features_train_epoch = text_to_instance(epoch_training_data)
+        features_train_epoch = AllennlpDataset(features_train_epoch, vocab=vocab)
         '''
         train_examples = []
         for j in range(num_train_epoch):
@@ -280,7 +286,7 @@ def train(args, outfile):
             train_examples.append(Instance(fields)) 
         features_train_epoch = AllennlpDataset(train_examples)
         '''
-
+        features_train_epoch.index_with(vocab)
         train_sampler = RandomSampler(features_train_epoch)
         train_dataloader = PyTorchDataLoader(features_train_epoch, sampler=train_sampler, batch_size=batch_size) 
 
