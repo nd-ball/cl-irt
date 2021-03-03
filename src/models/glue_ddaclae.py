@@ -36,10 +36,10 @@ def generate_features(examples, tokenizer, label_list):
         examples, tokenizer,
         label_list=label_list, 
         max_length=max_seq_len,
-        output_mode=output_mode,
-        pad_on_left=pad_on_left,
-        pad_token=pad_token,
-        pad_token_segment_id=pad_token_segment_id
+        output_mode=output_mode#,
+        #pad_on_left=pad_on_left,
+        #pad_token=pad_token,
+        #pad_token_segment_id=pad_token_segment_id
     )
 
     all_input_ids = torch.tensor([f.input_ids for f in features], dtype=torch.long)
@@ -87,7 +87,7 @@ def train(args, outfile):
     #print('num_epoch: {}\nbatch_size: {}'.format(num_epoch, batch_size))
     # construct the exp label
 
-    exp_label = 'bert_{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random)
+    exp_label = 'bert_{}_{}_{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random, args.lower_bound, args.upper_bound)
 
     # save training data set size to disk for bookkeeping
     os.makedirs(os.path.dirname(outfile), exist_ok=True)
@@ -227,7 +227,7 @@ def train(args, outfile):
         else:
             theta_hat=0
 
-        epoch_training_data = get_epoch_training_data(train, args, i, 'glue', theta_hat, diffs_sorted_idx) 
+        epoch_training_data = get_epoch_training_data(train, args, i, 'glue', theta_hat, diffs_sorted_idx, lower_offset=args.lower_bound, upper_offset=args.upper_bound) 
         num_train_epoch = len(epoch_training_data['phrase'])
         #print('training set size: {}'.format(num_train_epoch))
         # shuffle training data
@@ -387,15 +387,19 @@ def run():
     parser.add_argument('--cache-dir', help='cache dir for bert models')
     parser.add_argument('--num-obs', help='num obs for learning theta', default=1000, type=int)
     parser.add_argument('--task', choices=GLUETASKS, help='GLUE task for fine-tuning')
+    parser.add_argument('--lower-bound', default=np.NINF, type=float)
+    parser.add_argument('--upper-bound', default=0, type=float)
     args = parser.parse_args()
 
     # create output directory-file
-    outdir = 'results/bert-{}/{}-{}-len-{}-wordrarity-{}/{}/'.format(
+    outdir = 'results/bert-{}/{}-{}-len-{}-wordrarity-{}-{}-{}/{}/'.format(
         args.balanced,
         args.task,
         args.strategy,
         args.use_length,
         args.use_word_rarity,
+        args.lower_bound,
+        args.upper_bound,
         datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     )
 

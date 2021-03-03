@@ -417,7 +417,7 @@ def load_sstb_bert(data_dir):
 
 
 ####### Get CL Data per epoch ########
-def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_idx=None):
+def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_idx=None, lower_offset=np.NINF, upper_offset=0):
     if args.strategy == 'baseline':
         return ts 
     if args.strategy == 'theta':
@@ -519,7 +519,7 @@ def get_epoch_training_data(ts, args, epoch, task, theta_hat=None, diffs_sorted_
         train['pairID'] = [train_2['pairID'][i] for i in range(num_train)]
         return train 
     elif args.strategy == 'theta':
-        train_idx = [i for i in range(len(training_set['phrase'])) if train_2['difficulty'][i] <= theta_hat]
+        train_idx = [i for i in range(len(training_set['phrase'])) if (theta_hat + lower_offset) <= train_2['difficulty'][i] <= (theta_hat+upper_offset)]
         if len(train_idx) < args.min_train_length:
             train_idx = [i for i in range(args.min_train_length)] 
         train['lbls'] = [train_2['lbls'][i] for i in train_idx] 
