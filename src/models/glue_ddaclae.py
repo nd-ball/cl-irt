@@ -93,7 +93,7 @@ def train(args, outfile):
     os.makedirs(os.path.dirname(outfile), exist_ok=True)
     progress_file = open(outfile + 'tracker.csv', 'w')
     progress_writer = csv.writer(progress_file)
-    progress_writer.writerow(["epoch","num_training_examples", "dev_acc", "test_acc"])
+    progress_writer.writerow(["epoch","num_training_examples", "dev_acc", "test_acc","theta_hat"])
 
 
     full_train_diffs = train['difficulty'] 
@@ -192,7 +192,7 @@ def train(args, outfile):
         # load training data for this epoch
 
         # estimate theta_hat 
-        if args.strategy in ['theta', 'theta-hat']:
+        if args.strategy in ['theta', 'theta-hat','baseline']:
             theta_sampler = SequentialSampler(features_train)
             theta_dataloader = DataLoader(features_train, sampler=theta_sampler, batch_size=batch_size)
             preds = None 
@@ -338,7 +338,7 @@ def train(args, outfile):
         print('{},{},{},{},{},{}'.format(exp_label,i,num_train_epoch, dev_acc, test_acc, theta_hat))
 
         # write num_examples to tracker file
-        progress_writer.writerow([i, num_train_epoch, dev_acc, test_acc])
+        progress_writer.writerow([i, num_train_epoch, dev_acc, test_acc, theta_hat])
 
         # write test predictions to file
         if dev_acc > top_dev:

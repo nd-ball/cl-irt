@@ -3,7 +3,7 @@
 #$ -q gpu
 #$ -l gpu_card=1
 #$ -pe smp 1
-#$ -N bert-baseline
+#$ -N worm-bert-baseline
 
 module load conda
 module load cuda
@@ -20,4 +20,4 @@ TASK=$1
 CACHEDIR=~/data/bert/
 
 python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy baseline --use-length --ordering easiest --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --competency $COMP --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR
-python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy baseline --use-length --ordering easiest --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --competency $COMP --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR --balanced 
+#python -u -m models.glue_ddaclae --gpu 0 --data-dir $DATADIR --strategy baseline --use-length --ordering easiest --num-epochs $NUMEPOCHS --cache-dir $CACHEDIR --competency $COMP --task $TASK --num-obs $NUMOBS --diff-dir $DIFFDIR --balanced 
