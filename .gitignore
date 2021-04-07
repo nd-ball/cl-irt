@@ -111,3 +111,7 @@ target/
 
 
 *.zip
+
+worm-bert-baseline*
+logs/
+results/
