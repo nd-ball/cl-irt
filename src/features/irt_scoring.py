@@ -58,4 +58,4 @@ def test():
     print(calculate_theta(diffs, rp)) 
     print(calculate_theta(diffs, rp, 10000)) 
 
-#test() 
+test() 
