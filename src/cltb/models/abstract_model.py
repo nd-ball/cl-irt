@@ -11,4 +11,17 @@ But is that a data thing or a model thing?
 We'll see. 
 """
 
+import abc 
+from typing import Dict, Any
+
+
+class AbstractModel(abc.ABC)
+    def __init__(self, *):
+        pass    
+    
+    @abc.abstract method 
+    def forward(self, x):
+        pass 
+
+
 

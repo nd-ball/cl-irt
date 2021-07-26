@@ -10,3 +10,18 @@ where are hyperparams held? at the initialization of the trainer
 myTrainer = Trainer(args)  
 """
 
+
+import abc 
+from typing import Dict, Any
+
+
+class AbstractTrainer(abc.ABC)
+    def __init__(self, *):
+        pass    
+    
+    @abc.abstract method 
+    def train(self, x, d):
+        pass 
+
+
+
