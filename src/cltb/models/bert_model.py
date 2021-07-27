@@ -31,6 +31,7 @@ class BertModel(AbstractModel):
 
     def forward(self, epoch_training_data):
         logits = []
+        global_loss = 0
         for j, batch in enumerate(epoch_training_data):
             batch = tuple(t.to(self.device) for t in batch) 
             inputs = self.encode_batch(batch)
@@ -42,7 +43,8 @@ class BertModel(AbstractModel):
             self.optimizer.step() 
             self.scheduler.step()
             self.model.zero_grad()
-        return logits
+            global_loss += loss
+        return global_loss, logits
 
     def encode_batch(self, examples):
         if self.config.data["paired_inputs"]:
