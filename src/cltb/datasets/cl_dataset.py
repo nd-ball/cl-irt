@@ -12,10 +12,10 @@ import random
 import numpy as np
 
 
-class CLDataset(Dataset,BaseModel):
+class CLDataset(Dataset):#,BaseModel):
     """class for CL datasets"""
     ids: List[int]
-    difficulties: Optional[float] = None
+    difficulties: Optional[List[float]] = None
     examples = List[str]
     labels = List[int]
 
@@ -26,16 +26,7 @@ class CLDataset(Dataset,BaseModel):
         return len(self.examples)
 
     def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-        examples = self.examples.iloc[idx, 1:]
-        examples = np.array([examples])
-        difficulties = self.difficulties.iloc[idx, 1:]
-        difficulties = np.array([difficulties])
-        labels = self.labels.iloc[idx, 1:]
-        labels = np.array([labels])
-        sample = {'examples': examples, 'difficulties': difficulties, "labels": labels}
-        return sample
+        pass
 
     def fit_latent_crowd(self):
         pass
@@ -43,6 +34,6 @@ class CLDataset(Dataset,BaseModel):
     def get_probe_set(self, num_items):
         """return a random sample from the data set for estimating model ability"""
         idx = random.sample(range(0, len(self.examples)), num_items)
-        return self.__get__(idx)
+        return self.__getitem__(idx)
 
 

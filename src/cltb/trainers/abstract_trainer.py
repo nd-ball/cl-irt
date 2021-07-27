@@ -15,11 +15,11 @@ import abc
 from typing import Dict, Any
 
 
-class AbstractTrainer(abc.ABC)
-    def __init__(self, *):
+class AbstractTrainer(abc.ABC):
+    def __init__(self, *args):
         pass    
     
-    @abc.abstract method 
+    @abc.abstractmethod 
     def train(self, x, d):
         pass 
 

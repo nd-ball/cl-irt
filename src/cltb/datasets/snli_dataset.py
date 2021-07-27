@@ -1,7 +1,8 @@
-from cl_dataset import CLDataset 
+from datasets.cl_dataset import CLDataset 
 import pandas as pd
 import torch
 import numpy as np
+from sklearn.preprocessing import LabelEncoder
 
 
 FNAMES = {
@@ -9,6 +10,7 @@ FNAMES = {
     "dev": "snli_1.0_dev.txt",
     "test": "snli_1.0_test.txt"
 }
+
 
 class SNLIDataset(CLDataset):
     def __init__(self,config):
@@ -22,7 +24,8 @@ class SNLIDataset(CLDataset):
         self.examples = self.raw_data.sentence1
         self.examples2 = self.raw_data.sentence2
         
-        self.labels = self.raw_data.gold_label
+        le = LabelEncoder()
+        self.labels = le.fit_transform(self.raw_data.gold_label)
         
         if config["difficulties_file"]:
             self.difficulties_file = config["difficulties_file"]

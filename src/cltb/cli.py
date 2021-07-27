@@ -15,7 +15,7 @@ console = Console()
 app = typer.Typer()
 
 
-@app.command
+@app.command()
 def train(
     config_path: str
 ):
@@ -24,21 +24,27 @@ def train(
 
     # load data set
     data = DATASETS[
-        experiment_config.data["name"]
+        experiment_config["data"]["name"]
     ](experiment_config)
 
     # load and initialize model
     model = MODELS[
-        experiment_config.model["name"]
+        experiment_config["model"]["name"]
     ](experiment_config)
 
     # load and initialize trainer 
     trainer = TRAINERS[
-        experiment_config.trainer["name"]
+        experiment_config["trainer"]["name"]
     ](model, data, experiment_config)
 
     # train model 
     trainer.train() 
+
+@app.command()
+def test(
+    config_path: str
+):
+    pass
 
 if __name__ == "__main__":
     app()

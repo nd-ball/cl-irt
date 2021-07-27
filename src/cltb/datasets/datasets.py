@@ -1,5 +1,5 @@
-from snli_dataset import SNLIDataset
+from datasets.glue_dataset import GLUEDataset
 
 DATASETS = {
-    "SNLI": SNLIDataset
+    "GLUE": GLUEDataset
 }
