@@ -4,36 +4,23 @@ Datasets will be implemented as subclasses of the CLDataset class (maybe I renam
 CLDataset will subclass pytorch datasets, but require difficulty values for entries 
 """
 
-import torch 
-from pydantic import BaseModel 
-from torch.utils.data import Dataset 
-from typing import List, Optional 
-import random 
+import torch
+from pydantic import BaseModel
+from torch.utils.data import Dataset
+from typing import List, Optional
+import random
+import numpy as np
 
 
 class CLDataset(Dataset,BaseModel):
     """class for CL datasets"""
     ids: List[int]
-    difficulties: Optional[float] = None 
-    examples = List[str] 
+    difficulties: Optional[float] = None
+    examples = List[str]
     labels = List[int]
 
-    def __init__(self, ids, examples, labels, difficulties=None):
-        """
-        Args:
-            csv_file (string): Path to the csv file with annotations.
-            root_dir (string): Directory with all the images.
-            transform (callable, optional): Optional transform to be applied
-                on a sample.
-        """
-        self.ids = ids
-        self.examples = examples
-        self.labels = labels
-        if difficulties is not None:
-            self.difficulties = difficulties
-        else:
-            # we'll want to learn the difficulties
-            self.difficulties = self.fit_latent_crowd() 
+    def __init__(self, config):
+        pass 
 
     def __len__(self):
         return len(self.examples)
@@ -41,27 +28,21 @@ class CLDataset(Dataset,BaseModel):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-
         examples = self.examples.iloc[idx, 1:]
         examples = np.array([examples])
         difficulties = self.difficulties.iloc[idx, 1:]
         difficulties = np.array([difficulties])
         labels = self.labels.iloc[idx, 1:]
         labels = np.array([labels])
-        
         sample = {'examples': examples, 'difficulties': difficulties, "labels": labels}
-
         return sample
 
-
-    def fit_latent_crowd():
-        pass 
-
+    def fit_latent_crowd(self):
+        pass
     
-    def get_probe_set(num_items):
+    def get_probe_set(self, num_items):
         """return a random sample from the data set for estimating model ability"""
-        idx = random.sample(range(0, len(self.examples)), num_items) 
-
+        idx = random.sample(range(0, len(self.examples)), num_items)
         return self.__get__(idx)
 
 

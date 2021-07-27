@@ -7,6 +7,11 @@ authors = ["John Lalor <john.lalor@nd.edu>"]
 [tool.poetry.dependencies]
 python = "^3.7"
 pydantic = "^1.8.2"
+transformers = "^4.9.1"
+toml = "^0.10.2"
+typer = "^0.3.2"
+rich = "^10.6.0"
+torch = "^1.9.0"
 
 [tool.poetry.dev-dependencies]
 

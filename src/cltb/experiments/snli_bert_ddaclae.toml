@@ -1,0 +1,20 @@
+title = "DDaCLAE with BERT-base on SNLI"
+
+[model]
+name = "BERT"
+modelname = "bert-base-uncased"
+optimizer = "AdamW"
+scheduler = "constant"
+
+[data]
+name = "SNLI"
+num_labels = 3
+probe_set_size = 1000
+paired_inputs = True
+
+[trainer]
+name = "DDaCLAE"
+device = "gpu"
+num_epochs = 5
+batch_size = 32
+max_seq_len = 128

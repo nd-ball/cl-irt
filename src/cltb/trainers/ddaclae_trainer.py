@@ -1,14 +1,22 @@
 from abstract_trainer import AbstractTrainer
+from py_irt.scoring import calculate_theta
+import numpy as np
+from torch.utils.data import (DataLoader, SequentialSampler)
+
 
 class DDaCLAETrainer(AbstractTrainer):
     """Class implementing the DDaCLAE algorithm for CL training"""
-    def __init__(self, config):
-        self.model = config["model"]
-        self.data = config["data"] 
+    def __init__(self, model, data, config):
+        self.model = model
+        self.data = data
+        self.probe_set_size = config.data["probe_set_size"]
+        self.theta_data = self.data.get_probe_set(self.probe_set_size)
+        self.num_epochs = config.trainer["num_epochs"]
+        self.device = config.trainer["device"]
+        self.batch_size = config.trainer["batch_size"]
 
-
-
-    def train(self, x, d):
+        
+    def train(self):
         """
         at each timestep:
         a) estimate model theta
@@ -16,55 +24,48 @@ class DDaCLAETrainer(AbstractTrainer):
         c) run a training pass 
         """
 
-
         for e in self.num_epochs:
             # estimate theta
             theta_hat = self.estimate_theta() 
 
             # filter out needed training examples from full set
-            epoch_idx = self.filter_examples(theta_hat) 
-
-            # create a new pytorch dataset/dataloader
-            epoch_training_data = self.build_epoch_training_set(epoch_idx) 
+            epoch_training_data = self.filter_examples(theta_hat) 
 
             # run one training step 
             # calculate loss and backprop 
 
             # training 
-            self.model.train() 
-            for j, batch in enumerate(train_dataloader):
-                batch = tuple(t.to(device) for t in batch) 
-                inputs = {
-                            'input_ids': batch[0],
-                            'attention_mask': batch[1],
-                            'token_type_ids': batch[2],
-                            'labels': batch[3]
-                        }
-                outputs = self.model(**inputs) 
-                loss = outputs[0]
-                loss.backward() 
-                self.optimizer.step() 
-                self.scheduler.step()
-                self.model.zero_grad()
-
+            loss, logits = self.model.forward(epoch_training_data) 
+            print(loss)
             # eval 
-            self.model.eval()
-
+            #self.model.eval()
 
             # save model to disk if it's best performing so far 
-            self.model.save() 
+            #self.model.save() 
 
 
     def estimate_theta(self):
-        pass 
+        theta_sampler = SequentialSampler(
+            self.theta_data
+        )
+        theta_dataloader = DataLoader(
+            self.theta_data, 
+            sampler=theta_sampler, 
+            batch_size=self.batch_size
+        )
+        self.model.eval()
+        _, logits = self.model.forward(theta_dataloader)
+        preds = np.argmax(logits, axis=1) 
         
+        rps = [int(p == c) for p, c in zip(preds, self.theta_data.labels)] 
+        rps = [j if j==1 else -1 for j in rps] 
+        theta_hat = calculate_theta(self.theta_data.difficulties, rps)[0] 
+        return theta_hat
 
     def filter_examples(self, theta_hat):
-        pass 
+        idx = [i for i in range(len(self.data.difficulties)) if self.data.difficulties <= theta_hat]
+        return self.data[idx] 
 
-
-    def build_epoch_training_set(self, epoch_idx):
-        pass 
 
 
 

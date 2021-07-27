@@ -115,3 +115,7 @@ target/
 worm-bert-baseline*
 logs/
 results/
+
+
+.dir-locals.el
+reports/tkdd2020/
