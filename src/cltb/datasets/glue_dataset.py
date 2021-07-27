@@ -23,7 +23,6 @@ class GLUEDataset(CLDataset):
         self.ids = []
         self.examples = []
         self.paired_inputs = config["data"]["paired_inputs"]
-        print(self.paired_inputs)
         if self.paired_inputs:
             self.examples2 = []
         self.str_labels = []

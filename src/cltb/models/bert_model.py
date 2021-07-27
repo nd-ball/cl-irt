@@ -43,7 +43,6 @@ class BERTModel(AbstractModel):
                 inputs2[key] = val.to(self.device)
 
             outputs = self.model(**inputs2, labels=labels)
-            print(outputs)
             loss = outputs.loss
             logits.extend(outputs.logits.detach().cpu().numpy())
             loss.backward() 
@@ -51,8 +50,6 @@ class BERTModel(AbstractModel):
             self.scheduler.step()
             self.model.zero_grad()
             global_loss += loss
-        print(global_loss)
-        print(logits)
         return global_loss, logits
 
     def encode_batch(self, examples, batch_idx):

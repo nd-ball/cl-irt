@@ -37,7 +37,6 @@ class DDaCLAETrainer(AbstractTrainer):
             # training 
             self.model.model.train()
             loss, logits = self.model.forward(epoch_training_data) 
-            print(loss)
             # eval 
             #self.model.eval()
 
@@ -65,7 +64,6 @@ class DDaCLAETrainer(AbstractTrainer):
         rps = [int(p == c) for p, c in zip(preds, self.theta_data["labels"])] 
         rps = [j if j==1 else -1 for j in rps] 
         theta_hat = calculate_theta(self.theta_data["difficulties"], rps)[0]
-        print(theta_hat)
         return theta_hat
 
     def filter_examples(self, theta_hat):
