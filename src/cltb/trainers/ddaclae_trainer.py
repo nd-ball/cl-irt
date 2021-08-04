@@ -88,6 +88,7 @@ class DDaCLAETrainer(AbstractTrainer):
 
                 outputs = self.model.forward(inputs2, labels)
                 loss = outputs.loss
+                self.model.model.zero_grad()
 
                 logits.extend(outputs.logits.detach().cpu().numpy())
                 global_loss += loss

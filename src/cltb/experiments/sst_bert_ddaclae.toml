@@ -20,5 +20,5 @@ difficulties_file = "/afs/crc.nd.edu/user/j/jlalor1/data/artificial-crowd-rps/ss
 name = "DDaCLAE"
 device = "cuda"
 num_epochs = 5
-batch_size = 64
-max_seq_len = 128
+batch_size = 4
+max_seq_len = 64
