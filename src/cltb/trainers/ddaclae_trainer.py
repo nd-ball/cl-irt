@@ -3,6 +3,8 @@ from py_irt.scoring import calculate_theta
 import numpy as np
 from torch.utils.data import DataLoader, SequentialSampler, Dataset
 import pandas as pd
+import torch
+
 
 class DDaCLAETrainer(AbstractTrainer):
     """Class implementing the DDaCLAE algorithm for CL training"""
@@ -43,8 +45,8 @@ class DDaCLAETrainer(AbstractTrainer):
             global_loss = 0
             batch_size = self.config["trainer"]["batch_size"]
 
-            for j in range(len(epoch_training_data)//batch_size):
-                batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(epoch_training_data)))]
+            for j in range(len(epoch_training_data["examples"])//batch_size):
+                batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(epoch_training_data["examples"])))]
                 inputs, labels = self.encode_batch(epoch_training_data, batch_idx)
                 all_labels.extend(labels)
                 inputs2 = {}
@@ -56,24 +58,27 @@ class DDaCLAETrainer(AbstractTrainer):
 
                 logits.extend(outputs.logits.detach().cpu().numpy())
                 loss.backward() 
-                self.optimizer.step() 
-                self.scheduler.step()
-                self.model.zero_grad()
+                self.model.optimizer.step() 
+                self.model.scheduler.step()
+                self.model.model.zero_grad()
                 global_loss += loss
             acc = self.calculate_accuracy(logits, all_labels)
             print(acc, global_loss)
 
 
             # eval 
-            self.model.eval()
+            self.model.model.eval()
             logits = []
             all_labels = []
             global_loss = 0
 
             batch_size = self.config["trainer"]["batch_size"]
-            for j in range(len(self.dev_data)//batch_size):
-                batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(self.dev_data)))]
-                inputs, labels = self.encode_batch(self.dev_data, batch_idx)
+            dev_idx = list(range(len(self.dev_data.examples)))
+            epoch_dev_data = self.dev_data[dev_idx] 
+            for j in range(len(epoch_dev_data["examples"])//batch_size):
+                batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(epoch_dev_data["examples"])))]
+                #batch_dev = [self.dev_data[i] for i in batch_idx]
+                inputs, labels = self.encode_batch(epoch_dev_data, batch_idx)
                 all_labels.extend(labels)
 
                 inputs2 = {}
@@ -108,10 +113,23 @@ class DDaCLAETrainer(AbstractTrainer):
         )
         """
         self.model.model.eval()
-        _, logits = self.model.forward(self.theta_data)
-        preds = np.argmax(logits, axis=1) 
+        batch_size = self.config["trainer"]["batch_size"]
+        all_preds = []
+
+        for j in range(len(self.theta_data)//batch_size):
+            batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(self.theta_data["examples"])))]
+            inputs, labels = self.encode_batch(self.theta_data, batch_idx)
+            all_preds.extend(labels)
+            inputs2 = {}
+            for key, val in inputs.items():
+                inputs2[key] = val.to(self.device)
+
+            outputs = self.model.forward(inputs2)
+            logits = outputs.logits.detach().cpu().numpy()
+            preds = np.argmax(logits, axis=1)
+            all_preds.extend(preds) 
         
-        rps = [int(p == c) for p, c in zip(preds, self.theta_data["labels"])] 
+        rps = [int(p == c) for p, c in zip(all_preds, self.theta_data["labels"])] 
         rps = [j if j==1 else -1 for j in rps] 
         theta_hat = calculate_theta(self.theta_data["difficulties"], rps)[0]
         return theta_hat
@@ -122,6 +140,9 @@ class DDaCLAETrainer(AbstractTrainer):
 
 
     def calculate_accuracy(self, logits, labels):
+        #print(logits)
+        labels = [l.cpu().numpy() for l in labels]
+        #print(labels)
         return np.sum(np.argmax(logits, axis=1) == labels) / len(logits)
 
 
@@ -129,7 +150,7 @@ class DDaCLAETrainer(AbstractTrainer):
         if self.config["data"]["paired_inputs"]:
             batch_s_1 = [examples["examples"][i] for i in batch_idx]
             batch_s_2 = [examples["examples2"][i] for i in batch_idx]
-            encoded_inputs = self.tokenizer(
+            encoded_inputs = self.model.tokenizer(
                 batch_s_1,
                 batch_s_2,
                 return_tensors="pt",
@@ -139,7 +160,7 @@ class DDaCLAETrainer(AbstractTrainer):
             )
         else:
             batch_s_1 = [examples["examples"][i] for i in batch_idx]
-            encoded_inputs = self.tokenizer(
+            encoded_inputs = self.model.tokenizer(
                 batch_s_1,
                 return_tensors="pt",
                 max_length=self.config["trainer"]["max_seq_len"],

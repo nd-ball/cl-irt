@@ -20,7 +20,7 @@ class AbstractModel(abc.ABC):
         pass    
     
     @abc.abstractmethod 
-    def forward(self, x):
+    def forward(self, x, labels=None):
         pass 
 
 

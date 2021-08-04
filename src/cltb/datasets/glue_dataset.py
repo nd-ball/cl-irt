@@ -117,7 +117,7 @@ class GLUEDataset(CLDataset):
         elif task == 'MNLI':
             if split == "train":
                 return line[0], line[8], line[9], line[11]
-            elif split == "dev-matched":
+            elif split == "dev_matched":
                 return line[0], line[8], line[9], line[15]
             else:
                 return line[0], line[8], line[9]

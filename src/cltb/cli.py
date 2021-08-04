@@ -27,9 +27,15 @@ def train(
         experiment_config["data"]["name"]
     ](experiment_config)
 
+    # check
+    if experiment_config["data"]["taskname"] == "MNLI":
+        dev_file = "dev_matched"
+    else:
+        dev_file = "dev"
+
     dev_data = DATASETS[
         experiment_config["data"]["name"]
-    ](experiment_config, "dev")
+    ](experiment_config, dev_file)
 
     # load and initialize model
     model = MODELS[

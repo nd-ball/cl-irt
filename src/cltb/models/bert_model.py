@@ -30,7 +30,7 @@ class BERTModel(AbstractModel):
         self.scheduler = SCHEDULERS[self.config["model"]["scheduler"]](self.optimizer)
 
 
-    def forward(self, inputs2, labels):
+    def forward(self, inputs2, labels=None):
         if labels is not None:
             outputs = self.model(**inputs2, labels=labels)
         else:
