@@ -30,50 +30,11 @@ class BERTModel(AbstractModel):
         self.scheduler = SCHEDULERS[self.config["model"]["scheduler"]](self.optimizer)
 
 
-    def forward(self, epoch_training_data):
-        logits = []
-        global_loss = 0
-        batch_size = self.config["trainer"]["batch_size"]
-        for j in range(len(epoch_training_data)//batch_size):
-            batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(epoch_training_data)))]
-            inputs, labels = self.encode_batch(epoch_training_data, batch_idx)
-            print(inputs)
-            inputs2 = {}
-            for key, val in inputs.items():
-                inputs2[key] = val.to(self.device)
-
+    def forward(self, inputs2, labels):
+        if labels is not None:
             outputs = self.model(**inputs2, labels=labels)
-            loss = outputs.loss
-            logits.extend(outputs.logits.detach().cpu().numpy())
-            loss.backward() 
-            self.optimizer.step() 
-            self.scheduler.step()
-            self.model.zero_grad()
-            global_loss += loss
-        return global_loss, logits
-
-    def encode_batch(self, examples, batch_idx):
-        if self.config["data"]["paired_inputs"]:
-            batch_s_1 = [examples["examples"][i] for i in batch_idx]
-            batch_s_2 = [examples["examples2"][i] for i in batch_idx]
-            encoded_inputs = self.tokenizer(
-                batch_s_1,
-                batch_s_2,
-                return_tensors="pt",
-                max_length=self.config["trainer"]["max_seq_len"],
-                padding=True,
-                truncation=True
-            )
         else:
-            batch_s_1 = [examples["examples"][i] for i in batch_idx]
-            encoded_inputs = self.tokenizer(
-                batch_s_1,
-                return_tensors="pt",
-                max_length=self.config["trainer"]["max_seq_len"],
-                padding=True,
-                truncation=True
-            )
-        batch_labels = [examples["labels"][i] for i in batch_idx]
-        batch_labels = torch.tensor(batch_labels, device=self.device)
+            outputs = self.model(**inputs2)
+        return outputs
 
-        return encoded_inputs, batch_labels
+    

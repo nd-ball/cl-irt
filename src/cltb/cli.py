@@ -27,6 +27,10 @@ def train(
         experiment_config["data"]["name"]
     ](experiment_config)
 
+    dev_data = DATASETS[
+        experiment_config["data"]["name"]
+    ](experiment_config, "dev")
+
     # load and initialize model
     model = MODELS[
         experiment_config["model"]["name"]
@@ -35,7 +39,7 @@ def train(
     # load and initialize trainer 
     trainer = TRAINERS[
         experiment_config["trainer"]["name"]
-    ](model, data, experiment_config)
+    ](model, data, dev_data, experiment_config)
 
     # train model 
     trainer.train() 

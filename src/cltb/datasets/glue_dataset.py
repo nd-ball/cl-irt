@@ -7,7 +7,7 @@ from sklearn.preprocessing import LabelEncoder
 
 
 class GLUEDataset(CLDataset):
-    def __init__(self,config):
+    def __init__(self,config,mode="train"):
         '''
         load and return the glue data with difficulties
         '''
@@ -17,7 +17,7 @@ class GLUEDataset(CLDataset):
         assert self.taskname in GLUETASKS, 'task not found' 
 
 
-        self.split = config["data"]["data_split"]
+        self.split = mode #config["data"]["data_split"]
         self.data_path = config["data"]["data_path"]
         self.data_file = f"{self.data_path}/{self.taskname}/{self.split}.tsv"
         self.ids = []
