@@ -4,7 +4,8 @@ import numpy as np
 from torch.utils.data import DataLoader, SequentialSampler, Dataset
 import pandas as pd
 import torch
-
+import csv
+import datetime
 
 class DDaCLAETrainer(AbstractTrainer):
     """Class implementing the DDaCLAE algorithm for CL training"""
@@ -12,14 +13,19 @@ class DDaCLAETrainer(AbstractTrainer):
         self.model = model
         self.data = data
         self.dev_data = dev_data
-        self.probe_set_size = config["data"]["probe_set_size"]
-        self.theta_data = self.data.get_probe_set(self.probe_set_size)
-        self.num_epochs = config["trainer"]["num_epochs"]
-        self.device = config["trainer"]["device"]
-        self.batch_size = config["trainer"]["batch_size"]
         self.config = config
+        self.probe_set_size = self.config["data"]["probe_set_size"]
+        self.theta_data = self.data.get_probe_set(self.probe_set_size)
+        self.num_epochs = self.config["trainer"]["num_epochs"]
+        self.device = self.config["trainer"]["device"]
+        self.batch_size = self.config["trainer"]["batch_size"]
+        self.expname = self.config["trainer"]["expname"]
+        self.outwriter = csv.writer(open(f"logs/{self.expname}.log", "w"))
 
-        
+    
+    def get_time(self):
+        return str(datetime.datetime.now(datetime.timezone.utc))
+
     def train(self):
         """
         at each timestep:
@@ -27,13 +33,40 @@ class DDaCLAETrainer(AbstractTrainer):
         b) filter training data so that you only include those where b <= theta
         c) run a training pass 
         """
+        # initialize logger
+        self.outwriter.writerow(["timestamp","epoch","metric","value"])
+        self.outwriter.writerow(
+                [
+                    self.get_time(),
+                    -1,
+                    "starttime",
+                    self.get_time()
+                ]
+            )
 
         for e in range(self.num_epochs):
             # estimate theta
             theta_hat = self.estimate_theta() 
+            self.outwriter.writerow(
+                [
+                    self.get_time(),
+                    e,
+                    "theta_hat",
+                    theta_hat
+                ]
+            )
 
             # filter out needed training examples from full set
             epoch_training_data = self.filter_examples(theta_hat) 
+            self.outwriter.writerow(
+                [
+                    self.get_time(),
+                    e,
+                    "train_set_size",
+                    len(epoch_training_data["examples"])
+                ]
+            )
+
 
             # run one training step 
             # calculate loss and backprop 
@@ -63,7 +96,23 @@ class DDaCLAETrainer(AbstractTrainer):
                 self.model.model.zero_grad()
                 global_loss += loss
             acc = self.calculate_accuracy(logits, all_labels)
-            print(acc, global_loss)
+            self.outwriter.writerow(
+                [
+                    self.get_time(),
+                    e,
+                    "train_acc",
+                    acc
+                ]
+            )
+
+            self.outwriter.writerow(
+                [
+                    self.get_time(),
+                    e,
+                    "train_loss",
+                    global_loss
+                ]
+            )
 
 
             # eval 
@@ -93,11 +142,35 @@ class DDaCLAETrainer(AbstractTrainer):
                 logits.extend(outputs.logits.detach().cpu().numpy())
                 global_loss += loss
             acc = self.calculate_accuracy(logits, all_labels)
-            print(acc, global_loss)
+            self.outwriter.writerow(
+                [
+                    self.get_time(),
+                    e,
+                    "dev_acc",
+                    acc
+                ]
+            )
+
+            self.outwriter.writerow(
+                [
+                    self.get_time(),
+                    e,
+                    "dev_loss",
+                    global_loss
+                ]
+            )
 
 
             # save model to disk if it's best performing so far 
             #self.model.save() 
+        self.outwriter.writerow(
+                [
+                    self.get_time(),
+                    self.num_epochs,
+                    "endttime",
+                    self.get_time(),
+                ]
+            )
 
 
     def estimate_theta(self):

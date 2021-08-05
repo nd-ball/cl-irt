@@ -22,3 +22,4 @@ device = "cuda"
 num_epochs = 5
 batch_size = 4
 max_seq_len = 64
+expname = "DDaCLAE-SST-B-BERT"
