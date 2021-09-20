@@ -162,7 +162,7 @@ class RbFTrainer(AbstractTrainer):
             accuracies = np.argmax(logits, axis=1) == all_labels
             val_loss = [-1 * logits[i] if accuracies[i] == 0 else 0 for i in range(len(accuracies))]
 
-            optimal_tao = self.get_optimal_tau_rbf(self.kern, accuracies, val_loss, self.nu)
+            optimal_tau = self.get_optimal_tau_rbf(self.kern, accuracies, val_loss, self.nu)
 
             new_delays = self.calculate_delays(optimal_tau, accuracies, self.nu, self.kern)
             assert len(new_delays) == len(idx)
