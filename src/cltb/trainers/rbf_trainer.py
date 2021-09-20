@@ -24,13 +24,14 @@ class RbFTrainer(AbstractTrainer):
         self.expname = self.config["trainer"]["expname"]
         self.outwriter = csv.writer(open(f"logs/{self.expname}.log", "w"))
         self.nu = 0.5
+        self.kern = self.config["trainer"]["kern"]
     
     def get_time(self):
         return str(datetime.datetime.now(datetime.timezone.utc))
 
     def train(self):
         """
-        in this model difficulty is effectiveley (next epoch to train at)
+        in this model difficulty is effectively (next epoch to train at)
 
         at each timestep:
         
@@ -51,7 +52,7 @@ class RbFTrainer(AbstractTrainer):
                 ]
             )
 
-        self.data.difficulties = [0 for i in range(len(self.data.difficulties))]
+        self.data.difficulties.difficulty = [0 for i in range(len(self.data.difficulties.difficulty))]
         
         for e in range(self.num_epochs):
             # filter out needed training examples from full set
@@ -108,7 +109,7 @@ class RbFTrainer(AbstractTrainer):
                     self.get_time(),
                     e,
                     "train_loss",
-                    global_loss
+                    global_loss.cpu().detach()
                 ]
             )
 
@@ -153,20 +154,20 @@ class RbFTrainer(AbstractTrainer):
                     self.get_time(),
                     e,
                     "dev_loss",
-                    global_loss
+                    global_loss.cpu().detach()
                 ]
             )
 
-            labels = [l.cpu().numpy() for l in labels]
-            accuracies = np.argmax(logits, axis=1) == labels
+            all_labels = [l.cpu().numpy() for l in all_labels]
+            accuracies = np.argmax(logits, axis=1) == all_labels
             val_loss = [-1 * logits[i] if accuracies[i] == 0 else 0 for i in range(len(accuracies))]
 
-            optimal_tao = self.get_optimal_tau_rbf(kern, accuracies, val_loss, self.nu)
+            optimal_tao = self.get_optimal_tau_rbf(self.kern, accuracies, val_loss, self.nu)
 
-            new_delays = self.calculate_delays(optimal_tau, accuracies, self.nu)
+            new_delays = self.calculate_delays(optimal_tau, accuracies, self.nu, self.kern)
             assert len(new_delays) == len(idx)
             for i in range(len(idx)):
-                self.difficulty.difficulties[i] += new_delays[i] 
+                self.data.difficulties.difficulty[i] += new_delays[i] 
 
 
             # save model to disk if it's best performing so far 
@@ -182,15 +183,12 @@ class RbFTrainer(AbstractTrainer):
 
         
     def filter_examples(self, e):
-        idx = [i for i in range(len(self.data.difficulties)) if self.data.difficulties.difficulty[i] <= e]
-        #return self.data[idx]
+        idx = [i for i in range(len(self.data.difficulties.difficulty)) if self.data.difficulties.difficulty[i] <= e]
         return idx
 
 
     def calculate_accuracy(self, logits, labels):
-        #print(logits)
         labels = [l.cpu().numpy() for l in labels]
-        #print(labels)
         return np.sum(np.argmax(logits, axis=1) == labels) / len(logits)
 
 
@@ -254,7 +252,7 @@ class RbFTrainer(AbstractTrainer):
         
         return tau 
 
-    def calculate_delays(self, tau, accuracies, nu):
+    def calculate_delays(self, tau, accuracies, nu, kern):
         delays = []
         val_strength = np.sum(accuracies)
         if kern == "gau":

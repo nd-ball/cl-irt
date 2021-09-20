@@ -94,7 +94,7 @@ class DDaCLAETrainer(AbstractTrainer):
                 self.model.optimizer.step() 
                 self.model.scheduler.step()
                 self.model.model.zero_grad()
-                global_loss += loss
+                global_loss += loss.item()
             acc = self.calculate_accuracy(logits, all_labels)
             self.outwriter.writerow(
                 [
@@ -140,7 +140,7 @@ class DDaCLAETrainer(AbstractTrainer):
                 self.model.model.zero_grad()
 
                 logits.extend(outputs.logits.detach().cpu().numpy())
-                global_loss += loss
+                global_loss += loss.item()
             acc = self.calculate_accuracy(logits, all_labels)
             self.outwriter.writerow(
                 [

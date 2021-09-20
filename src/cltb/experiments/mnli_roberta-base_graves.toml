@@ -1,0 +1,25 @@
+title = "Graves with RoBERTa on MNLI"
+
+[model]
+name = "BERT"
+modelname = "roberta-base"
+optimizer = "AdamW"
+scheduler = "constant"
+
+[data]
+name = "GLUE"
+taskname = "MNLI"
+num_labels = 3
+probe_set_size = 4
+paired_inputs = true
+data_split = "train"
+data_path = "/afs/crc.nd.edu/user/j/jlalor1/data/glue"
+difficulties_file = "/afs/crc.nd.edu/user/j/jlalor1/data/artificial-crowd-rps/mnli.rp.diffs"
+
+[trainer]
+name = "Graves"
+device = "cuda"
+num_epochs = 5
+batch_size = 4
+max_seq_len = 64
+expname = "mnli_roberta-base_graves"

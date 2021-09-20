@@ -1,0 +1,26 @@
+title = "RbF with BERT-base on MRPC"
+
+[model]
+name = "BERT"
+modelname = "bert-base-uncased"
+optimizer = "AdamW"
+scheduler = "constant"
+
+[data]
+name = "GLUE"
+taskname = "MRPC"
+num_labels = 2
+probe_set_size = 4
+paired_inputs = false
+data_split = "train"
+data_path = "/afs/crc.nd.edu/user/j/jlalor1/data/glue"
+difficulties_file = "/afs/crc.nd.edu/user/j/jlalor1/data/artificial-crowd-rps/mrpc.rp.diffs"
+
+[trainer]
+name = "RbF"
+device = "cuda"
+num_epochs = 5
+batch_size = 4
+max_seq_len = 64
+expname = "mrpc_bert-base_rbf-gau"
+kern = "gau"

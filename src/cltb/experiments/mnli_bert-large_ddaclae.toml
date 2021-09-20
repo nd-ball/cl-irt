@@ -1,8 +1,8 @@
-title = "DDaCLAE with BERT-base on MNLI"
+title = "DDaCLAE with BERT-large on MNLI"
 
 [model]
 name = "BERT"
-modelname = "bert-base-uncased"
+modelname = "bert-large-uncased"
 optimizer = "AdamW"
 scheduler = "constant"
 
@@ -20,5 +20,6 @@ difficulties_file = "/afs/crc.nd.edu/user/j/jlalor1/data/artificial-crowd-rps/mn
 name = "DDaCLAE"
 device = "cuda"
 num_epochs = 5
-batch_size = 64
-max_seq_len = 128
+batch_size = 4
+max_seq_len = 64
+expname = "mnli_bert-large_ddaclae"

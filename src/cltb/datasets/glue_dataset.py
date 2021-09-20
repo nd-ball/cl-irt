@@ -5,7 +5,6 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 
 
-
 class GLUEDataset(CLDataset):
     def __init__(self,config,mode="train"):
         '''

@@ -1,4 +1,4 @@
-title = "DDaCLAE with BERT-base on MNLI"
+title = "RbF with BERT-base on QQP"
 
 [model]
 name = "BERT"
@@ -8,18 +8,19 @@ scheduler = "constant"
 
 [data]
 name = "GLUE"
-taskname = "SST-2"
-num_labels = 3
+taskname = "QQP"
+num_labels = 2
 probe_set_size = 4
 paired_inputs = false
 data_split = "train"
 data_path = "/afs/crc.nd.edu/user/j/jlalor1/data/glue"
-difficulties_file = "/afs/crc.nd.edu/user/j/jlalor1/data/artificial-crowd-rps/sst-2.rp.diffs"
+difficulties_file = "/afs/crc.nd.edu/user/j/jlalor1/data/artificial-crowd-rps/qqp.rp.diffs"
 
 [trainer]
-name = "DDaCLAE"
+name = "RbF"
 device = "cuda"
 num_epochs = 5
 batch_size = 4
 max_seq_len = 64
-expname = "DDaCLAE-SST-B-BERT"
+expname = "qqp_bert-base_rbf-gau"
+kern = "gau"
