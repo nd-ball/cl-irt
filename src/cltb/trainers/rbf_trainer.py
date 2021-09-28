@@ -57,6 +57,10 @@ class RbFTrainer(AbstractTrainer):
         for e in range(self.num_epochs):
             # filter out needed training examples from full set
             idx = self.filter_examples(e)
+            print(len(idx))
+            if len(idx) < 300:
+                print("too few for training")
+                continue
             epoch_training_data = self.data[idx]
             self.outwriter.writerow(
                 [
@@ -77,8 +81,10 @@ class RbFTrainer(AbstractTrainer):
             global_loss = 0
             batch_size = self.config["trainer"]["batch_size"]
 
-            for j in range(len(epoch_training_data["examples"])//batch_size):
+            for j in range(len(epoch_training_data["examples"])//batch_size + 1):
                 batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(epoch_training_data["examples"])))]
+                if len(batch_idx) == 0:
+                    continue
                 inputs, labels = self.encode_batch(epoch_training_data, batch_idx)
                 all_labels.extend(labels)
                 inputs2 = {}
@@ -94,7 +100,10 @@ class RbFTrainer(AbstractTrainer):
                 self.model.scheduler.step()
                 self.model.model.zero_grad()
                 global_loss += loss
+
             acc = self.calculate_accuracy(logits, all_labels)
+            all_labels = [l.cpu().numpy() for l in all_labels]
+            train_accuracies = np.argmax(logits, axis=1) == all_labels
             self.outwriter.writerow(
                 [
                     self.get_time(),
@@ -132,10 +141,10 @@ class RbFTrainer(AbstractTrainer):
                 for key, val in inputs.items():
                     inputs2[key] = val.to(self.device)
 
-
-                outputs = self.model.forward(inputs2, labels)
-                loss = outputs.loss
-                self.model.model.zero_grad()
+                with torch.no_grad():
+                  outputs = self.model.forward(inputs2, labels)
+                  loss = outputs.loss
+                  self.model.model.zero_grad()
 
                 logits.extend(outputs.logits.detach().cpu().numpy())
                 global_loss += loss
@@ -159,15 +168,18 @@ class RbFTrainer(AbstractTrainer):
             )
 
             all_labels = [l.cpu().numpy() for l in all_labels]
-            accuracies = np.argmax(logits, axis=1) == all_labels
-            val_loss = [-1 * logits[i] if accuracies[i] == 0 else 0 for i in range(len(accuracies))]
+            val_accuracies = (np.argmax(logits, axis=1) == all_labels) * 1
+            val_loss = [-1 * logits[i][all_labels[i]] for i in range(len(val_accuracies))]
 
-            optimal_tau = self.get_optimal_tau_rbf(self.kern, accuracies, val_loss, self.nu)
+            optimal_tau = self.get_optimal_tau_rbf(self.kern, val_accuracies, val_loss, self.nu)
 
-            new_delays = self.calculate_delays(optimal_tau, accuracies, self.nu, self.kern)
+            new_delays = self.calculate_delays(optimal_tau, train_accuracies, self.nu, self.kern)
             assert len(new_delays) == len(idx)
             for i in range(len(idx)):
-                self.data.difficulties.difficulty[i] += new_delays[i] 
+                self.data.difficulties.difficulty[idx[i]] += new_delays[i]
+                # we want a full pass through the data at the last epoch
+                if self.data.difficulties.difficulty[idx[i]] >= self.num_epochs:
+                    self.data.difficulties.difficulty[idx[i]] = self.num_epochs - 1
 
 
             # save model to disk if it's best performing so far 
@@ -196,6 +208,7 @@ class RbFTrainer(AbstractTrainer):
         if self.config["data"]["paired_inputs"]:
             batch_s_1 = [examples["examples"][i] for i in batch_idx]
             batch_s_2 = [examples["examples2"][i] for i in batch_idx]
+            print("b2",len(batch_s_1), len(batch_s_2))
             encoded_inputs = self.model.tokenizer(
                 batch_s_1,
                 batch_s_2,
@@ -206,6 +219,7 @@ class RbFTrainer(AbstractTrainer):
             )
         else:
             batch_s_1 = [examples["examples"][i] for i in batch_idx]
+            print("b", len(batch_s_1))
             encoded_inputs = self.model.tokenizer(
                 batch_s_1,
                 return_tensors="pt",
@@ -220,8 +234,9 @@ class RbFTrainer(AbstractTrainer):
 
     def get_optimal_tau_rbf(self, kern, val_accs, val_loss, nu):
         x = 1.0 / np.sum(val_accs)
+        
         if kern == 'gau':
-            a_ln = -1. * np.sum([np.log(a) for a in val_accs if a >= nu])
+            a_ln = -1. * np.sum([np.log(a- 0.1) for a in val_accs if a >= nu])
             x_sum_pow = np.sum([pow(l * x, 2) for l, a in zip(val_loss, val_accs) if a >= nu])
             tau = a_ln / x_sum_pow
         
@@ -281,6 +296,7 @@ class RbFTrainer(AbstractTrainer):
             if accuracies[i] < nu:
                 delays.append(1)
             else:
-                delays.append(fn(accuracies[i]))
+                delays.append(min(fn(accuracies[i]), self.num_epochs-1))
+        return delays
                         
         
