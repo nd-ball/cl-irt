@@ -10,5 +10,45 @@ module load conda
 module load cuda
 module load cudnn
 
-poetry run python cli.py train experiments/rbf.$SGE_TASK_ID
+# put configs here
+
+FILES=(
+    skip
+    hs/ahs-r1-dev.jsonl.preds.jsonlines
+    hs/ahs-r3-dev.jsonl.preds.jsonlines
+    hs/ahs-r5-dev.jsonl.preds.jsonlines
+    hs/ahs-r7-dev.jsonl.preds.jsonlines
+    hs/hatemoji-check.jsonl.preds.jsonlines
+    hs/ahs-r2-dev.jsonl.preds.jsonlines
+    hs/ahs-r4-dev.jsonl.preds.jsonlines
+    hs/ahs-r6-dev.jsonl.preds.jsonlines
+    hs/hatecheck.jsonl.preds.jsonlines
+
+    # NLI data sets
+    nli/anli-r1-dev.jsonl.preds.jsonlines
+    nli/hans.jsonl.preds.jsonlines
+    nli/nli-stress-test.jsonl.preds.jsonlines
+    nli/zm-mnli-dev-mismatched.jsonl.preds.jsonlines
+    nli/anli-r2-dev.jsonl.preds.jsonlines
+    nli/mnli-dev-matched.jsonl.preds.jsonlines
+    nli/snli-dev.jsonl.preds.jsonlines
+    nli/anli-r3-dev.jsonl.preds.jsonlines
+    nli/mnli-dev-mismatched.jsonl.preds.jsonlines
+    nli/superglue-winogender.jsonl.preds.jsonlines
+
+    # Sentiment data sets
+    sentiment/amazon-review-dev.jsonl.preds.jsonlines
+    sentiment/dynasent-r2-dev.jsonl.preds.jsonlines
+    sentiment/yelp-review-test.jsonl.preds.jsonlines
+    sentiment/amazon-review-test.jsonl.preds.jsonlines
+    sentiment/sst3-dev.jsonl.preds.jsonlines
+    sentiment/dynasent-r1-dev.jsonl.preds.jsonlines
+    sentiment/yelp-review-dev.jsonl.preds.jsonlines
+)
+
+
+CONFIG=${FILES[$SGE_TASK_ID]}
+
+
+poetry run python cli.py train experiments/$CONFIG
 
