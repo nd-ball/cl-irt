@@ -1,0 +1,26 @@
+title = "RbF with roBERTa-base on RTE"
+
+[model]
+name = "BERT"
+modelname = "roberta-base"
+optimizer = "AdamW"
+scheduler = "constant"
+
+[data]
+name = "GLUE"
+taskname = "RTE"
+num_labels = 2
+probe_set_size = 4
+paired_inputs = false
+data_split = "train"
+data_path = "/afs/crc.nd.edu/user/j/jlalor1/data/glue"
+difficulties_file = "/afs/crc.nd.edu/user/j/jlalor1/data/artificial-crowd-rps/rte.rp.diffs"
+
+[trainer]
+name = "RbF"
+device = "cuda"
+num_epochs = 5
+batch_size = 4
+max_seq_len = 64
+expname = "rte_roberta-base_rbf-gau"
+kern = "gau"

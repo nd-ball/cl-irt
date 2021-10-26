@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#$ -q gpu
+#$ -l gpu_card=1
+#$ -pe smp 1
+#$ -N RbF
+#$ -t 1-18
+
+module load conda
+module load cuda
+module load cudnn
+
+poetry run python cli.py train experiments/rbf.$SGE_TASK_ID
+
