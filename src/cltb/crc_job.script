@@ -14,36 +14,61 @@ module load cudnn
 
 FILES=(
     skip
-    hs/ahs-r1-dev.jsonl.preds.jsonlines
-    hs/ahs-r3-dev.jsonl.preds.jsonlines
-    hs/ahs-r5-dev.jsonl.preds.jsonlines
-    hs/ahs-r7-dev.jsonl.preds.jsonlines
-    hs/hatemoji-check.jsonl.preds.jsonlines
-    hs/ahs-r2-dev.jsonl.preds.jsonlines
-    hs/ahs-r4-dev.jsonl.preds.jsonlines
-    hs/ahs-r6-dev.jsonl.preds.jsonlines
-    hs/hatecheck.jsonl.preds.jsonlines
-
-    # NLI data sets
-    nli/anli-r1-dev.jsonl.preds.jsonlines
-    nli/hans.jsonl.preds.jsonlines
-    nli/nli-stress-test.jsonl.preds.jsonlines
-    nli/zm-mnli-dev-mismatched.jsonl.preds.jsonlines
-    nli/anli-r2-dev.jsonl.preds.jsonlines
-    nli/mnli-dev-matched.jsonl.preds.jsonlines
-    nli/snli-dev.jsonl.preds.jsonlines
-    nli/anli-r3-dev.jsonl.preds.jsonlines
-    nli/mnli-dev-mismatched.jsonl.preds.jsonlines
-    nli/superglue-winogender.jsonl.preds.jsonlines
-
-    # Sentiment data sets
-    sentiment/amazon-review-dev.jsonl.preds.jsonlines
-    sentiment/dynasent-r2-dev.jsonl.preds.jsonlines
-    sentiment/yelp-review-test.jsonl.preds.jsonlines
-    sentiment/amazon-review-test.jsonl.preds.jsonlines
-    sentiment/sst3-dev.jsonl.preds.jsonlines
-    sentiment/dynasent-r1-dev.jsonl.preds.jsonlines
-    sentiment/yelp-review-dev.jsonl.preds.jsonlines
+    mnli_bert-base_ddaclae.toml     
+    mrpc_bert-large_rbf.toml        
+    qqp_bert-base_graves.toml      
+    rte_roberta-base_ddaclae.toml
+    mnli_bert-base_graves.toml      
+    mrpc_roberta-base_ddaclae.toml  
+    qqp_bert-base_rbf-gau.toml     
+    rte_roberta-base_graves.toml
+    mnli_bert-base_rbf.toml         
+    mrpc_roberta-base_graves.toml   
+    qqp_bert-large_ddaclae.toml    
+    rte_roberta-base_rbf-gau.toml
+    mnli_bert-large_ddaclae.toml    
+    mrpc_roberta-base_rbf.toml      
+    qqp_bert-large_graves.toml     
+    sst-2_bert-base_ddaclae.toml
+    mnli_bert-large_graves.toml     
+    qnli_bert-base_ddaclae.toml     
+    qqp_bert-large_rbf-gau.toml    
+    sst-2_bert-base_graves.toml
+    mnli_bert-large_rbf.toml        
+    qnli_bert-base_graves.toml      
+    qqp_roberta-base_ddaclae.toml  
+    sst-2_bert-base_rbf-gau.toml
+    mnli_roberta-base_ddaclae.toml  
+    qnli_bert-base_rbf.toml         
+    qqp_roberta-base_graves.toml   
+    sst-2_bert-large_ddaclae.toml
+    mnli_roberta-base_graves.toml   
+    qnli_bert-large_ddaclae.toml    
+    qqp_roberta-base_rbf-gau.toml  
+    sst-2_bert-large_graves.toml
+    mnli_roberta-base_rbf.toml      
+    qnli_bert-large_graves.toml     
+    rte_bert-base_ddaclae.toml     
+    sst-2_bert-large_rbf-gau.toml
+    mrpc_bert-base_ddaclae.toml     
+    qnli_bert-large_rbf-gau.toml    
+    rte_bert-base_graves.toml      
+    sst-2_roberta-base_ddaclae.toml
+    mrpc_bert-base_graves.toml      
+    qnli_roberta-base_ddaclae.toml  
+    rte_bert-base_rbf-gau.toml     
+    sst-2_roberta-base_graves.toml
+    mrpc_bert-base_rbf.toml         
+    qnli_roberta-base_graves.toml   
+    rte_bert-large_ddaclae.toml    
+    sst-2_roberta-base_rbf-gau.toml
+    mrpc_bert-large_ddaclae.toml    
+    qnli_roberta-base_rbf-gau.toml  
+    rte_bert-large_graves.toml
+    mrpc_bert-large_graves.toml     
+    qqp_bert-base_ddaclae.toml      
+    rte_bert-large_rbf-gau.toml
+    
 )
 
 
