@@ -1,6 +1,7 @@
 """spaced repitition trainer"""
 
 from trainers.abstract_trainer import AbstractTrainer
+from trainers.trainer_utils import calculate_accuracy, encode_batch
 from py_irt.scoring import calculate_theta
 import numpy as np
 from torch.utils.data import DataLoader, SequentialSampler, Dataset
@@ -85,7 +86,7 @@ class RbFTrainer(AbstractTrainer):
                 batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(epoch_training_data["examples"])))]
                 if len(batch_idx) == 0:
                     continue
-                inputs, labels = self.encode_batch(epoch_training_data, batch_idx)
+                inputs, labels = encode_batch(epoch_training_data, batch_idx)
                 all_labels.extend(labels)
                 inputs2 = {}
                 for key, val in inputs.items():
@@ -101,7 +102,7 @@ class RbFTrainer(AbstractTrainer):
                 self.model.model.zero_grad()
                 global_loss += loss
 
-            acc = self.calculate_accuracy(logits, all_labels)
+            acc = calculate_accuracy(logits, all_labels)
             all_labels = [l.cpu().numpy() for l in all_labels]
             train_accuracies = np.argmax(logits, axis=1) == all_labels
             self.outwriter.writerow(
@@ -118,7 +119,7 @@ class RbFTrainer(AbstractTrainer):
                     self.get_time(),
                     e,
                     "train_loss",
-                    global_loss.cpu().detach()
+                    global_loss.cpu().detach().numpy()
                 ]
             )
 
@@ -134,7 +135,7 @@ class RbFTrainer(AbstractTrainer):
             for j in range(len(epoch_dev_data["examples"])//batch_size):
                 batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(epoch_dev_data["examples"])))]
                 #batch_dev = [self.dev_data[i] for i in batch_idx]
-                inputs, labels = self.encode_batch(epoch_dev_data, batch_idx)
+                inputs, labels = encode_batch(epoch_dev_data, batch_idx)
                 all_labels.extend(labels)
 
                 inputs2 = {}
@@ -148,7 +149,7 @@ class RbFTrainer(AbstractTrainer):
 
                 logits.extend(outputs.logits.detach().cpu().numpy())
                 global_loss += loss
-            acc = self.calculate_accuracy(logits, all_labels)
+            acc = calculate_accuracy(logits, all_labels)
             self.outwriter.writerow(
                 [
                     self.get_time(),
@@ -163,7 +164,7 @@ class RbFTrainer(AbstractTrainer):
                     self.get_time(),
                     e,
                     "dev_loss",
-                    global_loss.cpu().detach()
+                    global_loss.cpu().detach().numpy()
                 ]
             )
 
@@ -198,39 +199,6 @@ class RbFTrainer(AbstractTrainer):
         idx = [i for i in range(len(self.data.difficulties.difficulty)) if self.data.difficulties.difficulty[i] <= e]
         return idx
 
-
-    def calculate_accuracy(self, logits, labels):
-        labels = [l.cpu().numpy() for l in labels]
-        return np.sum(np.argmax(logits, axis=1) == labels) / len(logits)
-
-
-    def encode_batch(self, examples, batch_idx):
-        if self.config["data"]["paired_inputs"]:
-            batch_s_1 = [examples["examples"][i] for i in batch_idx]
-            batch_s_2 = [examples["examples2"][i] for i in batch_idx]
-            print("b2",len(batch_s_1), len(batch_s_2))
-            encoded_inputs = self.model.tokenizer(
-                batch_s_1,
-                batch_s_2,
-                return_tensors="pt",
-                max_length=self.config["trainer"]["max_seq_len"],
-                padding=True,
-                truncation=True
-            )
-        else:
-            batch_s_1 = [examples["examples"][i] for i in batch_idx]
-            print("b", len(batch_s_1))
-            encoded_inputs = self.model.tokenizer(
-                batch_s_1,
-                return_tensors="pt",
-                max_length=self.config["trainer"]["max_seq_len"],
-                padding=True,
-                truncation=True
-            )
-        batch_labels = [examples["labels"][i] for i in batch_idx]
-        batch_labels = torch.tensor(batch_labels, device=self.device)
-
-        return encoded_inputs, batch_labels
 
     def get_optimal_tau_rbf(self, kern, val_accs, val_loss, nu):
         x = 1.0 / np.sum(val_accs)

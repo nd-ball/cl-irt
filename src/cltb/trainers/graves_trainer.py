@@ -1,8 +1,3 @@
-"""
-Baseline trainer that either a) lets the model handle adaptation or b) trains the baseline model (no curriculum) 
-
-"""
-
 from trainers.abstract_trainer import AbstractTrainer
 from trainers.trainer_utils import calculate_accuracy, encode_batch
 from py_irt.scoring import calculate_theta
@@ -13,8 +8,8 @@ import torch
 import csv
 import datetime
 
-class BaselineTrainer(AbstractTrainer):
-    """Class implementing the baseline algorithm for CL training (e.g., just regular training)"""
+class GravesTrainer(AbstractTrainer):
+    """Class implementing the Graves bandit algorithm for CL training"""
     def __init__(self, model, data, dev_data, config):
         self.model = model
         self.data = data
@@ -35,6 +30,8 @@ class BaselineTrainer(AbstractTrainer):
     def train(self):
         """
         at each timestep:
+        a) estimate model theta
+        b) filter training data so that you only include those where b <= theta
         c) run a training pass 
         """
         # initialize logger
@@ -49,7 +46,19 @@ class BaselineTrainer(AbstractTrainer):
             )
 
         for e in range(self.num_epochs):
-            epoch_training_data = self.data
+            # estimate theta
+            theta_hat = self.estimate_theta() 
+            self.outwriter.writerow(
+                [
+                    self.get_time(),
+                    e,
+                    "theta_hat",
+                    theta_hat
+                ]
+            )
+
+            # filter out needed training examples from full set
+            epoch_training_data = self.filter_examples(theta_hat) 
             self.outwriter.writerow(
                 [
                     self.get_time(),
@@ -163,6 +172,46 @@ class BaselineTrainer(AbstractTrainer):
                     self.get_time(),
                 ]
             )
+
+
+    def estimate_theta(self):
+        
+        #theta_data = pd.DataFrame.from_dict(self.theta_data)
+        """
+        theta_sampler = SequentialSampler(
+            theta_data
+        )
+        theta_dataloader = DataLoader(
+            theta_data, 
+            sampler=theta_sampler, 
+            batch_size=self.batch_size
+        )
+        """
+        self.model.model.eval()
+        batch_size = self.config["trainer"]["batch_size"]
+        all_preds = []
+
+        for j in range(len(self.theta_data)//batch_size):
+            batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(self.theta_data["examples"])))]
+            inputs, labels = self.encode_batch(self.theta_data, batch_idx)
+            all_preds.extend(labels)
+            inputs2 = {}
+            for key, val in inputs.items():
+                inputs2[key] = val.to(self.device)
+
+            outputs = self.model.forward(inputs2)
+            logits = outputs.logits.detach().cpu().numpy()
+            preds = np.argmax(logits, axis=1)
+            all_preds.extend(preds) 
+        
+        rps = [int(p == c) for p, c in zip(all_preds, self.theta_data["labels"])] 
+        rps = [j if j==1 else -1 for j in rps] 
+        theta_hat = calculate_theta(self.theta_data["difficulties"], rps)[0]
+        return theta_hat
+
+    def filter_examples(self, theta_hat):
+        idx = [i for i in range(len(self.data.difficulties)) if self.data.difficulties.difficulty[i] <= theta_hat]
+        return self.data[idx] 
 
 
     
