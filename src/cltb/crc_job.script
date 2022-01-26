@@ -3,8 +3,8 @@
 #$ -q gpu
 #$ -l gpu_card=1
 #$ -pe smp 1
-#$ -N RbF
-#$ -t 1-18
+#$ -N curriculum-learning-exp
+#$ -t 1-54
 
 module load conda
 module load cuda
@@ -68,7 +68,6 @@ FILES=(
     mrpc_bert-large_graves.toml     
     qqp_bert-base_ddaclae.toml      
     rte_bert-large_rbf-gau.toml
-    
 )
 
 
