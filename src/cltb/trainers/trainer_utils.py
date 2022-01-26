@@ -1,14 +1,14 @@
 import numpy as np
 import torch
 
-def calculate_accuracy(self, logits, labels):
+def calculate_accuracy(logits, labels):
         #print(logits)
         labels = [l.cpu().numpy() for l in labels]
         #print(labels)
         return np.sum(np.argmax(logits, axis=1) == labels) / len(logits)
 
 
-def encode_batch(self, examples, batch_idx):
+def encode_batch(examples, batch_idx):
     if self.config["data"]["paired_inputs"]:
         batch_s_1 = [examples["examples"][i] for i in batch_idx]
         batch_s_2 = [examples["examples2"][i] for i in batch_idx]
