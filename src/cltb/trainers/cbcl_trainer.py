@@ -79,7 +79,7 @@ class CBCLTrainer(AbstractTrainer):
 
             for j in range(len(epoch_training_data["examples"])//batch_size):
                 batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(epoch_training_data["examples"])))]
-                inputs, labels = encode_batch(epoch_training_data, batch_idx)
+                inputs, labels = encode_batch(epoch_training_data, batch_idx, self.config, self.model)
                 all_labels.extend(labels)
                 inputs2 = {}
                 for key, val in inputs.items():
@@ -126,7 +126,7 @@ class CBCLTrainer(AbstractTrainer):
             for j in range(len(epoch_dev_data["examples"])//batch_size):
                 batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(epoch_dev_data["examples"])))]
                 #batch_dev = [self.dev_data[i] for i in batch_idx]
-                inputs, labels = encode_batch(epoch_dev_data, batch_idx)
+                inputs, labels = encode_batch(epoch_dev_data, batch_idx, self.config, self.model)
                 all_labels.extend(labels)
 
                 inputs2 = {}
@@ -195,30 +195,5 @@ class CBCLTrainer(AbstractTrainer):
         return np.sum(np.argmax(logits, axis=1) == labels) / len(logits)
 
 
-    def encode_batch(self, examples, batch_idx):
-        if self.config["data"]["paired_inputs"]:
-            batch_s_1 = [examples["examples"][i] for i in batch_idx]
-            batch_s_2 = [examples["examples2"][i] for i in batch_idx]
-            encoded_inputs = self.model.tokenizer(
-                batch_s_1,
-                batch_s_2,
-                return_tensors="pt",
-                max_length=self.config["trainer"]["max_seq_len"],
-                padding=True,
-                truncation=True
-            )
-        else:
-            batch_s_1 = [examples["examples"][i] for i in batch_idx]
-            encoded_inputs = self.model.tokenizer(
-                batch_s_1,
-                return_tensors="pt",
-                max_length=self.config["trainer"]["max_seq_len"],
-                padding=True,
-                truncation=True
-            )
-        batch_labels = [examples["labels"][i] for i in batch_idx]
-        batch_labels = torch.tensor(batch_labels, device=self.device)
-
-        return encoded_inputs, batch_labels
 
 

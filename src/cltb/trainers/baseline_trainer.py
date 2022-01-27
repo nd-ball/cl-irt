@@ -72,7 +72,7 @@ class BaselineTrainer(AbstractTrainer):
 
             for j in range(len(epoch_training_data["examples"])//batch_size):
                 batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(epoch_training_data["examples"])))]
-                inputs, labels = encode_batch(epoch_training_data, batch_idx)
+                inputs, labels = encode_batch(epoch_training_data, batch_idx, self.config, self.model)
                 all_labels.extend(labels)
                 inputs2 = {}
                 for key, val in inputs.items():
@@ -119,7 +119,7 @@ class BaselineTrainer(AbstractTrainer):
             for j in range(len(epoch_dev_data["examples"])//batch_size):
                 batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(epoch_dev_data["examples"])))]
                 #batch_dev = [self.dev_data[i] for i in batch_idx]
-                inputs, labels = encode_batch(epoch_dev_data, batch_idx)
+                inputs, labels = encode_batch(epoch_dev_data, batch_idx, self.config, self.model)
                 all_labels.extend(labels)
 
                 inputs2 = {}
