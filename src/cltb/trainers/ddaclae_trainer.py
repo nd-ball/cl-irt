@@ -26,10 +26,15 @@ class DDaCLAETrainer(AbstractTrainer):
 
         # does the data difficulty exist?
         # try to read the difficulty file from config
+        # CHANGE THIS:
+        # DIFFICULTY SHOULD BE LOADED WHEN DATA IS LOADED
+        # AND SET WHEN NEEDED DURING TRAINING
         self.difficulties_file = self.config["data"]["difficulties_file"]
         try:
             difficulties = pd.read_csv(self.difficulties_file, sep=',',
                                 header=None, names=['id', 'difficulty'])
+            difficulties = self.difficulties.set_index('pairID')
+            difficulties = self.difficulties.to_dict('index')
         except:
             difficulties = self.learn_difficulties(model, data, e, outwriter)
         return difficulties
