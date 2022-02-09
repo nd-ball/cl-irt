@@ -1,32 +1,24 @@
 from trainers.abstract_trainer import AbstractTrainer
-from trainers.trainer_utils import calculate_accuracy, encode_batch
+from trainers.trainer_utils import encode_batch
 from py_irt.scoring import calculate_theta
 import numpy as np
-from torch.utils.data import DataLoader, SequentialSampler, Dataset
 import pandas as pd
-import torch
 import csv
 import datetime
 
-class GravesTrainer(AbstractTrainer):
-    """Class implementing the Graves bandit algorithm for CL training"""
-    def __init__(self, model, data, dev_data, config):
-        self.model = model
-        self.data = data
-        self.dev_data = dev_data
+class HacohenTrainer(AbstractTrainer):
+    """Class implementing the Hacohen algorithm for CL training"""
+    def __init__(self, config):
         self.config = config
-        self.probe_set_size = self.config["data"]["probe_set_size"]
-        self.theta_data = self.data.get_probe_set(self.probe_set_size)
         self.num_epochs = self.config["trainer"]["num_epochs"]
         self.device = self.config["trainer"]["device"]
         self.batch_size = self.config["trainer"]["batch_size"]
         self.expname = self.config["trainer"]["expname"]
-        self.outwriter = csv.writer(open(f"logs/{self.expname}.log", "w"))
 
     
     def get_time(self):
         return str(datetime.datetime.now(datetime.timezone.utc))
-
+    
     def get_difficulties(self, model, data, dev_data, e, outwriter):
         # I want this to look like the following:
         # first, try to look up the difficulties
@@ -44,7 +36,4 @@ class GravesTrainer(AbstractTrainer):
     def learn_difficulties(self, model, data, e, outwriter):
         raise NotImplementedError("TBD, stay tuned. For now learn difficulties offline via artificial crowd.")
 
-
     
-
-
