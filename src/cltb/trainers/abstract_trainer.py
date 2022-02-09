@@ -19,9 +19,5 @@ class AbstractTrainer(abc.ABC):
     def __init__(self, *args):
         pass    
     
-    @abc.abstractmethod 
-    def train(self, x, d):
-        pass 
-
 
 
