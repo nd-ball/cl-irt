@@ -23,9 +23,9 @@ class VGGModel(AbstractModel):
         input_batch = input_tensor.unsqueeze(0) # create a mini-batch as expected by the model
 
         if labels is not None:
-            outputs = self.model(**inputs, labels=labels)
+            outputs = self.model(**input_batch, labels=labels)
         else:
-            outputs = self.model(**inputs)
+            outputs = self.model(**input_batch)
         return outputs
 
 # or any of these variants

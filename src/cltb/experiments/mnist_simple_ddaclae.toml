@@ -1,0 +1,23 @@
+title = "DDaCLAE with roBERTa-base on RTE"
+
+[model]
+name = "SimpleNN"
+optimizer = "AdamW"
+scheduler = "constant"
+
+[data]
+name = "MNIST"
+num_labels = 10
+probe_set_size = 100
+paired_inputs = false
+data_split = "train"
+data_path = "/afs/crc.nd.edu/user/j/jlalor1/data/mnist"
+difficulties_file = "/afs/crc.nd.edu/user/j/jlalor1/data/artificial-crowd-rps/mnist_diffs_train.csv"
+
+[trainer]
+name = "DDaCLAE"
+device = "cuda"
+num_epochs = 50
+batch_size = 4
+max_seq_len = 64
+expname = "mnist_simplenn_ddaclae"
