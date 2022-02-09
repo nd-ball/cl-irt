@@ -12,7 +12,7 @@ probe_set_size = 100
 paired_inputs = false
 data_split = "train"
 data_path = "/afs/crc.nd.edu/user/j/jlalor1/data/mnist"
-difficulties_file = "/afs/crc.nd.edu/user/j/jlalor1/data/artificial-crowd-rps/mnist_diffs_train.csv"
+difficulties_file = "/afs/crc.nd.edu/user/j/jlalor1/data/artificial-crowd-rps/"
 
 [trainer]
 name = "DDaCLAE"
