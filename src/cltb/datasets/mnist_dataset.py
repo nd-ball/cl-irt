@@ -8,6 +8,8 @@ import os
 from torchvision import transforms
 import csv
 from PIL import Image
+import codecs
+import errno
 
 FNAMES = {
     "train": "snli_1.0_train.txt",
@@ -77,6 +79,55 @@ class MNISTDataset(CLDataset):
             self.difficulties = {}
             for i in range(len(self.data)):
                 self.difficulties[i] = 0
+
+    def _check_exists(self):
+        return os.path.exists(os.path.join(self.root, self.processed_folder, self.training_file)) and \
+            os.path.exists(os.path.join(self.root, self.processed_folder, self.test_file))
+
+    def download(self):
+        """Download the MNIST data if it doesn't exist in processed_folder already."""
+        import gzip
+
+        if self._check_exists():
+            return
+
+        # download files
+        try:
+            os.makedirs(os.path.join(self.root, self.raw_folder))
+            os.makedirs(os.path.join(self.root, self.processed_folder))
+        except OSError as e:
+            if e.errno == errno.EEXIST:
+                pass
+            else:
+                raise
+
+        for url in self.urls:
+            filename = url.rpartition('/')[2]
+            file_path = os.path.join(self.root, self.raw_folder, filename)
+            download_url(url, root=os.path.join(self.root, self.raw_folder),
+                         filename=filename, md5=None)
+            with open(file_path.replace('.gz', ''), 'wb') as out_f, \
+                    gzip.GzipFile(file_path) as zip_f:
+                out_f.write(zip_f.read())
+            os.unlink(file_path)
+
+        # process and save as torch files
+        print('Processing...')
+
+        training_set = (
+            read_image_file(os.path.join(self.root, self.raw_folder, 'train-images-idx3-ubyte')),
+            read_label_file(os.path.join(self.root, self.raw_folder, 'train-labels-idx1-ubyte'))
+        )
+        test_set = (
+            read_image_file(os.path.join(self.root, self.raw_folder, 't10k-images-idx3-ubyte')),
+            read_label_file(os.path.join(self.root, self.raw_folder, 't10k-labels-idx1-ubyte'))
+        )
+        with open(os.path.join(self.root, self.processed_folder, self.training_file), 'wb') as f:
+            torch.save(training_set, f)
+        with open(os.path.join(self.root, self.processed_folder, self.test_file), 'wb') as f:
+            torch.save(test_set, f)
+
+        print('Done!')
         
        
 
@@ -97,30 +148,6 @@ class MNISTDataset(CLDataset):
             "labels": target
             }
         return sample
-
-        """
-        Args:
-            index (int): Index
-        Returns:
-            tuple: (image, target) where target is index of the target class.
-        """
-        img, target, label, diff = self.data[index], self.targets[index], self.idx[index], self.difficulties[index]
-        pcorrect = self.pcorrect[index] 
-
-        # doing this so that it is consistent with all other datasets
-        # to return a PIL Image
-        img = Image.fromarray(img.numpy(), mode='L')
-
-        if self.transform is not None:
-            img = self.transform(img)
-
-        if self.target_transform is not None:
-            target = self.target_transform(target)
-
-
-
-        return img, target, label, diff, pcorrect
-
 
 
 def get_int(b):
@@ -146,3 +173,4 @@ def read_image_file(path):
         images = []
         parsed = np.frombuffer(data, dtype=np.uint8, offset=16)
         return torch.from_numpy(parsed).view(length, num_rows, num_cols)
+
