@@ -1,10 +1,10 @@
 #!/bin/bash
 
-#$ -q gpu
+#$ -q gpu@@lalor
 #$ -l gpu_card=1
 #$ -pe smp 1
 #$ -N curriculum-learning-exp
-#$ -t 1-54
+#$ -t 1-37
 
 module load conda
 module load cuda
@@ -15,64 +15,47 @@ module load cudnn
 FILES=(
     skip
     mnli_bert-base_ddaclae.toml     
-    mrpc_bert-large_rbf.toml        
-    qqp_bert-base_graves.toml      
-    rte_roberta-base_ddaclae.toml
     mnli_bert-base_graves.toml      
-    mrpc_roberta-base_ddaclae.toml  
-    qqp_bert-base_rbf-gau.toml     
-    rte_roberta-base_graves.toml
     mnli_bert-base_rbf.toml         
-    mrpc_roberta-base_graves.toml   
-    qqp_bert-large_ddaclae.toml    
-    rte_roberta-base_rbf-gau.toml
-    mnli_bert-large_ddaclae.toml    
-    mrpc_roberta-base_rbf.toml      
-    qqp_bert-large_graves.toml     
-    sst-2_bert-base_ddaclae.toml
-    mnli_bert-large_graves.toml     
-    qnli_bert-base_ddaclae.toml     
-    qqp_bert-large_rbf-gau.toml    
-    sst-2_bert-base_graves.toml
-    mnli_bert-large_rbf.toml        
-    qnli_bert-base_graves.toml      
-    qqp_roberta-base_ddaclae.toml  
-    sst-2_bert-base_rbf-gau.toml
     mnli_roberta-base_ddaclae.toml  
-    qnli_bert-base_rbf.toml         
-    qqp_roberta-base_graves.toml   
-    sst-2_bert-large_ddaclae.toml
     mnli_roberta-base_graves.toml   
-    qnli_bert-large_ddaclae.toml    
-    qqp_roberta-base_rbf-gau.toml  
-    sst-2_bert-large_graves.toml
     mnli_roberta-base_rbf.toml      
-    qnli_bert-large_graves.toml     
-    rte_bert-base_ddaclae.toml     
-    sst-2_bert-large_rbf-gau.toml
-    mrpc_bert-base_ddaclae.toml     
-    qnli_bert-large_rbf-gau.toml    
-    rte_bert-base_graves.toml      
-    sst-2_roberta-base_ddaclae.toml
-    mrpc_bert-base_graves.toml      
-    qnli_roberta-base_ddaclae.toml  
-    rte_bert-base_rbf-gau.toml     
-    sst-2_roberta-base_graves.toml
-    mrpc_bert-base_rbf.toml         
-    qnli_roberta-base_graves.toml   
-    rte_bert-large_ddaclae.toml    
-    sst-2_roberta-base_rbf-gau.toml
-    mrpc_bert-large_ddaclae.toml    
-    qnli_roberta-base_rbf-gau.toml  
-    rte_bert-large_graves.toml
-    mrpc_bert-large_graves.toml     
+    qqp_bert-base_graves.toml      
+    qqp_bert-base_rbf-gau.toml     
     qqp_bert-base_ddaclae.toml      
-    rte_bert-large_rbf-gau.toml
+    qqp_roberta-base_ddaclae.toml  
+    qqp_roberta-base_graves.toml   
+    qqp_roberta-base_rbf-gau.toml  
+    rte_bert-base_ddaclae.toml     
+    rte_bert-base_graves.toml      
+    rte_bert-base_rbf-gau.toml     
+    rte_roberta-base_ddaclae.toml
+    rte_roberta-base_graves.toml
+    rte_roberta-base_rbf-gau.toml
+    mrpc_bert-base_ddaclae.toml     
+    mrpc_bert-base_graves.toml      
+    mrpc_bert-base_rbf.toml         
+    mrpc_roberta-base_ddaclae.toml  
+    mrpc_roberta-base_graves.toml   
+    mrpc_roberta-base_rbf.toml      
+    sst-2_bert-base_ddaclae.toml
+    sst-2_bert-base_graves.toml
+    sst-2_bert-base_rbf-gau.toml
+    sst-2_roberta-base_ddaclae.toml
+    sst-2_roberta-base_graves.toml
+    sst-2_roberta-base_rbf-gau.toml
+    qnli_bert-base_ddaclae.toml     
+    qnli_bert-base_graves.toml      
+    qnli_bert-base_rbf.toml         
+    qnli_roberta-base_ddaclae.toml  
+    qnli_roberta-base_graves.toml   
+    qnli_roberta-base_rbf-gau.toml  
 )
 
 
 CONFIG=${FILES[$SGE_TASK_ID]}
 
-
+echo $CONFIG
 poetry run python cli.py train experiments/$CONFIG
+echo $CONFIG
 
