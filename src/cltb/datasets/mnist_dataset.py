@@ -34,7 +34,7 @@ class MNISTDataset(CLDataset):
     classes = ['0 - zero', '1 - one', '2 - two', '3 - three', '4 - four',
                '5 - five', '6 - six', '7 - seven', '8 - eight', '9 - nine']
     class_to_idx = {_class: i for i, _class in enumerate(classes)}
-    def __init__(self,config):
+    def __init__(self,config,mode="train"):
         self.split = config["data"]["data_split"]
         self.data_path = config["data"]["data_path"]
         #self.data_path = f"{self.data_path}/{FNAMES[self.split]}"
@@ -46,7 +46,7 @@ class MNISTDataset(CLDataset):
             transforms.Normalize((0.1307,), (0.3081,))
         ])
         self.target_transform = None
-        self.train =  self.split == "train" # training set or test set
+        self.train =  mode == "train" # training set or test set
 
         if not self._check_exists():
             self.download()
