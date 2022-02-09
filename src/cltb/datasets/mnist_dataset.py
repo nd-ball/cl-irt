@@ -33,25 +33,9 @@ class MNISTDataset(CLDataset):
                '5 - five', '6 - six', '7 - seven', '8 - eight', '9 - nine']
     class_to_idx = {_class: i for i, _class in enumerate(classes)}
     def __init__(self,config):
-        self.split = config["data_split"]
-        self.data_path = config["data_path"]
+        self.split = config["data"]["data_split"]
+        self.data_path = config["data"]["data_path"]
         #self.data_path = f"{self.data_path}/{FNAMES[self.split]}"
-
-        self.raw_data = pd.read_csv(self.data_path, sep='\t',
-                            usecols=['gold_label', 'sentence1', 'sentence2', 'pairID'])
-        self.ids = self.raw_data.pairID
-        self.examples = self.raw_data.sentence1
-        self.examples2 = self.raw_data.sentence2
-        
-        le = LabelEncoder()
-        self.labels = le.fit_transform(self.raw_data.gold_label)
-        
-        if config["difficulties_file"]:
-            self.difficulties_file = config["difficulties_file"]
-            self.difficulties = pd.read_csv(self.difficulties_file, sep=',',
-                                header=None, names=['pairID', 'difficulty'])
-            self.difficulties = self.difficulties.set_index('pairID')
-            self.difficulties = self.difficulties.to_dict('index')
 
         self.root = os.path.expanduser(self.data_path)
         
@@ -74,8 +58,8 @@ class MNISTDataset(CLDataset):
         self.idx = torch.tensor(list(range(len(self.data))), dtype=torch.int)
 
         self.difficulties = []
-        diff_dir = config["difficulties_file"] 
-        if config["difficulties_file"]:            
+        diff_dir = config["data"]["difficulties_file"] 
+        if config["data"]["difficulties_file"]:            
             if self.train:
                 diff_file = diff_dir + 'mnist_diffs_train.csv'
             else:
