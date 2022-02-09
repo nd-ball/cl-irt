@@ -3,10 +3,7 @@ Competency-based curriculum learning trainer
 """
 
 from trainers.abstract_trainer import AbstractTrainer
-from trainers.trainer_utils import calculate_accuracy, encode_batch
-from py_irt.scoring import calculate_theta
 import numpy as np
-from torch.utils.data import DataLoader, SequentialSampler, Dataset
 import pandas as pd
 import torch
 import csv
@@ -14,10 +11,7 @@ import datetime
 
 class CBCLTrainer(AbstractTrainer):
     """Class implementing the CBCL algorithm for CL training"""
-    def __init__(self, model, data, dev_data, config):
-        self.model = model
-        self.data = data
-        self.dev_data = dev_data
+    def __init__(self, config):
         self.config = config
         self.probe_set_size = self.config["data"]["probe_set_size"]
         self.theta_data = self.data.get_probe_set(self.probe_set_size)
@@ -35,13 +29,51 @@ class CBCLTrainer(AbstractTrainer):
     def get_time(self):
         return str(datetime.datetime.now(datetime.timezone.utc))
 
+    def get_difficulties(self, model, data, dev_data, e, outwriter):
+        # I want this to look like the following:
+        # first, try to look up the difficulties
+        # second, learn difficulties
+
+        # does the data difficulty exist?
+        # try to read the difficulty file from config
+        self.difficulties_file = self.config["data"]["difficulties_file"]
+        try:
+            difficulties = pd.read_csv(self.difficulties_file, sep=',',
+                                header=None, names=['id', 'difficulty'])
+        except:
+            difficulties = self.learn_difficulties(model, data, e, outwriter)
+        return difficulties
+
+    def get_schedule(self, model,  data, dev_data, e, epoch_data_difficulties, outwriter):
+        epoch_training_data = self.filter_examples(data, e, epoch_data_difficulties) 
+        return epoch_training_data
+
+    def filter_examples(self, data, e, epoch_data_difficulties):
+        # sorted difficulty indices
+        diffs_sorted_idx = np.argsort(epoch_data_difficulties) 
+
+        # calculate competency
+        if self.competencyfn == "linear":
+            epoch_competency = np.min([1, e * ((1 - self.c_init)/self.competency) + self.c_init])
+        elif self.competencyfn == "root":
+            epoch_competency = np.min([1,np.sqrt(e * ((1 - self.c_init**2)/self.competency) + self.c_init**2)])
+        else:
+            raise NotImplementedError("other competency functions not implemented.")
+
+        # get indices
+        idx = [diffs_sorted_idx[i] for i in range(epoch_competency * len(self.data.difficulties))]
+        epoch_training_data = data[idx]  
+        return epoch_training_data
+
+"""
+Will delete once I know I don't need it
     def train(self):
-        """
+        ""
         at each timestep:
         a) estimate model theta
         b) filter training data so that you only include those where b <= theta
         c) run a training pass 
-        """
+        ""
         # initialize logger
         self.outwriter.writerow(["timestamp","epoch","metric","value"])
         self.outwriter.writerow(
@@ -170,30 +202,5 @@ class CBCLTrainer(AbstractTrainer):
                     self.get_time(),
                 ]
             )
-
-    def filter_examples(self, e):
-        # sorted difficulty indices
-        diffs_sorted_idx = np.argsort(self.data.difficulties) 
-
-        # calculate competency
-        if self.competencyfn == "linear":
-            epoch_competency = np.min([1, e * ((1 - self.c_init)/self.competency) + c_init])
-        elif self.competencyfn == "root":
-            epoch_competency = np.min([1,np.sqrt(e * ((1 - self.c_init**2)/self.competency) + self.c_init**2)])
-        else:
-            raise NotImplementedError("other competency functions not implemented.")
-
-        # get indices
-        idx = [diffs_sorted_idx[i] for i in range(epoch_competency * len(self.data.difficulties))]
-        return self.data[idx] 
-
-
-    def calculate_accuracy(self, logits, labels):
-        #print(logits)
-        labels = [l.cpu().numpy() for l in labels]
-        #print(labels)
-        return np.sum(np.argmax(logits, axis=1) == labels) / len(logits)
-
-
-
+"""
 

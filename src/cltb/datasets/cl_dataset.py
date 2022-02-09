@@ -2,17 +2,20 @@
 Datasets will be implemented as subclasses of the CLDataset class (maybe I rename this)?
 
 CLDataset will subclass pytorch datasets, but require difficulty values for entries 
+
+We're making the following assumptions regarding the datasets
+
+1. every entry  has a unique identifier
+2. difficulty files are stored in the format ID, difficulty
 """
 
-import torch
-from pydantic import BaseModel
 from torch.utils.data import Dataset
 from typing import List, Optional
 import random
 import numpy as np
 
 
-class CLDataset(Dataset):#,BaseModel):
+class CLDataset(Dataset):
     """class for CL datasets"""
     ids: List[int]
     difficulties: Optional[List[float]] = None

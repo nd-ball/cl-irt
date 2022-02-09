@@ -1,21 +1,15 @@
 """spaced repitition trainer"""
 
 from trainers.abstract_trainer import AbstractTrainer
-from trainers.trainer_utils import calculate_accuracy, encode_batch
-from py_irt.scoring import calculate_theta
+from trainers.trainer_utils import encode_batch
 import numpy as np
-from torch.utils.data import DataLoader, SequentialSampler, Dataset
 import pandas as pd
-import torch
 import csv
 import datetime
 
 class RbFTrainer(AbstractTrainer):
     """Class implementing the RbF algorithm for CL training"""
-    def __init__(self, model, data, dev_data, config):
-        self.model = model
-        self.data = data
-        self.dev_data = dev_data
+    def __init__(self, config):
         self.config = config
         self.probe_set_size = self.config["data"]["probe_set_size"]
         self.theta_data = self.data.get_probe_set(self.probe_set_size)
@@ -30,8 +24,159 @@ class RbFTrainer(AbstractTrainer):
     def get_time(self):
         return str(datetime.datetime.now(datetime.timezone.utc))
 
+    def get_difficulties(self, model, data, dev_data, e, outwriter):
+        # I want this to look like the following:
+        if e == 0:
+            self.difficulties = [0 for i in range(len(data.examples))]
+        else:
+            epoch_idx = self.filter_examples(e, self.difficulties)
+            train_accuracies, val_accuracies, val_loss = self.check_model(model, data[epoch_idx], dev_data)
+            optimal_tau = self.get_optimal_tau_rbf(self.kern, val_accuracies, val_loss, self.nu)
+            new_delays = self.calculate_delays(optimal_tau, train_accuracies, self.nu, self.kern)
+            assert len(new_delays) == len(epoch_idx)
+            for i in range(len(epoch_idx)):
+                self.difficulties[epoch_idx[i]] += new_delays[i]
+                # we want a full pass through the data at the last epoch
+                if self.difficulties[epoch_idx[i]] >= self.num_epochs:
+                    self.difficulties[epoch_idx[i]] = self.num_epochs - 1
+
+        return self.difficulties
+        
+    def get_schedule(self, model,  data, dev_data, e, epoch_data_difficulties, outwriter):
+        idx = self.filter_examples(e, epoch_data_difficulties)
+        epoch_training_data = data[idx]
+        return epoch_training_data
+
+    def filter_examples(self, e, epoch_data_difficulties):
+        idx = [i for i in range(len(epoch_data_difficulties)) if epoch_data_difficulties[i] <= e]
+        return idx
+
+
+    def get_optimal_tau_rbf(self, kern, val_accs, val_loss, nu):
+        x = 1.0 / np.sum(val_accs)
+        
+        if kern == 'gau':
+            a_ln = -1. * np.sum([np.log(a- 0.1) for a in val_accs if a >= nu])
+            x_sum_pow = np.sum([pow(l * x, 2) for l, a in zip(val_loss, val_accs) if a >= nu])
+            tau = a_ln / x_sum_pow
+        
+        if kern == 'lap':
+            a_ln = -1. * np.sum([np.log(a) for a in val_accs if a >= nu])
+            x_sum = np.sum([l * x for l, a in zip(val_loss, val_accs) if a >= nu])                        
+            tau = a_ln / x_sum
+        
+        if kern == 'lin':
+            a_one = np.sum([(1. - a) for a in val_accs if a >= nu])
+            x_sum = np.sum([l * x for l, a in zip(val_loss, val_accs) if a >= nu])                            
+            tau = a_one / x_sum
+        
+        if kern == 'cos':
+            a_arc = np.sum([np.arccos(2. * a - 1.) for a in val_accs if a >= nu])
+            x_sum = np.sum([l * x for l, a in zip(val_loss, val_accs) if a >= nu])
+            tau = a_arc / (np.pi * x_sum)
+        
+        if kern == 'qua':
+            a_one = np.sum([(1. - a) for a in val_accs if a >= nu])
+            x_sum_pow = np.sum([pow(l * x, 2) for l, a in zip(val_loss, val_accs) if a >= nu])           
+            tau = a_one / x_sum_pow
+        
+        if kern == 'sec':
+            a_sq = np.sum([np.log(1. / a + np.sqrt(1. / a - 1.)) for a in val_accs if a >= nu])
+            x_sum = np.sum([l * x for l, a in zip(val_loss, val_accs) if a >= nu])                            
+            tau = a_sq / x_sum
+        
+        return tau 
+
+    def calculate_delays(self, tau, accuracies, nu, kern):
+        delays = []
+        val_strength = np.sum(accuracies)
+        if kern == "gau":
+            nu_gau = np.sqrt(-np.log(nu) / tau)
+            fn = lambda a : max(1., val_strength * nu_gau / a)
+        if kern == "lap":
+            nu_lap = np.log(nu)    
+            fn = lambda a :  max(1., -1. * val_strength * nu_lap / (a * tau))
+        if kern == "lin":
+            nu_lin = (1. - nu)
+            fn = lambda a : max(1., val_strength * nu_lin / (a * tau))
+        
+        if kern == 'cos':
+            nu_cos = np.arccos(2 * nu - 1.)
+            fn = lambda a :  max(1., val_strength * nu_cos / (np.pi * a * tau))
+                        
+        if kern == 'qua':
+            nu_qua = np.sqrt((1. - nu) / tau)
+            fn = lambda a :  max(1., val_strength * nu_qua / a)
+                            
+        if kern == 'sec':
+            nu_sec = np.log(1. / nu * (1 + np.sqrt(1 - nu * nu)))
+            fn = lambda a :  max(1., val_strength * nu_sec / (a * tau))
+            
+        for i in range(len(accuracies)):
+            if accuracies[i] < nu:
+                delays.append(1)
+            else:
+                delays.append(min(fn(accuracies[i]), self.num_epochs-1))
+        return delays
+
+    def check_model(self, model, data, dev_data):
+        logits = []
+        all_labels = []
+        global_loss = 0
+        batch_size = self.config["trainer"]["batch_size"]
+        model.model.eval()
+
+        for j in range(len(data["examples"])//batch_size):
+            batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(data["examples"])))]
+            inputs, labels = encode_batch(data, batch_idx, self.config, self.model)
+            all_labels.extend(labels)
+            inputs2 = {}
+            for key, val in inputs.items():
+                inputs2[key] = val.to(self.device)
+
+            outputs = model.forward(inputs2, labels)
+            loss = outputs.loss
+            model.model.zero_grad()
+
+            logits.extend(outputs.logits.detach().cpu().numpy())
+            global_loss += loss.item()
+        all_labels = [l.cpu().numpy() for l in all_labels]
+        train_accuracies = np.argmax(logits, axis=1) == all_labels
+
+        # eval 
+        logits = []
+        all_labels = []
+        global_loss = 0
+
+        batch_size = self.config["trainer"]["batch_size"]
+        dev_idx = list(range(len(dev_data.examples)))
+        epoch_dev_data = dev_data[dev_idx] 
+        for j in range(len(epoch_dev_data["examples"])//batch_size):
+            batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(epoch_dev_data["examples"])))]
+            inputs, labels = encode_batch(epoch_dev_data, batch_idx, self.config, self.model)
+            all_labels.extend(labels)
+
+            inputs2 = {}
+            for key, val in inputs.items():
+                inputs2[key] = val.to(self.device)
+
+
+            outputs = model.forward(inputs2, labels)
+            loss = outputs.loss
+            model.model.zero_grad()
+
+            logits.extend(outputs.logits.detach().cpu().numpy())
+            global_loss += loss.item()
+
+        all_labels = [l.cpu().numpy() for l in all_labels]
+        val_accuracies = (np.argmax(logits, axis=1) == all_labels) * 1
+        val_loss = [-1 * logits[i][all_labels[i]] for i in range(len(val_accuracies))]
+
+        return train_accuracies, val_accuracies, val_loss 
+
+"""
     def train(self):
-        """
+        ""
         in this model difficulty is effectively (next epoch to train at)
 
         at each timestep:
@@ -41,8 +186,7 @@ class RbFTrainer(AbstractTrainer):
         c) calulate tao on validation data (expensive?)
         d) estimate tao hat for each trained examples
         e) update diffs accordingly
-        """
-        # initialize logger
+        ""        # initialize logger
         self.outwriter.writerow(["timestamp","epoch","metric","value"])
         self.outwriter.writerow(
                 [
@@ -194,77 +338,7 @@ class RbFTrainer(AbstractTrainer):
                 ]
             )
 
-        
-    def filter_examples(self, e):
-        idx = [i for i in range(len(self.data.difficulties.difficulty)) if self.data.difficulties.difficulty[i] <= e]
-        return idx
-
-
-    def get_optimal_tau_rbf(self, kern, val_accs, val_loss, nu):
-        x = 1.0 / np.sum(val_accs)
-        
-        if kern == 'gau':
-            a_ln = -1. * np.sum([np.log(a- 0.1) for a in val_accs if a >= nu])
-            x_sum_pow = np.sum([pow(l * x, 2) for l, a in zip(val_loss, val_accs) if a >= nu])
-            tau = a_ln / x_sum_pow
-        
-        if kern == 'lap':
-            a_ln = -1. * np.sum([np.log(a) for a in val_accs if a >= nu])
-            x_sum = np.sum([l * x for l, a in zip(val_loss, val_accs) if a >= nu])                        
-            tau = a_ln / x_sum
-        
-        if kern == 'lin':
-            a_one = np.sum([(1. - a) for a in val_accs if a >= nu])
-            x_sum = np.sum([l * x for l, a in zip(val_loss, val_accs) if a >= nu])                            
-            tau = a_one / x_sum
-        
-        if kern == 'cos':
-            a_arc = np.sum([np.arccos(2. * a - 1.) for a in val_accs if a >= nu])
-            x_sum = np.sum([l * x for l, a in zip(val_loss, val_accs) if a >= nu])
-            tau = a_arc / (np.pi * x_sum)
-        
-        if kern == 'qua':
-            a_one = np.sum([(1. - a) for a in val_accs if a >= nu])
-            x_sum_pow = np.sum([pow(l * x, 2) for l, a in zip(val_loss, val_accs) if a >= nu])           
-            tau = a_one / x_sum_pow
-        
-        if kern == 'sec':
-            a_sq = np.sum([np.log(1. / a + np.sqrt(1. / a - 1.)) for a in val_accs if a >= nu])
-            x_sum = np.sum([l * x for l, a in zip(val_loss, val_accs) if a >= nu])                            
-            tau = a_sq / x_sum
-        
-        return tau 
-
-    def calculate_delays(self, tau, accuracies, nu, kern):
-        delays = []
-        val_strength = np.sum(accuracies)
-        if kern == "gau":
-            nu_gau = np.sqrt(-np.log(nu) / tau)
-            fn = lambda a : max(1., val_strength * nu_gau / a)
-        if kern == "lap":
-            nu_lap = np.log(nu)    
-            fn = lambda a :  max(1., -1. * val_strength * nu_lap / (a * tau))
-        if kern == "lin":
-            nu_lin = (1. - nu)
-            fn = lambda a : max(1., val_strength * nu_lin / (a * tau))
-        
-        if kern == 'cos':
-            nu_cos = np.arccos(2 * nu - 1.)
-            fn = lambda a :  max(1., val_strength * nu_cos / (np.pi * a * tau))
-                        
-        if kern == 'qua':
-            nu_qua = np.sqrt((1. - nu) / tau)
-            fn = lambda a :  max(1., val_strength * nu_qua / a)
-                            
-        if kern == 'sec':
-            nu_sec = np.log(1. / nu * (1 + np.sqrt(1 - nu * nu)))
-            fn = lambda a :  max(1., val_strength * nu_sec / (a * tau))
-            
-        for i in range(len(accuracies)):
-            if accuracies[i] < nu:
-                delays.append(1)
-            else:
-                delays.append(min(fn(accuracies[i]), self.num_epochs-1))
-        return delays
+"""      
+    
                         
         

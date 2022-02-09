@@ -10,6 +10,7 @@ from rich.console import Console
 from models.models import MODELS
 from datasets.datasets import DATASETS 
 from trainers.trainers import TRAINERS
+from teachers.default_teacher import DefaultTeacher
 
 console = Console()
 app = typer.Typer()
@@ -45,10 +46,13 @@ def train(
     # load and initialize trainer 
     trainer = TRAINERS[
         experiment_config["trainer"]["name"]
-    ](model, data, dev_data, experiment_config)
+    ](experiment_config)
+
+    # load the teacher 
+    teacher = DefaultTeacher(model, data, dev_data, trainer, experiment_config)
 
     # train model 
-    trainer.train() 
+    teacher.train() 
 
 @app.command()
 def test(

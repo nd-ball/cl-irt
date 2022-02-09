@@ -34,3 +34,8 @@ def encode_batch(examples, batch_idx, config, model):
     batch_labels = torch.tensor(batch_labels, device=device)
 
     return encoded_inputs, batch_labels
+
+def train():
+    pass
+
+

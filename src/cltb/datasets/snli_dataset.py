@@ -31,6 +31,8 @@ class SNLIDataset(CLDataset):
             self.difficulties_file = config["difficulties_file"]
             self.difficulties = pd.read_csv(self.difficulties_file, sep=',',
                                 header=None, names=['pairID', 'difficulty'])
+            self.difficulties = self.difficulties.set_index('pairID')
+            self.difficulties = self.difficulties.to_dict('index')
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
@@ -39,13 +41,18 @@ class SNLIDataset(CLDataset):
         examples = np.array([examples])
         examples2 = self.examples2.iloc[idx, 1:]
         examples2 = np.array([examples2])
-        difficulties = self.difficulties.iloc[idx, 1:]
+        ids = self.ids.iloc[idx, 1:]
+        ids = np.array([ids])
+        #difficulties = self.difficulties.iloc[idx, 1:]
+        difficulties = [self.difficulties[i] for i in ids]
         difficulties = np.array([difficulties])
         labels = self.labels.iloc[idx, 1:]
         labels = np.array([labels])
         sample = {
+            "ids": ids,
             "examples": examples,
             "examples2": examples2,  
             "difficulties": difficulties, 
-            "labels": labels}
+            "labels": labels
+            }
         return sample
