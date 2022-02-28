@@ -79,7 +79,7 @@ class DefaultTeacher():
             acc = calculate_accuracy(logits, all_labels)
             self.outwriter.writerow([self.get_time(),e,"train_acc",acc])
 
-            self.outwriter.writerow([self.get_time(),e,"train_loss",global_loss.cpu().detach().numpy()])
+            self.outwriter.writerow([self.get_time(),e,"train_loss",global_loss])
 
             # eval 
             self.model.model.eval()
@@ -110,7 +110,7 @@ class DefaultTeacher():
             acc = calculate_accuracy(logits, all_labels)
             self.outwriter.writerow([self.get_time(),e,"dev_acc",acc])
 
-            self.outwriter.writerow([self.get_time(),e,"dev_loss",global_loss.cpu().detach().numpy()])
+            self.outwriter.writerow([self.get_time(),e,"dev_loss",global_loss])
 
             # save model to disk if it's best performing so far 
             #self.model.save() 

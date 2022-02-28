@@ -33,18 +33,23 @@ class DDaCLAETrainer(AbstractTrainer):
         try:
             difficulties = pd.read_csv(self.difficulties_file, sep=',',
                                 header=None, names=['id', 'difficulty'])
-            difficulties = self.difficulties.set_index('pairID')
-            difficulties = self.difficulties.to_dict('index')
+            difficulties = difficulties.set_index('id')
+            difficulties = difficulties["difficulty"].to_dict()
+            #print(difficulties)
+            difficulties = [difficulties[int(i)] for i in data.ids]
+            difficulties = np.array(difficulties)
         except:
             difficulties = self.learn_difficulties(model, data, e, outwriter)
         return difficulties
         
     def get_schedule(self, model,  data, dev_data, e, epoch_data_difficulties, outwriter):
         self.probe_set_size = self.config["data"]["probe_set_size"]
-        self.theta_data = data.get_probe_set(self.probe_set_size)
-        theta_hat = self.estimate_theta(model, self.theta_data) 
+        #data["difficulties"] = epoch_data_difficulties
+        theta_data = data.get_probe_set(self.probe_set_size)
+        theta_hat = self.estimate_theta(model, theta_data) 
         outwriter.writerow([self.get_time(),e,"theta_hat",theta_hat])
-        epoch_training_data = self.filter_examples(theta_hat, epoch_data_difficulties) 
+        diffs = data.difficulties
+        epoch_training_data = self.filter_examples(data, theta_hat, diffs) 
         return epoch_training_data
 
     def learn_difficulties(self, model, data, e, outwriter):
@@ -55,27 +60,28 @@ class DDaCLAETrainer(AbstractTrainer):
         batch_size = self.config["trainer"]["batch_size"]
         all_preds = []
 
-        for j in range(len(self.theta_data)//batch_size):
-            batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(self.theta_data["examples"])))]
+        for j in range(len(theta_data)//batch_size):
+            batch_idx = [i for i in range(j*batch_size, min((j+1)*batch_size, len(theta_data["examples"])))]
             inputs, labels = encode_batch(theta_data, batch_idx, self.config, model)
             all_preds.extend(labels)
             inputs2 = {}
             for key, val in inputs.items():
                 inputs2[key] = val.to(self.device)
 
-            outputs = self.model.forward(inputs2)
+            outputs = model.forward(inputs2)
             logits = outputs.logits.detach().cpu().numpy()
             preds = np.argmax(logits, axis=1)
             all_preds.extend(preds) 
         
-        rps = [int(p == c) for p, c in zip(all_preds, self.theta_data["labels"])] 
-        rps = [j if j==1 else -1 for j in rps] 
-        theta_hat = calculate_theta(self.theta_data["difficulties"], rps)[0]
+        rps = [int(p == c) for p, c in zip(all_preds, theta_data["labels"])] 
+        rps = [j if j==1 else -1 for j in rps]
+        diffs = theta_data["difficulties"]
+        theta_hat = calculate_theta(diffs, rps)[0]
         return theta_hat
 
-    def filter_examples(self, theta_hat, difficulties):
+    def filter_examples(self, data, theta_hat, difficulties):
         idx = [i for i in range(len(difficulties)) if difficulties[i] <= theta_hat]
-        return self.data[idx] 
+        return data[idx] 
 
 """
 I'll delete the below once I'm sure I'm done with it

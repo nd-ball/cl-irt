@@ -52,8 +52,9 @@ class GLUEDataset(CLDataset):
             self.difficulties = pd.read_csv(self.difficulties_file, sep=',',
                                 header=None, names=['id', 'difficulty'])
             self.difficulties = self.difficulties.set_index('id')
-            self.difficulties = self.difficulties.to_dict('index')
-
+            self.difficulties = self.difficulties["difficulty"].to_dict()
+            self.difficulties = [self.difficulties[int(i)] for i in self.ids]
+            self.difficulties = np.array(self.difficulties)
 
 
     def __getitem__(self, idx):
@@ -64,13 +65,13 @@ class GLUEDataset(CLDataset):
         if self.paired_inputs:
             examples2 = [self.examples2[i] for i in idx]
             examples2 = np.array(examples2)
-        ids = self.ids.iloc[idx, 1:]
-        ids = np.array([ids])
+        ids = [self.ids[i] for i in idx]
+        ids = np.array(ids)
 
         #difficulties = [self.difficulties.difficulty[i] for i in idx]
         #difficulties = np.array(difficulties)
-        difficulties = [self.difficulties[i] for i in ids]
-        difficulties = np.array([difficulties])
+        difficulties = [self.difficulties[i] for i in idx]
+        difficulties = np.array(difficulties)
 
         labels = [self.labels[i] for i in idx]
         labels = np.array(labels)
