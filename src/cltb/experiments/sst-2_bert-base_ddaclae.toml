@@ -1,20 +1,20 @@
-title = "DDaCLAE with roBERTa-base on RTE"
+title = "DDaCLAE with roBERTa-base on SST-2"
 
 [model]
 name = "BERT"
-modelname = "roberta-base"
+modelname = "bert-base"
 optimizer = "AdamW"
 scheduler = "constant"
 
 [data]
 name = "GLUE"
-taskname = "RTE"
-num_labels = 2
+taskname = "SST-2"
+num_labels = 3
 probe_set_size = 4
 paired_inputs = false
 data_split = "train"
 data_path = "/afs/crc.nd.edu/user/j/jlalor1/data/glue"
-difficulties_file = "/afs/crc.nd.edu/user/j/jlalor1/data/artificial-crowd-rps/rte.rp.diffs"
+difficulties_file = "/afs/crc.nd.edu/user/j/jlalor1/data/artificial-crowd-rps/sst-2.rp.diffs"
 
 [trainer]
 name = "DDaCLAE"
@@ -22,5 +22,5 @@ device = "cuda"
 num_epochs = 5
 batch_size = 4
 max_seq_len = 64
-expname = "rte_roberta-base_ddaclae"
+expname = "sst-2_bert-base_ddaclae"
 kern = "gau"
