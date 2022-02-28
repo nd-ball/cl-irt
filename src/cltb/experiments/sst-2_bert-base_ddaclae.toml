@@ -2,7 +2,7 @@ title = "DDaCLAE with roBERTa-base on SST-2"
 
 [model]
 name = "BERT"
-modelname = "bert-base"
+modelname = "bert-base-uncased"
 optimizer = "AdamW"
 scheduler = "constant"
 
