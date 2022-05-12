@@ -1,0 +1,8 @@
+title = "Crowd for Yelp"
+
+[model]
+name = "bert-base-uncased"
+crowd_size = 5
+
+[data]
+name = "yelp_review_full"
