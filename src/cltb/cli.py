@@ -6,6 +6,7 @@ all experiments will be defined via a TOML file
 import typer
 import toml
 from rich.console import Console
+import json
 
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from transformers import TrainingArguments, Trainer
@@ -91,24 +92,35 @@ def run_crowd(
 
 
     crowd_size = experiment_config["model"]["crowd_size"]
-    for i in range(crowd_size):
-        model = AutoModelForSequenceClassification.from_pretrained(
-            model_name,
-            num_labels=len(set(train_dataset["label"]))
-        )
-        
-        training_args = TrainingArguments(
-            output_dir=f"{dataname}_{i}",
-            evaluation_strategy="epoch"
-        )
-        trainer = Trainer(
-            model=model,
-            args=training_args,
-            train_dataset=train_dataset,
-            eval_dataset=eval_dataset,
-            compute_metrics=compute_metrics,
-        )
-        trainer.train()
+
+    model = AutoModelForSequenceClassification.from_pretrained(
+        model_name,
+        num_labels=len(set(train_dataset["label"]))
+    )
+
+    training_args = TrainingArguments(
+        output_dir=f"{dataname}_{model_name}",
+        evaluation_strategy="epoch",
+        num_train_epochs=1,
+        max_steps=1
+    )
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=eval_dataset,
+        compute_metrics=compute_metrics
+    )
+    trainer.train()
+
+    train_predictions = trainer.predict(train_dataset)
+    train_predictions = train_preditions._asdict()
+
+    # write json to disk
+    with open(f"{dataname}_{model_name}_preds.json", "w") as outfile:
+        json.dump(train_predictions, outfile) 
+    
+    
 
 
 if __name__ == "__main__":

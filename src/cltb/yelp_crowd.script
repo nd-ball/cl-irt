@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#$ -q gpu@@lalor
+#$ -q gpu
 #$ -l gpu_card=1
 #$ -pe smp 1
 #$ -N yelp-crowd
