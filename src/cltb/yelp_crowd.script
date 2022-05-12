@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#$ -q gpu@@lalor
+#$ -l gpu_card=1
+#$ -pe smp 1
+#$ -N yelp-crowd
+
+module load cuda
+module load cudnn
+
+poetry run python cli.py run-crowd experiments/crowd_yelp.toml
+

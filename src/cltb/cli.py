@@ -7,13 +7,13 @@ import typer
 import toml
 from rich.console import Console
 
-from transformers import AutoModelForSequenceClassification
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from transformers import TrainingArguments, Trainer
 import numpy as np
 from datasets import load_dataset, load_metric
     
 from models.models import MODELS
-from datasets.datasets import DATASETS 
+#from datasets.datasets import DATASETS 
 from trainers.trainers import TRAINERS
 from teachers.default_teacher import DefaultTeacher
 
@@ -60,7 +60,7 @@ def test(
 ):
     pass
 
-@app.command
+@app.command()
 def run_crowd(
     config_path: str
 ):
@@ -68,7 +68,8 @@ def run_crowd(
         experiment_config = toml.load(f)
 
     # load data set and assign ids
-    dataset = load_dataset(experiment_config["data"]["name"])
+    dataname = experiment_config["data"]["name"]
+    dataset = load_dataset(dataname)
     dataset = dataset.map(lambda x, idx: {"idx": idx}, with_indices=True)
 
     # format dataset
@@ -78,8 +79,8 @@ def run_crowd(
         return tokenizer(examples["text"], padding="max_length", truncation=True)
 
     tokenized_dataset = dataset.map(tokenize_function, batched=True)
-    train_dataset = tokenized_datasets["train"].shuffle(seed=42)
-    eval_dataset = tokenized_datasets["test"].shuffle(seed=42)
+    train_dataset = tokenized_dataset["train"].shuffle(seed=42)
+    eval_dataset = tokenized_dataset["test"].shuffle(seed=42)
 
     metric = load_metric("accuracy")
 
@@ -97,7 +98,7 @@ def run_crowd(
         )
         
         training_args = TrainingArguments(
-            output_dir=f"test_trainer_{i}",
+            output_dir=f"{dataname}_{i}",
             evaluation_strategy="epoch"
         )
         trainer = Trainer(
