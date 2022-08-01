@@ -87,7 +87,7 @@ def train(args, outfile):
     #print('num_epoch: {}\nbatch_size: {}'.format(num_epoch, batch_size))
     # construct the exp label
 
-    exp_label = 'bert_{}_{}_{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random, args.lower_bound, args.upper_bound)
+    exp_label = 'bert_large_{}_{}_{}_{}_{}_{}'.format(args.strategy, args.balanced, args.ordering, args.random, args.lower_bound, args.upper_bound)
 
     # save training data set size to disk for bookkeeping
     os.makedirs(os.path.dirname(outfile), exist_ok=True)
@@ -392,7 +392,7 @@ def run():
     args = parser.parse_args()
 
     # create output directory-file
-    outdir = 'results/bert-{}/{}-{}-len-{}-wordrarity-{}-{}-{}/{}/'.format(
+    outdir = 'results/bert-large-{}/{}-{}-len-{}-wordrarity-{}-{}-{}/{}/'.format(
         args.balanced,
         args.task,
         args.strategy,
