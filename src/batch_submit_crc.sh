@@ -9,7 +9,7 @@
 for TASK in MRPC QNLI RTE QQP MNLI SST-2 
 do 
     # ddaclae
-    qsub glue_test_crc.sh $TASK $lb $ub 
+    qsub glue_test_crc.sh $TASK -1000 1000
 
     # baseline
     #qsub bert_baseline_crc.sh $TASK 
