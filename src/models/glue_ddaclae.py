@@ -68,16 +68,16 @@ def train(args, outfile):
     out_dim = len(label_list)
     
 
-    config = config_class.from_pretrained('bert-base-uncased',
+    config = config_class.from_pretrained('bert-large-uncased',
                                             num_labels=out_dim,
                                             cache_dir=args.cache_dir)
     tokenizer = tokenizer_class.from_pretrained(
-                                            'bert-base-uncased',
+                                            'bert-large-uncased',
                                             do_lower_case=True,
                                             cache_dir=args.cache_dir
     )
     model = model_class.from_pretrained(
-                                    'bert-base-uncased',
+                                    'bert-large-uncased',
                                     config=config,
                                     cache_dir=args.cache_dir
     )
