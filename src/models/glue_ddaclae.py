@@ -36,10 +36,7 @@ def generate_features(examples, tokenizer, label_list):
         examples, tokenizer,
         label_list=label_list, 
         max_length=max_seq_len,
-        output_mode=output_mode#,
-        #pad_on_left=pad_on_left,
-        #pad_token=pad_token,
-        #pad_token_segment_id=pad_token_segment_id
+        output_mode=output_mode
     )
 
     all_input_ids = torch.tensor([f.input_ids for f in features], dtype=torch.long)
