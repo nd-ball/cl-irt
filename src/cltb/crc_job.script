@@ -3,8 +3,9 @@
 #$ -q gpu@@lalor
 #$ -l gpu_card=1
 #$ -pe smp 1
-#$ -N curriculum-learning-exp
-#$ -t 1-37
+#$ -N sst-curriculum-learning-exp
+
+# -t 1-37
 
 module load conda
 module load cuda
@@ -54,6 +55,7 @@ FILES=(
 
 
 CONFIG=${FILES[$SGE_TASK_ID]}
+CONFIG=sst-2_roberta-base_ddaclae.toml
 
 echo $CONFIG
 poetry run python cli.py train experiments/$CONFIG

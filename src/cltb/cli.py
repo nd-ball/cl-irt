@@ -3,6 +3,7 @@ Workhorse file for loading everything, setting parameters and training
 all experiments will be defined via a TOML file
 """
 
+import pickle
 import typer
 import toml
 from rich.console import Console
@@ -114,11 +115,10 @@ def run_crowd(
     trainer.train()
 
     train_predictions = trainer.predict(train_dataset)
-    train_predictions = train_preditions._asdict()
 
     # write json to disk
-    with open(f"{dataname}_{model_name}_preds.json", "w") as outfile:
-        json.dump(train_predictions, outfile) 
+    with open(f"{dataname}_{model_name}_preds.pickle", "wb") as outfile:
+        pickle.dump(train_predictions, outfile, protocol=pickle.HIGHEST_PROTOCOL) 
     
     
 

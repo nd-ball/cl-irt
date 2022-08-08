@@ -7,8 +7,8 @@ optimizer = "AdamW"
 scheduler = "constant"
 
 [data]
-name = "GLUE"
-taskname = "SST-2"
+name = "glue"
+taskname = "sst2"
 num_labels = 3
 probe_set_size = 4
 paired_inputs = false
