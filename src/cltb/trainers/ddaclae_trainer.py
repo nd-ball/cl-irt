@@ -20,27 +20,7 @@ class DDaCLAETrainer(AbstractTrainer):
         return str(datetime.datetime.now(datetime.timezone.utc))
     
     def get_difficulties(self, model, data, dev_data, e, outwriter):
-        # I want this to look like the following:
-        # first, try to look up the difficulties
-        # second, learn difficulties
-
-        # does the data difficulty exist?
-        # try to read the difficulty file from config
-        # CHANGE THIS:
-        # DIFFICULTY SHOULD BE LOADED WHEN DATA IS LOADED
-        # AND SET WHEN NEEDED DURING TRAINING
-        self.difficulties_file = self.config["data"]["difficulties_file"]
-        try:
-            difficulties = pd.read_csv(self.difficulties_file, sep=',',
-                                header=None, names=['id', 'difficulty'])
-            difficulties = difficulties.set_index('id')
-            difficulties = difficulties["difficulty"].to_dict()
-            #print(difficulties)
-            difficulties = [difficulties[int(i)] for i in data.ids]
-            difficulties = np.array(difficulties)
-        except:
-            difficulties = self.learn_difficulties(model, data, e, outwriter)
-        return difficulties
+        return self.data["difficulty_irt"]
         
     def get_schedule(self, model,  data, dev_data, e, epoch_data_difficulties, outwriter):
         self.probe_set_size = self.config["data"]["probe_set_size"]
@@ -75,7 +55,7 @@ class DDaCLAETrainer(AbstractTrainer):
         
         rps = [int(p == c) for p, c in zip(all_preds, theta_data["labels"])] 
         rps = [j if j==1 else -1 for j in rps]
-        diffs = theta_data["difficulties"]
+        diffs = theta_data["difficulty_irt"]
         theta_hat = calculate_theta(diffs, rps)[0]
         return theta_hat
 
