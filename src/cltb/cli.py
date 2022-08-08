@@ -33,11 +33,11 @@ def train(
     dataset = load_dataset(experiment_config["data"]["name"])
 
     # assign ids (always do this for consistency)
-    dataset = dataset.map(lambda x, idx: {"idx": idx}, with_indices=True) 
+    #dataset = dataset.map(lambda x, idx: {"idx": idx}, with_indices=True) 
 
     # load initial difficulties
-    difficulties = load_difficulties(experiment_config["data"]["diff_file"])
-    dataset = dataset.map(lambda x: {"difficulty": difficulties[x["idx"]]}) 
+    #difficulties = load_difficulties(experiment_config["data"]["diff_file"])
+    #dataset = dataset.map(lambda x: {"difficulty": difficulties[x["idx"]]}) 
     
     # load and initialize model
     model = MODELS[
