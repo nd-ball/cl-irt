@@ -55,7 +55,7 @@ FILES=(
 
 
 CONFIG=${FILES[$SGE_TASK_ID]}
-CONFIG=sst-2_roberta-base_ddaclae.toml
+CONFIG=mrpc_bert-large_ddaclae.toml
 
 echo $CONFIG
 poetry run python cli.py train experiments/$CONFIG

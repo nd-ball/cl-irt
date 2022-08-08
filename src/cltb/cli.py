@@ -31,7 +31,10 @@ def train(
         experiment_config = toml.load(f)
 
     # load data set
-    dataset = load_dataset(experiment_config["data"]["name"])
+    dataset = load_dataset(
+        experiment_config["data"]["name"],
+        experiment_config["data"]["taskname"]
+    )
 
     # assign ids (always do this for consistency)
     #dataset = dataset.map(lambda x, idx: {"idx": idx}, with_indices=True) 
@@ -51,7 +54,7 @@ def train(
     ](experiment_config)
 
     # load the teacher 
-    teacher = DefaultTeacher(model, data, trainer, experiment_config)
+    teacher = DefaultTeacher(model, dataset, trainer, experiment_config)
 
     # train model 
     teacher.train() 
