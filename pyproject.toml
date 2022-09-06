@@ -7,7 +7,7 @@ authors = ["John Lalor <john.lalor@nd.edu>"]
 [tool.poetry.dependencies]
 python = ">=3.8,<3.10"
 pydantic = "^1.8.2"
-transformers = "^4.9.1"
+transformers = "^4.21.3"
 toml = "^0.10.2"
 typer = "^0.3.2"
 rich = ">=9.3.0,<10.0.0"
@@ -16,7 +16,7 @@ scikit-learn = "^0.24.2"
 pandas = "^1.3.1"
 py-irt = "^0.4.5"
 Pillow = "^9.0.1"
-torchvision = "^0.11.3"
+torchvision = "^0.13.1"
 datasets = "^2.2.1"
 
 [tool.poetry.dev-dependencies]
