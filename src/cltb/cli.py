@@ -54,7 +54,7 @@ def train(
     ](experiment_config)
 
     # load the teacher 
-    teacher = DefaultTeacher(model, dataset, trainer, experiment_config)
+    teacher = DefaultTeacher(model, dataset["train"], dataset["validation"], trainer, experiment_config)
 
     # train model 
     teacher.train() 
