@@ -52,6 +52,52 @@ Project Organization
     └── tox.ini            <- tox file with settings for running tox; see tox.testrun.org
 
 
+## 04/2024 Updates
+
+High-level target: Write a pipeline code to calculate the difficulty on each dataset of GLUE or other datasets through pre-trained models with 0/1/3/5 epochs fine-tuning.
+
+### There are three parts in the pipeline:
+1. Generate accuracy
+   
+    Inputs: Datasets (GLUE), pre-trained models (e.g., albert, bert, t5, gpt-2) with 0/1/3/5 epochs fine-tuning
+
+    Outputs: predicted accuracy, probability
+
+2. Calculate difficulty of each dataset and ability of each model
+   
+    Inputs: accuracy
+
+    Outputs: dataset difficulty, models's ability (through irt-model) 
+
+3. Visulize results
+   
+    A. Difficulty distribution
+
+    B. The probability of model labeling data correctly vs. difficulty
+
+    C. Accuracy vs. probability 
+
+    D. Predicted logits vs. difficulty
+
+### Code
+1. Generate accuracy
+    
+   Run `gen_respon_256.sh`
+
+2. Calculate difficulty of each dataset and ability of each model
+
+    Once obtained the predicted results, we do the following steps to generate the difficulty and ability:
+   
+    A. Run `cal_diff.py`: Merge the accuracy results of different models for each dataset.
+   
+    B. Run `generate_diff.py`: Convert the csv file into json file.
+   
+    C. Run `GLUE_pyirt.ipynb`: Generate data difficulty and model ability through py-irt library.
+
+3. Visulize results: All the plot_xxx.py files
+
+
+
 --------
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
