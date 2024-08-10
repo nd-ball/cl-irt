@@ -75,20 +75,21 @@ To run baseline experiments:
 ```bash
 cd baseline_GLUE
 bash glue_deberta.sh
+
 or
-```bash
 cd baseline_GLUE
 bash glue_gpt2.sh
+
 or
-```bash
 cd baseline_GLUE
 bash glue_t5.sh
+
 Similarly,
 cd ../baseline_SuperGLUE
 bash superglue_deberta.sh
 ```
 
-#### PUDF-Enhanced Models
+#### Baseline+PUDF Models
 
 To run PUDF-enhanced models:
 
@@ -96,7 +97,7 @@ To run PUDF-enhanced models:
 cd PUDF_GLUE
 bash glue_PUDF_debertav3.sh
 
-cd ../PUDF_Super_GLUE
+cd PUDF_Super_GLUE
 bash superglue_debertaV3.sh
 ```
 
