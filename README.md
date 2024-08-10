@@ -36,7 +36,7 @@ The PUDF framework consists of two main steps:
 1. IRT-AC for the Difficulty Measurement (DM)
 2. DDS-MAE and PLM Fine-tuning for the Training Strategy (TS)
 
-![PUDF Workflow](workflow_diagram.png)
+![PUDF Workflow](workflow_PUDF.jpg)
 
 Figure 1: Workflow of the PUDF. The process consists of two main steps: 1) IRT-AC for the DM, 2) DDS-MAE and PLM Fine-tuning for the TS.
 
@@ -118,13 +118,13 @@ Our experiments show that PUDF significantly improves the performance of various
 
 ### Performance Comparison on GLUE Benchmark
 
-![Performance Comparison](performance_comparison.png)
+![Performance Comparison](main_results1.jpg)
 
 Table 1: Comparison of the performance of PLMs with and without PUDF on the GLUE benchmark. The table shows accuracy (Acc.) and training time in minutes (TT), with standard deviations (std) calculated from three repeated experiments in parentheses. Bold results indicate those that are statistically significantly better (p < 0.05) than the baseline.
 
 ### Comparison with Other Curriculum Learning Methods
 
-![CL Methods Comparison](cl_methods_comparison.png)
+![CL Methods Comparison](main_results2.jpg)
 
 Table 2: Comparison of different CL methods on the DeBERTaV3 model on GLUE benchmark. The table shows accuracy (Acc.) and training time in minutes (TT). dSL and dWR denote sentence length and word rarity, respectively. L and R represent the linear and root functions, respectively. Trans. and RL. denote transfer-teacher and reinforcement learning-based CL methods. Best results are bolded. PUDF significantly outperforms baseline and other CL methods (p < 0.05), except those marked by †.
 
