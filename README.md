@@ -1,103 +1,143 @@
-cl-irt
-==============================
+# PUDF Framework for Curriculum Learning
 
-irt curriculum learning experiments
+This repository contains the implementation of the Psychology-based Unified Dynamic Framework (PUDF) for Curriculum Learning, as presented in our paper titled *"A Psychology-based Unified Dynamic Framework for Curriculum Learning."*
 
-Project Organization
-------------
+## Table of Contents
 
-    ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini            <- tox file with settings for running tox; see tox.testrun.org
+1. [Introduction](#introduction)
+2. [Features](#features)
+3. [PUDF Workflow](#pudf-workflow)
+4. [Installation](#installation)
+5. [Usage](#usage)
+   - [Generating Data Difficulty](#generating-data-difficulty)
+   - [Running Experiments](#running-experiments)
+   - [Benchmarking](#benchmarking)
+   - [Ablation Study](#ablation-study)
+6. [Results](#results)
+7. [Citation](#citation)
+8. [License](#license)
 
+## Introduction
 
-## 04/2024 Updates
+The PUDF framework is designed to enhance the performance of machine learning models by dynamically adjusting the training curriculum based on the difficulty of the training data and the model's ability. It leverages Item Response Theory (IRT) and Artificial Crowds (AC) to automatically estimate the difficulty of training examples and the ability of models during the training process.
 
-High-level target: Write a pipeline code to calculate the difficulty on each dataset of GLUE or other datasets through pre-trained models with 0/1/3/5 epochs fine-tuning.
+## Features
 
-### There are three parts in the pipeline:
-1. Generate accuracy
-   
-    Inputs: Datasets (GLUE), pre-trained models (e.g., albert, bert, t5, gpt-2) with 0/1/3/5 epochs fine-tuning
+- Automatic difficulty estimation for training data
+- Dynamic curriculum adjustment during training
+- Implementation for GLUE and SuperGLUE benchmarks
+- Comparison with state-of-the-art curriculum learning methods
+- Ablation study capabilities
 
-    Outputs: predicted accuracy, probability
+## PUDF Workflow
 
-2. Calculate difficulty of each dataset and ability of each model
-   
-    Inputs: accuracy
+The PUDF framework consists of two main steps:
 
-    Outputs: dataset difficulty, models's ability (through irt-model) 
+1. IRT-AC for the Difficulty Measurement (DM)
+2. DDS-MAE and PLM Fine-tuning for the Training Strategy (TS)
 
-3. Visulize results
-   
-    A. Difficulty distribution
+![PUDF Workflow](workflow_diagram.png)
 
-    B. The probability of model labeling data correctly vs. difficulty
+Figure 1: Workflow of the PUDF. The process consists of two main steps: 1) IRT-AC for the DM, 2) DDS-MAE and PLM Fine-tuning for the TS.
 
-    C. Accuracy vs. probability 
+## Installation
 
-    D. Predicted logits vs. difficulty
+1. Clone the repository:
 
-### Code
-1. Generate accuracy
-    
-   Run `gen_respon_256.sh`
+   ```
+   git clone https://github.com/your-username/pudf-framework.git
+   cd pudf-framework
+   ```
 
-2. Calculate difficulty of each dataset and ability of each model
+2. Install the required dependencies:
 
-    Once obtained the predicted results, we do the following steps to generate the difficulty and ability:
-   
-    A. Run `cal_diff.py`: Merge the accuracy results of different models for each dataset.
-   
-    B. Run `generate_diff.py`: Convert the csv file into json file.
-   
-    C. Run `GLUE_pyirt.ipynb`: Generate data difficulty and model ability through py-irt library.
+   ```
+   pip install -r requirements.txt
+   ```
 
-3. Visulize results: All the plot_xxx.py files
+## Usage
 
+### Generating Data Difficulty
 
+Before running the experiments, generate the difficulty scores for the training data:
 
---------
+```bash
+cd gen_difficulty
+bash gen_respon_256.sh
+```
 
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+This step generates difficulty scores for the training dataset using Artificial Crowds (AC).
+
+### Running Experiments
+
+#### Baseline Models
+
+To run baseline experiments:
+
+```bash
+cd baseline_GLUE
+bash glue_deberta.sh
+
+cd ../baseline_SuperGLUE
+bash superglue_deberta.sh
+```
+
+#### PUDF-Enhanced Models
+
+To run PUDF-enhanced models:
+
+```bash
+cd PUDF_GLUE
+bash glue_deberta.sh
+
+cd ../PUDF_SuperGLUE
+bash superglue_deberta.sh
+```
+
+### Benchmarking
+
+To compare PUDF with other state-of-the-art curriculum learning methods:
+
+```bash
+cd benchmark_CL_GLUE
+bash compare_cl_methods.sh
+```
+
+### Ablation Study
+
+To perform an ablation study and analyze the contributions of different components of PUDF:
+
+```bash
+cd ablation_study
+bash run_ablation.sh
+```
+
+## Results
+
+Our experiments show that PUDF significantly improves the performance of various pre-trained language models (PLMs) on the GLUE benchmark. Here are some key results:
+
+### Performance Comparison on GLUE Benchmark
+
+![Performance Comparison](performance_comparison.png)
+
+Table 1: Comparison of the performance of PLMs with and without PUDF on the GLUE benchmark. The table shows accuracy (Acc.) and training time in minutes (TT), with standard deviations (std) calculated from three repeated experiments in parentheses. Bold results indicate those that are statistically significantly better (p < 0.05) than the baseline.
+
+### Comparison with Other Curriculum Learning Methods
+
+![CL Methods Comparison](cl_methods_comparison.png)
+
+Table 2: Comparison of different CL methods on the DeBERTaV3 model on GLUE benchmark. The table shows accuracy (Acc.) and training time in minutes (TT). dSL and dWR denote sentence length and word rarity, respectively. L and R represent the linear and root functions, respectively. Trans. and RL. denote transfer-teacher and reinforcement learning-based CL methods. Best results are bolded. PUDF significantly outperforms baseline and other CL methods (p < 0.05), except those marked by †.
+
+These results demonstrate that PUDF consistently improves both the accuracy and training efficiency of various PLMs across different GLUE tasks.
+
+## Citation
+
+If you use this framework in your research, please cite our paper:
+
+```
+[Insert citation details here]
+```
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
