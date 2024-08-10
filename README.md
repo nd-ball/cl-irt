@@ -44,8 +44,8 @@ The PUDF framework consists of two main steps:
 1. Clone the repository:
 
    ```
-   git clone https://github.com/your-username/pudf-framework.git
-   cd pudf-framework
+   git clone git@github.com:nd-ball/cl-irt.git
+   cd cl-irt
    ```
 
 2. Install the required dependencies:
@@ -65,18 +65,25 @@ cd gen_difficulty
 bash gen_respon_256.sh
 ```
 
-This step generates difficulty scores for the training dataset using Artificial Crowds (AC).
+This step generates difficulty scores for the training dataset using IRT-AC.
 
 ### Running Experiments
 
 #### Baseline Models
 
 To run baseline experiments:
-
 ```bash
 cd baseline_GLUE
 bash glue_deberta.sh
-
+or
+```bash
+cd baseline_GLUE
+bash glue_gpt2.sh
+or
+```bash
+cd baseline_GLUE
+bash glue_t5.sh
+Similarly,
 cd ../baseline_SuperGLUE
 bash superglue_deberta.sh
 ```
@@ -87,10 +94,10 @@ To run PUDF-enhanced models:
 
 ```bash
 cd PUDF_GLUE
-bash glue_deberta.sh
+bash glue_PUDF_debertav3.sh
 
-cd ../PUDF_SuperGLUE
-bash superglue_deberta.sh
+cd ../PUDF_Super_GLUE
+bash superglue_debertaV3.sh
 ```
 
 ### Benchmarking
@@ -99,7 +106,6 @@ To compare PUDF with other state-of-the-art curriculum learning methods:
 
 ```bash
 cd benchmark_CL_GLUE
-bash compare_cl_methods.sh
 ```
 
 ### Ablation Study
@@ -108,7 +114,6 @@ To perform an ablation study and analyze the contributions of different componen
 
 ```bash
 cd ablation_study
-bash run_ablation.sh
 ```
 
 ## Results
