@@ -1,4 +1,4 @@
-# PUDF Framework for Curriculum Learning
+# PUDF for Curriculum Learning
 
 This repository contains the implementation of the Psychology-based Unified Dynamic Framework (PUDF) for Curriculum Learning, as presented in our paper titled *"A Psychology-based Unified Dynamic Framework for Curriculum Learning."*
 
