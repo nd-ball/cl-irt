@@ -140,6 +140,13 @@ If you use this framework in your research, please cite our paper:
 
 ```
 
+@misc{2408.05326,
+Author = {Guangyu Meng and Qingkai Zeng and John P. Lalor and Hong Yu},
+Title = {A Psychology-based Unified Dynamic Framework for Curriculum Learning},
+Year = {2024},
+Eprint = {arXiv:2408.05326},
+}
+
 ```
 
 ## License
